@@ -1,0 +1,17 @@
+{
+  "name": "serene-salon-academy",
+  "version": "1.0.0",
+  "description": "Dynamic Booking Website and Management System for Serene Salon & Academy Vadodara",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "build:client": "cd client && npm run build",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm install && npm run build"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0"
+  }
+}

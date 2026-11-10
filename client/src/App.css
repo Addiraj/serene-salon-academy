@@ -1,0 +1,37 @@
+/* Custom animations & enhancements for Serene Salon & Academy */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Luxury button glow */
+.btn-gold-glow {
+  box-shadow: 0 4px 14px 0 rgba(210, 172, 116, 0.39);
+}
+
+.btn-gold-glow:hover {
+  box-shadow: 0 6px 20px rgba(210, 172, 116, 0.55);
+}

@@ -1,0 +1,798 @@
+{
+  "settings": {
+    "salonName": "Serene Salon & Academy",
+    "tagline": "Where Clinical Hygiene Meets Couture Beauty & Mastery",
+    "founder": "Rashmi Sah",
+    "phone": "+91 6203060789",
+    "whatsapp": "916203060789",
+    "email": "contact@serenesalonacademy.com",
+    "address": "Opp. Shell Petrol Pump, Makarpura Industrial Estate, Manjalpur, Vadodara, Gujarat 390010",
+    "timings": "Mon – Sun: 10:00 AM – 08:30 PM",
+    "instagram": "https://www.instagram.com/serenesalonacademy/?hl=en",
+    "facebook": "https://www.facebook.com/Serensalonandacademy/",
+    "justdial": "https://www.justdial.com/Vadodara/Serene-Salon-Academy-Near-Shell-Petrol-Pump-Makarpura-Industrial-Estate/0265PX265-X265-220827151238-Q4G8_BZDET",
+    "upiId": "6203060789@upi",
+    "adminPin": "1234",
+    "captchaEnabled": true,
+    "enrichPromo": {
+      "headline": "YOUR FIRST VISIT, YOUR WAY!",
+      "subheadline": "From medical-grade facials to couture bridal makeovers.",
+      "womenOffer": "Women's Privileges From ₹549",
+      "academyOffer": "Academy Masterclasses From ₹4,999",
+      "ctaText": "EXPLORE PRIVILEGE OFFERS",
+      "bgImage": "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1000&q=80"
+    }
+  },
+  "offers": [
+    {
+      "id": "off-festive-navratri",
+      "title": "Festive Glow & Navratri Special",
+      "code": "SERENE20",
+      "discountPercent": 20,
+      "minBookingAmount": 1200,
+      "validTill": "2026-11-30",
+      "description": "Get flat 20% off on all Luxury Facials, Hair Spa & Navratri Makeover appointments!",
+      "highlightBadge": "Festive Highlight",
+      "isBanner": true,
+      "active": true
+    },
+    {
+      "id": "off-bridal-earlybird",
+      "title": "Royal Bridal HD & Airbrush Early-Bird",
+      "code": "BRIDAL15",
+      "discountPercent": 15,
+      "minBookingAmount": 5000,
+      "validTill": "2026-12-31",
+      "description": "Book your 2026-27 wedding makeup with Rashmi Sah and enjoy 15% discount + free trial draping.",
+      "highlightBadge": "Wedding Special",
+      "isBanner": false,
+      "active": true
+    },
+    {
+      "id": "off-first-visit",
+      "title": "Welcome Privilege Offer",
+      "code": "SERENE15",
+      "discountPercent": 15,
+      "minBookingAmount": 500,
+      "validTill": "2027-03-31",
+      "description": "Enjoy 15% off your first luxury beauty session at Serene Salon & Academy.",
+      "highlightBadge": "New Guests",
+      "isBanner": false,
+      "active": true
+    }
+  ],
+  "services": [
+    {
+      "id": "srv-facial-signature",
+      "name": "Signature Luxury Hydra-Glow Facial",
+      "category": "Skin & Facials",
+      "price": 2000,
+      "duration": 60,
+      "badge": "Justdial Catalogue Featured",
+      "hygieneNote": "Sealed Mono-Dose Kit + Ultrasonic Sterilized Extractor",
+      "description": "Official Justdial catalogue highlight (₹2,000 onwards/session). Deep pore oxygenation, authentic high-grade botanical serums, and lymphatic glow massage.",
+      "active": true,
+      "image": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "srv-hair-cut-advance",
+      "name": "Advance Designer Hair Cut & Blowdry Styling",
+      "category": "Hair Care & Spa",
+      "price": 650,
+      "duration": 45,
+      "badge": "Most Booked",
+      "hygieneNote": "Autoclave Pouched Shears + Fresh Disposable Cape",
+      "description": "Face-framing layers, butterfly cuts, or textured bobs tailored by Rashmi Sah & senior hair stylists with nourishing wash and salon blowdry.",
+      "active": true,
+      "image": "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "srv-hair-spa",
+      "name": "Insta Care Hair Spa (Up to Below-Waist Length)",
+      "category": "Hair Care & Spa",
+      "price": 1450,
+      "duration": 60,
+      "badge": "Vadodara Specialty",
+      "hygieneNote": "Steam Ozone Dome + Paraben-Free Ampoule",
+      "description": "Featured on Justdial for long hair care. Repairs dryness, split ends, and frizz with deep keratin-infused masque and relaxing cranial acupressure.",
+      "active": true,
+      "image": "/images/lookbook-hair.jpg"
+    },
+    {
+      "id": "srv-hair-highlights",
+      "name": "Dimensional Balayage & Global Hair Highlights",
+      "category": "Hair Care & Spa",
+      "price": 3200,
+      "duration": 120,
+      "badge": "Pro Colour Studio",
+      "hygieneNote": "Ammonia-Free Bond Protector + Patch Test Included",
+      "description": "Custom caramel, espresso, or honey-gold highlights using bond-repair technology that leaves hair glossy, healthy, and vibrant.",
+      "active": true,
+      "image": "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "srv-acrylic-perm",
+      "name": "Acrylic Permanent Nail Extensions + Gel Art",
+      "category": "Nail Artistry",
+      "price": 1800,
+      "duration": 75,
+      "badge": "Top Reviewed Nail Service",
+      "hygieneNote": "Single-Use Nail Buffers + UV Sterilized Nippers",
+      "description": "Custom sculpted permanent acrylic extensions topped with authentic chip-resistant gel polish, French tips, chrome, or bridal 3D nail art.",
+      "active": true,
+      "image": "/images/lookbook-nails.jpg"
+    },
+    {
+      "id": "srv-acrylic-ext",
+      "name": "Natural-Look Acrylic Nail Extensions (Overlay)",
+      "category": "Nail Artistry",
+      "price": 1400,
+      "duration": 60,
+      "badge": "Damage-Free Prep",
+      "hygieneNote": "Authentic International Gel Polish Brands",
+      "description": "Lightweight, durable acrylic extensions designed to protect natural nail beds while delivering a sleek salon finish.",
+      "active": true,
+      "image": "https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "srv-manicure-premium",
+      "name": "Serene Rose-Gold Spa Premium Manicure",
+      "category": "Nail Artistry",
+      "price": 850,
+      "duration": 45,
+      "badge": "Relaxing Ritual",
+      "hygieneNote": "Disposable Tub Liner + Autoclaved Cuticle Tools",
+      "description": "Warm orchid-petal soak, organic sugar exfoliation, cuticle care, hydrating paraffin masque, and authentic high-gloss nail lacquer.",
+      "active": true,
+      "image": "https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "srv-bridal-hd",
+      "name": "Royal Bridal HD & Airbrush Complete Makeover",
+      "category": "Bridal & Festive",
+      "price": 8500,
+      "duration": 150,
+      "badge": "By Rashmi Sah",
+      "hygieneNote": "Sanitized Brushes + Single-Use Mascara/Lip Wands",
+      "description": "Complete luxury bridal package including skin prep, waterproof HD/Airbrush base, floral hairstyling, eye lenses, lashes, and saree/lehenga draping.",
+      "active": true,
+      "image": "/images/lookbook-bridal.jpg"
+    },
+    {
+      "id": "srv-navratri-festive",
+      "name": "Navratri & Festive Glam Makeover (Early-Bird)",
+      "category": "Bridal & Festive",
+      "price": 2200,
+      "duration": 75,
+      "badge": "Instagram Reel Hit",
+      "hygieneNote": "Sweat-Resistant Long-Wear International Cosmetics",
+      "description": "Our viral @serenesalonacademy festive makeover! Sweat-proof radiant base, dramatic eyes, braided/traditional hairstyling, and chaniya choli pinning.",
+      "active": true,
+      "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "srv-waxing-rollon",
+      "name": "Rica Italian Liposoluble Cartridge Waxing (Full Body)",
+      "category": "Waxing & Threading",
+      "price": 1150,
+      "duration": 45,
+      "badge": "Zero Double-Dipping",
+      "hygieneNote": "Strictly Single-Use Wooden Spatulas & Strips",
+      "description": "Gentle Italian liposoluble wax for sensitive skin that removes tan and short hair cleanly without redness.",
+      "active": true,
+      "image": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80"
+    }
+  ],
+  "courses": [
+    {
+      "id": "crs-cosmetology",
+      "title": "Complete Pro Cosmetology & Salon Management Diploma",
+      "duration": "16 Weeks • Mon–Sat",
+      "level": "Beginner to Salon Owner",
+      "fee": 48000,
+      "earlyBirdFee": 38400,
+      "nextBatch": "1st & 15th of Every Month",
+      "highlights": [
+        "Hair, Skin, Makeup & Nail Mastery",
+        "Live Client & Model Practice",
+        "Salon Hygiene & Business Setup Guidance"
+      ],
+      "active": true
+    },
+    {
+      "id": "crs-bridal-makeup",
+      "title": "Master Bridal, Navratri & Editorial Makeup Course",
+      "duration": "6 Weeks • Intensive",
+      "level": "Foundation + Advanced HD/Airbrush",
+      "fee": 28000,
+      "earlyBirdFee": 22400,
+      "nextBatch": "Upcoming Festive Batch",
+      "highlights": [
+        "Mentored directly by Rashmi Sah",
+        "3 Portfolio Photo Shoots for Instagram",
+        "Color Theory & Saree Draping"
+      ],
+      "active": true
+    },
+    {
+      "id": "crs-hair-chemical",
+      "title": "Advance Hair Cut, Global Colour & Chemical Mastery",
+      "duration": "8 Weeks • Hands-On",
+      "level": "Pro Hair Stylist Track",
+      "fee": 32000,
+      "earlyBirdFee": 25600,
+      "nextBatch": "Weekly Intakes Available",
+      "highlights": [
+        "Balayage, Highlights & Color Correction",
+        "Keratin, Botox & Nanoplastia Protocols",
+        "Below-Waist Hair Spa Protocols"
+      ],
+      "active": true
+    },
+    {
+      "id": "crs-nail-artistry",
+      "title": "Acrylic Nail Extension, Gel & 3D Nail Art Pro Course",
+      "duration": "3 Weeks • Fast-Track",
+      "level": "Certified Nail Technician",
+      "fee": 15000,
+      "earlyBirdFee": 12000,
+      "nextBatch": "Weekend & Weekday Batches",
+      "highlights": [
+        "Permanent & Overlay Acrylic Sculpting",
+        "Chrome, Ombré, French & Bridal 3D Art",
+        "Sterilization & Safe E-File Drill Techniques"
+      ],
+      "active": true
+    }
+  ],
+  "certificates": [
+    {
+      "id": "SSA-2026-104",
+      "student": "Priya Patel",
+      "course": "Complete Pro Cosmetology & Salon Management Diploma",
+      "grade": "Distinction (A+)",
+      "issued": "October 2026 • Signed by Rashmi Sah",
+      "active": true
+    },
+    {
+      "id": "SSA-2025-089",
+      "student": "Neha Solanki",
+      "course": "Acrylic Nail Extension, Gel & 3D Nail Art Pro Course",
+      "grade": "Distinction (A+)",
+      "issued": "December 2025 • Signed by Rashmi Sah",
+      "active": true
+    },
+    {
+      "id": "SSA-2026-118",
+      "student": "Aakanksha Joshi",
+      "course": "Master Bridal, Navratri & Editorial Makeup Course",
+      "grade": "First Class with Distinction",
+      "issued": "November 2026 • Signed by Rashmi Sah",
+      "active": true
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev-1",
+      "reviewer": "Rupesh Sonar",
+      "rating": 5,
+      "timeAgo": "Verified Justdial Review",
+      "tags": [
+        "Hygienic salon",
+        "Reasonably priced",
+        "Great offers"
+      ],
+      "quote": "I had a wonderful experience at Serene Salon & Academy. The salon was very clean and hygienic, which made me feel safe. I got a haircut and hair styling—highly recommended!",
+      "approved": true
+    },
+    {
+      "id": "rev-2",
+      "reviewer": "Shadab Shaikh",
+      "rating": 5,
+      "timeAgo": "Verified Justdial Review",
+      "tags": [
+        "Luxurious vibe",
+        "Experienced staff"
+      ],
+      "quote": "Serene Salon & Academy is a gem in the beauty industry! With its up-to-date procedures and a luxurious vibe, every visit feels like a treat.",
+      "approved": true
+    },
+    {
+      "id": "rev-4",
+      "reviewer": "Jignesh",
+      "rating": 5,
+      "timeAgo": "Verified Justdial Review",
+      "tags": [
+        "Clean equipment",
+        "Reasonably priced",
+        "Hygienic salon"
+      ],
+      "quote": "My experience at Serene Salon & Academy was excellent! The equipment was impeccably clean, and the entire salon maintained a high level of hygiene at a very reasonable price.",
+      "approved": true
+    },
+    {
+      "id": "rev-5",
+      "reviewer": "Krishna Panchal",
+      "rating": 5,
+      "timeAgo": "Verified Justdial Review",
+      "tags": [
+        "Luxurious vibe",
+        "Reasonably priced"
+      ],
+      "quote": "I had a great experience at Serene Salon & Academy! They have amazing offers that make it easy to try new services, and the procedures are completely up-to-date.",
+      "approved": true
+    },
+    {
+      "id": "rev-6",
+      "reviewer": "Gautam Lokwani & Dadwani Nitish",
+      "rating": 5,
+      "timeAgo": "Verified Justdial Reviews",
+      "tags": [
+        "Experienced staff",
+        "Clean equipment"
+      ],
+      "quote": "The experienced and knowledgeable staff provide exceptional service with polite behavior, particularly Rashmi, the owner of the salon. Left feeling completely rejuvenated!",
+      "approved": true
+    }
+  ],
+  "bookings": [
+    {
+      "id": "SSA-6888",
+      "guestName": "Ananya Patel",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-20",
+      "time": "02:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Signature Luxury Hydra-Glow Facial"
+      ],
+      "subtotal": 2000,
+      "discount": 400,
+      "promoCode": "SERENE20",
+      "total": 1600,
+      "status": "Confirmed",
+      "notes": "Enrich-inspired luxury appointment",
+      "createdAt": "2026-11-10T14:36:32.404Z"
+    },
+    {
+      "id": "SSA-2650",
+      "guestName": "Pooja Shah",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-10",
+      "time": "11:00 AM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "VIP First Visit Consultation & Treatment Selection"
+      ],
+      "subtotal": 549,
+      "discount": 0,
+      "promoCode": "FIRSTVISIT",
+      "total": 549,
+      "status": "Pending",
+      "notes": "First Visit Priority Request (Enrich-Style Booking)",
+      "createdAt": "2026-11-10T14:36:32.378Z"
+    },
+    {
+      "id": "SSA-8834",
+      "guestName": "Aditya Raj",
+      "guestPhone": "+91 7461048307",
+      "date": "2026-11-10",
+      "time": "11:00 AM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "VIP First Visit Consultation & Treatment Selection"
+      ],
+      "subtotal": 549,
+      "discount": 0,
+      "promoCode": "FIRSTVISIT",
+      "total": 549,
+      "status": "Pending",
+      "notes": "First Visit Priority Request (Enrich-Style Booking)",
+      "createdAt": "2026-11-10T14:31:31.812Z"
+    },
+    {
+      "id": "SSA-4006",
+      "guestName": "Ananya Patel",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-20",
+      "time": "02:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Signature Luxury Hydra-Glow Facial"
+      ],
+      "subtotal": 2000,
+      "discount": 400,
+      "promoCode": "SERENE20",
+      "total": 1600,
+      "status": "Confirmed",
+      "notes": "Enrich-inspired luxury appointment",
+      "createdAt": "2026-11-10T05:58:40.896Z"
+    },
+    {
+      "id": "SSA-4202",
+      "guestName": "Pooja Shah",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-10",
+      "time": "11:00 AM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "VIP First Visit Consultation & Treatment Selection"
+      ],
+      "subtotal": 549,
+      "discount": 0,
+      "promoCode": "FIRSTVISIT",
+      "total": 549,
+      "status": "Pending",
+      "notes": "First Visit Priority Request (Enrich-Style Booking)",
+      "createdAt": "2026-11-10T05:58:40.873Z"
+    },
+    {
+      "id": "SSA-7065",
+      "guestName": "Ananya Patel",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-20",
+      "time": "02:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Signature Luxury Hydra-Glow Facial"
+      ],
+      "subtotal": 2000,
+      "discount": 400,
+      "promoCode": "SERENE20",
+      "total": 1600,
+      "status": "Confirmed",
+      "notes": "Enrich-inspired luxury appointment",
+      "createdAt": "2026-11-10T05:31:37.087Z"
+    },
+    {
+      "id": "SSA-3759",
+      "guestName": "Pooja Shah",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-10",
+      "time": "11:00 AM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "VIP First Visit Consultation & Treatment Selection"
+      ],
+      "subtotal": 549,
+      "discount": 0,
+      "promoCode": "FIRSTVISIT",
+      "total": 549,
+      "status": "Pending",
+      "notes": "First Visit Priority Request (Enrich-Style Booking)",
+      "createdAt": "2026-11-10T05:31:37.010Z"
+    },
+    {
+      "id": "SSA-3269",
+      "guestName": "Pooja Shah",
+      "guestPhone": "+91 9988776655",
+      "date": "2026-11-10",
+      "time": "11:00 AM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "VIP First Visit Consultation & Treatment Selection"
+      ],
+      "subtotal": 549,
+      "discount": 0,
+      "promoCode": "FIRSTVISIT",
+      "total": 549,
+      "status": "Pending",
+      "notes": "Enrich-style appointment test",
+      "createdAt": "2026-11-10T05:25:09.095Z"
+    },
+    {
+      "id": "SSA-5434",
+      "guestName": "Ananya Patel",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-15",
+      "time": "02:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Hydra Medi-Facial & Deep Oxygen Infusion",
+        "Insta Care Hair Spa & Dimensional Highlights"
+      ],
+      "subtotal": 0,
+      "discount": 0,
+      "promoCode": "",
+      "total": 0,
+      "status": "Confirmed",
+      "notes": "Navratri festive booking via React web portal",
+      "createdAt": "2026-11-10T05:03:57.342Z"
+    },
+    {
+      "id": "SSA-3465",
+      "guestName": "Ananya Patel",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-15",
+      "time": "02:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Hydra Medi-Facial & Deep Oxygen Infusion",
+        "Insta Care Hair Spa & Dimensional Highlights"
+      ],
+      "subtotal": 0,
+      "discount": 0,
+      "promoCode": "",
+      "total": 0,
+      "status": "Confirmed",
+      "notes": "Navratri festive booking via React web portal",
+      "createdAt": "2026-11-10T05:03:38.308Z"
+    },
+    {
+      "id": "SSA-6066",
+      "guestName": "Ananya Patel",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-15",
+      "time": "02:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Hydra Medi-Facial & Deep Oxygen Infusion",
+        "Insta Care Hair Spa & Dimensional Highlights"
+      ],
+      "subtotal": 0,
+      "discount": 0,
+      "promoCode": "",
+      "total": 0,
+      "status": "Confirmed",
+      "notes": "Navratri festive booking via React web portal",
+      "createdAt": "2026-11-09T17:23:38.165Z"
+    },
+    {
+      "id": "SSA-3973",
+      "guestName": "Test Guest Nikita",
+      "guestPhone": "+91 9998887777",
+      "date": "2026-11-20",
+      "time": "02:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Signature Luxury Hydra-Glow Facial"
+      ],
+      "subtotal": 2000,
+      "discount": 400,
+      "promoCode": "SERENE20",
+      "total": 1600,
+      "status": "Confirmed",
+      "notes": "",
+      "createdAt": "2026-11-09T16:09:54.465Z"
+    },
+    {
+      "id": "SSA-3373",
+      "guestName": "Test Guest Nikita",
+      "guestPhone": "+91 9998887777",
+      "date": "2026-11-20",
+      "time": "02:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Signature Luxury Hydra-Glow Facial"
+      ],
+      "subtotal": 2000,
+      "discount": 400,
+      "promoCode": "SERENE20",
+      "total": 1600,
+      "status": "Confirmed",
+      "notes": "",
+      "createdAt": "2026-11-09T14:37:55.201Z"
+    },
+    {
+      "id": "SSA-3298",
+      "guestName": "Test Guest Nikita",
+      "guestPhone": "+91 9998887777",
+      "date": "2026-11-20",
+      "time": "02:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Signature Luxury Hydra-Glow Facial"
+      ],
+      "subtotal": 2000,
+      "discount": 400,
+      "promoCode": "SERENE20",
+      "total": 1600,
+      "status": "Confirmed",
+      "notes": "",
+      "createdAt": "2026-11-09T09:52:23.685Z"
+    },
+    {
+      "id": "SSA-8492",
+      "guestName": "Ananya Sharma",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-12",
+      "time": "04:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Signature Luxury Hydra-Glow Facial",
+        "Advance Designer Hair Cut & Blowdry Styling"
+      ],
+      "subtotal": 2650,
+      "discount": 530,
+      "promoCode": "SERENE20",
+      "total": 2120,
+      "status": "Confirmed",
+      "notes": "Prefers gentle pressure for facial extraction.",
+      "createdAt": "2026-11-09T10:30:00Z"
+    },
+    {
+      "id": "SSA-9104",
+      "guestName": "Pooja Vora",
+      "guestPhone": "+91 9825123456",
+      "date": "2026-11-13",
+      "time": "11:30 AM",
+      "stylist": "Senior Nail & Lash Technician",
+      "services": [
+        "Acrylic Permanent Nail Extensions + Gel Art"
+      ],
+      "subtotal": 1800,
+      "discount": 0,
+      "promoCode": "",
+      "total": 1800,
+      "status": "Pending",
+      "notes": "Wants French ombré gel finish.",
+      "createdAt": "2026-11-09T11:15:00Z"
+    }
+  ],
+  "inquiries": [
+    {
+      "id": "INQ-167",
+      "name": "Pooja Trivedi",
+      "phone": "+91 9988776655",
+      "course": "Master Bridal & HD Airbrush Artistry Diploma",
+      "preferredTime": "Morning Batch (10 AM - 1 PM)",
+      "notes": "",
+      "status": "New",
+      "createdAt": "2026-11-10T14:36:32.408Z"
+    },
+    {
+      "id": "INQ-941",
+      "name": "Pooja Trivedi",
+      "phone": "+91 9988776655",
+      "course": "Master Bridal & HD Airbrush Artistry Diploma",
+      "preferredTime": "Morning Batch (10 AM - 1 PM)",
+      "notes": "",
+      "status": "New",
+      "createdAt": "2026-11-10T05:58:40.902Z"
+    },
+    {
+      "id": "INQ-176",
+      "name": "Pooja Trivedi",
+      "phone": "+91 9988776655",
+      "course": "Master Bridal & HD Airbrush Artistry Diploma",
+      "preferredTime": "Morning Batch (10 AM - 1 PM)",
+      "notes": "",
+      "status": "New",
+      "createdAt": "2026-11-10T05:31:37.095Z"
+    },
+    {
+      "id": "INQ-396",
+      "name": "Pooja Trivedi",
+      "phone": "+91 9988776655",
+      "course": "Master Bridal & HD Airbrush Artistry Diploma",
+      "preferredTime": "Morning Batch (10 AM - 1 PM)",
+      "notes": "Interested in upcoming masterclass with Rashmi Sah",
+      "status": "New",
+      "createdAt": "2026-11-10T05:03:57.357Z"
+    },
+    {
+      "id": "INQ-518",
+      "name": "Pooja Trivedi",
+      "phone": "+91 9988776655",
+      "course": "Master Bridal & HD Airbrush Artistry Diploma",
+      "preferredTime": "Morning Batch (10 AM - 1 PM)",
+      "notes": "Interested in upcoming masterclass with Rashmi Sah",
+      "status": "New",
+      "createdAt": "2026-11-10T05:03:38.323Z"
+    },
+    {
+      "id": "INQ-678",
+      "name": "Pooja Trivedi",
+      "phone": "+91 9988776655",
+      "course": "Master Bridal & HD Airbrush Artistry Diploma",
+      "preferredTime": "Morning Batch (10 AM - 1 PM)",
+      "notes": "Interested in upcoming masterclass with Rashmi Sah",
+      "status": "New",
+      "createdAt": "2026-11-09T17:23:38.179Z"
+    },
+    {
+      "id": "INQ-126",
+      "name": "Test Student Sneha",
+      "phone": "9876543210",
+      "course": "Complete Pro Cosmetology & Salon Management Diploma",
+      "preferredTime": "Morning Batch",
+      "notes": "Looking for early-bird admission",
+      "status": "New",
+      "createdAt": "2026-11-09T16:09:54.470Z"
+    },
+    {
+      "id": "INQ-681",
+      "name": "Test Student Sneha",
+      "phone": "9876543210",
+      "course": "Complete Pro Cosmetology & Salon Management Diploma",
+      "preferredTime": "Morning Batch",
+      "notes": "Looking for early-bird admission",
+      "status": "New",
+      "createdAt": "2026-11-09T14:37:55.273Z"
+    },
+    {
+      "id": "INQ-917",
+      "name": "Test Student Sneha",
+      "phone": "9876543210",
+      "course": "Complete Pro Cosmetology & Salon Management Diploma",
+      "preferredTime": "Morning Batch",
+      "notes": "Looking for early-bird admission",
+      "status": "New",
+      "createdAt": "2026-11-09T09:52:23.694Z"
+    },
+    {
+      "id": "INQ-201",
+      "name": "Diya Trivedi",
+      "phone": "+91 9909012345",
+      "course": "Complete Pro Cosmetology & Salon Management Diploma",
+      "preferredTime": "Morning Batch (10 AM - 1 PM)",
+      "notes": "Interested in opening own salon in Manjalpur after graduation. Inquiring about installment options.",
+      "status": "New",
+      "createdAt": "2026-11-09T09:45:00Z"
+    },
+    {
+      "id": "INQ-198",
+      "name": "Meera Chauhan",
+      "phone": "+91 9727123987",
+      "course": "Master Bridal, Navratri & Editorial Makeup Course",
+      "preferredTime": "Weekend Intensive",
+      "notes": "Looking to upgrade airbrush and eye artistry skills.",
+      "status": "Contacted",
+      "createdAt": "2026-11-08T16:20:00Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr-1794293989471",
+      "name": "Pakhi Bondya",
+      "phone": "+91 7461048307",
+      "email": "aryaaditya9801@gmail.com",
+      "interests": [
+        "Skin & Medifacials",
+        "Hair Care & Balayage"
+      ],
+      "role": "customer",
+      "tier": "Serene Silver Privilege",
+      "loyaltyPoints": 150,
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+      "createdAt": "2026-11-10"
+    },
+    {
+      "id": "usr-1794288309104",
+      "name": "Meera Joshi",
+      "phone": "+91 9112233445",
+      "email": "meera@gmail.com",
+      "interests": [
+        "Skin & Facials",
+        "Hair Care"
+      ],
+      "role": "customer",
+      "tier": "Serene Silver Privilege",
+      "loyaltyPoints": 150,
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+      "createdAt": "2026-11-10"
+    },
+    {
+      "id": "usr-101",
+      "name": "Ananya Patel",
+      "phone": "+91 9876543210",
+      "email": "ananya.patel@gmail.com",
+      "role": "customer",
+      "tier": "Serene Gold Privilege",
+      "loyaltyPoints": 350,
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+      "createdAt": "2026-10-10"
+    },
+    {
+      "id": "usr-102",
+      "name": "Rhea Shah",
+      "phone": "+91 9123456780",
+      "email": "rhea.shah@gmail.com",
+      "role": "customer",
+      "tier": "Serene Diamond Privilege",
+      "loyaltyPoints": 620,
+      "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80",
+      "createdAt": "2026-09-01"
+    }
+  ]
+}

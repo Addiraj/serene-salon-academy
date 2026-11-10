@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Serene Salon & Academy | Luxury Women's Salon & Beauty Academy in Vadodara</title>
+    
+    <!-- Tailwind CSS 3.4 CDN -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              champagne: {
+                50: '#FBF8F3',
+                100: '#F5EFE4',
+                200: '#EADBC2',
+                300: '#DFC49B',
+                400: '#D2AC74',
+                500: '#C59653',
+                600: '#AA7B3B',
+                700: '#88602E',
+                800: '#6B4B26',
+                900: '#4F371D'
+              },
+              espresso: {
+                800: '#261E1B',
+                900: '#181210',
+                950: '#0F0B0A'
+              },
+              blush: {
+                50: '#FDF8F7',
+                100: '#F9ECE9',
+                200: '#F2D5CF'
+              }
+            },
+            fontFamily: {
+              serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+              sans: ['Inter', 'system-ui', 'sans-serif']
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #FBF8F3;
+        color: #261E1B;
+      }
+      .font-editorial {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+      }
+      .glass-panel {
+        background: rgba(251, 248, 243, 0.9);
+        backdrop-filter: blur(12px);
+      }
+    </style>
+  </head>
+  <body class="antialiased selection:bg-champagne-300 selection:text-espresso-950 min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

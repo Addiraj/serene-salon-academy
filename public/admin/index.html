@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | Serene Salon & Academy</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            champagne: {
+              50: '#FBF8F3',
+              100: '#F5EFE4',
+              200: '#EADBC2',
+              300: '#DFC49B',
+              400: '#D2AC74',
+              500: '#C59653',
+              600: '#AA7B3B',
+              700: '#88602E',
+              800: '#6B4B26',
+              900: '#4F371D'
+            },
+            espresso: {
+              800: '#261E1B',
+              900: '#181210',
+              950: '#0F0B0A'
+            }
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+    .font-editorial { font-family: 'Cormorant Garamond', Georgia, serif; }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- ADMIN AUTH OVERLAY (PIN Protected) -->
+  <div id="authOverlay" class="fixed inset-0 z-50 bg-espresso-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-champagne-300 text-center space-y-5">
+      <div class="w-16 h-16 bg-champagne-100 rounded-2xl flex items-center justify-center mx-auto text-champagne-800 text-2xl font-bold shadow-inner">
+        👑
+      </div>
+      <div>
+        <h2 class="font-editorial text-3xl font-bold text-espresso-950">Serene Admin Access</h2>
+        <p class="text-xs text-slate-500 mt-1">Please enter your 4-digit Salon Owner PIN to manage bookings, festive offers, rate card and academy leads.</p>
+      </div>
+      <form id="pinLoginForm" class="space-y-4">
+        <div>
+          <input type="password" id="adminPinInput" maxlength="6" autofocus placeholder="Enter Admin PIN (Default: 1234)" 
+                 class="w-full text-center text-2xl tracking-widest font-mono py-3 px-4 rounded-xl border border-champagne-300 focus:outline-none focus:ring-2 focus:ring-champagne-500 bg-champagne-50/50" />
+          <p id="pinErrorMsg" class="text-xs text-rose-600 mt-1 hidden font-medium">Incorrect PIN. Please try again.</p>
+        </div>
+        <button type="submit" class="w-full py-3.5 bg-espresso-900 hover:bg-espresso-950 text-champagne-200 rounded-xl font-bold text-sm tracking-wide shadow-md transition">
+          Unlock Dashboard
+        </button>
+      </form>
+      <div class="text-[11px] text-slate-400">
+        Default Owner PIN is <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-600">1234</code>. You can customize this in Salon Settings.
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP ADMIN NAVBAR -->
+  <header class="bg-espresso-950 text-white border-b border-champagne-800/60 sticky top-0 z-30 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-champagne-600 flex items-center justify-center text-espresso-950 font-serif font-bold text-xl shadow">
+          S
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-editorial text-xl sm:text-2xl font-bold text-champagne-100 tracking-wide">Serene Salon & Academy</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-champagne-500/20 text-champagne-300 border border-champagne-500/40 uppercase tracking-wider">Owner Portal</span>
+          </div>
+          <p class="text-[11px] text-champagne-200/70 hidden sm:block">Vadodara's Premier Women's Luxury Salon & Cosmetology Academy</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/" target="_blank" class="px-3 py-1.5 rounded-lg bg-champagne-900/60 hover:bg-champagne-800/80 text-champagne-200 text-xs font-medium border border-champagne-700/50 flex items-center gap-1.5 transition">
+          <span>View Website</span>
+          <span>↗</span>
+        </a>
+        <button id="lockPortalBtn" class="px-3 py-1.5 rounded-lg bg-red-900/40 hover:bg-red-800/60 text-red-200 text-xs font-medium border border-red-800/50 transition">
+          Lock 🔒
+        </button>
+      </div>
+    </div>
+
+    <!-- SUB-NAV / TABS -->
+    <div class="bg-espresso-900 border-t border-champagne-900/80 overflow-x-auto scrollbar-none">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-2 py-1.5">
+        <button data-tab="overview" class="admin-tab-btn active px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-champagne-600 text-espresso-950 shadow">
+          📊 Overview
+        </button>
+        <button data-tab="offers" class="admin-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-champagne-200 hover:bg-espresso-800">
+          🎁 Festive Offers & Promos
+        </button>
+        <button data-tab="services" class="admin-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-champagne-200 hover:bg-espresso-800">
+          💇‍♀️ Rate Card & Services
+        </button>
+        <button data-tab="courses" class="admin-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-champagne-200 hover:bg-espresso-800">
+          🎓 Academy Courses
+        </button>
+        <button data-tab="bookings" class="admin-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-champagne-200 hover:bg-espresso-800">
+          📅 Bookings CRM
+        </button>
+        <button data-tab="inquiries" class="admin-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-champagne-200 hover:bg-espresso-800">
+          💬 Student Leads
+        </button>
+        <button data-tab="certificates" class="admin-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-champagne-200 hover:bg-espresso-800">
+          📜 Certificates
+        </button>
+        <button data-tab="broadcast" class="admin-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-champagne-200 hover:bg-espresso-800">
+          📢 WhatsApp Marketing
+        </button>
+        <button data-tab="reviews" class="admin-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-champagne-200 hover:bg-espresso-800">
+          ⭐ Reviews
+        </button>
+        <button data-tab="settings" class="admin-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-champagne-200 hover:bg-espresso-800">
+          ⚙️ Settings
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN ADMIN CONTENT -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- 1. TAB: OVERVIEW -->
+    <div id="tab-overview" class="admin-tab-pane space-y-6">
+      <!-- Greeting and Quick Actions Banner -->
+      <div class="bg-gradient-to-r from-espresso-950 via-espresso-900 to-espresso-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div class="relative z-10 space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-champagne-500/20 text-champagne-300 border border-champagne-500/30">
+                Salon Performance Hub
+              </span>
+              <h1 class="font-editorial text-3xl sm:text-4xl font-bold text-champagne-100 mt-2">
+                Welcome, Rashmi Sah & Management
+              </h1>
+              <p class="text-xs sm:text-sm text-champagne-200/80 max-w-2xl">
+                Monitor client appointments, adjust seasonal Navratri & festive discounts in real time, and convert academy student admissions.
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="openModal('offerModal')" class="px-4 py-2.5 rounded-xl bg-champagne-500 hover:bg-champagne-400 text-espresso-950 font-bold text-xs shadow transition flex items-center gap-1.5">
+                <span>+ Launch Festive Offer</span>
+              </button>
+              <button onclick="openModal('serviceModal')" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-1.5">
+                <span>+ Add Salon Treatment</span>
+              </button>
+              <button onclick="openModal('courseModal')" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-1.5">
+                <span>+ Add Academy Course</span>
+              </button>
+              <a href="/api/admin/backup/db.json" download class="px-4 py-2.5 rounded-xl bg-champagne-900/80 hover:bg-champagne-800 text-champagne-200 font-bold text-xs border border-champagne-600/50 transition flex items-center gap-1.5">
+                <span>💾 Backup Data</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KEY METRIC KPI TILES -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total Bookings -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-500">
+            <span class="text-xs font-medium uppercase tracking-wider">Total Bookings</span>
+            <span class="p-2 rounded-xl bg-champagne-50 text-champagne-800 text-sm">📅</span>
+          </div>
+          <div class="mt-3">
+            <div id="statTotalBookings" class="text-2xl sm:text-3xl font-extrabold text-espresso-950">--</div>
+            <div id="statTodayBookings" class="text-[11px] text-emerald-600 font-semibold mt-0.5">-- appointments today</div>
+          </div>
+        </div>
+
+        <!-- Pending Confirmation -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-500">
+            <span class="text-xs font-medium uppercase tracking-wider">Pending Confirmation</span>
+            <span class="p-2 rounded-xl bg-amber-50 text-amber-600 text-sm">⏳</span>
+          </div>
+          <div class="mt-3">
+            <div id="statPendingBookings" class="text-2xl sm:text-3xl font-extrabold text-amber-600">--</div>
+            <div class="text-[11px] text-slate-500 mt-0.5">Awaiting WhatsApp slot confirmation</div>
+          </div>
+        </div>
+
+        <!-- Academy Inquiries -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-500">
+            <span class="text-xs font-medium uppercase tracking-wider">Academy Leads</span>
+            <span class="p-2 rounded-xl bg-indigo-50 text-indigo-600 text-sm">🎓</span>
+          </div>
+          <div class="mt-3">
+            <div id="statNewInquiries" class="text-2xl sm:text-3xl font-extrabold text-indigo-600">--</div>
+            <div id="statTotalInquiries" class="text-[11px] text-slate-500 mt-0.5">-- total student inquiries</div>
+          </div>
+        </div>
+
+        <!-- Active Offers & Est. Revenue -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-500">
+            <span class="text-xs font-medium uppercase tracking-wider">Estimated Booking Revenue</span>
+            <span class="p-2 rounded-xl bg-emerald-50 text-emerald-700 text-sm">₹</span>
+          </div>
+          <div class="mt-3">
+            <div id="statTotalRevenue" class="text-2xl sm:text-3xl font-extrabold text-emerald-700">₹0</div>
+            <div id="statActiveOffers" class="text-[11px] text-slate-500 mt-0.5">-- active festive offers</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT APPOINTMENTS FEED -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h2 class="font-bold text-base text-slate-900">Recent Customer Appointments</h2>
+            <p class="text-xs text-slate-500">Latest online bookings from the public website</p>
+          </div>
+          <button onclick="switchTab('bookings')" class="text-xs font-semibold text-champagne-700 hover:underline">
+            View All Bookings →
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Booking ID</th>
+                <th class="py-3 px-4">Guest Name & Phone</th>
+                <th class="py-3 px-4">Date & Time</th>
+                <th class="py-3 px-4">Treatments Booked</th>
+                <th class="py-3 px-4">Total (₹)</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Quick Action</th>
+              </tr>
+            </thead>
+            <tbody id="overviewRecentBookingsTable" class="divide-y divide-slate-100">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. TAB: FESTIVE OFFERS & PROMOS -->
+    <div id="tab-offers" class="admin-tab-pane hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Festive Offers & Coupon Campaigns</h2>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Active offers automatically synchronize with the top announcement bar on the public website and calculate dynamic cart discounts.
+          </p>
+        </div>
+        <button onclick="openModal('offerModal')" class="px-4 py-2.5 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs shadow transition flex items-center gap-1.5">
+          <span>+ Create New Offer</span>
+        </button>
+      </div>
+
+      <div id="offersListGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Populated via JS -->
+      </div>
+    </div>
+
+    <!-- 3. TAB: SERVICES & RATE CARD -->
+    <div id="tab-services" class="admin-tab-pane hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Signature Salon Services & Rate Card</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Manage treatment pricing, duration, category filters, and clinical sterilization badges.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <select id="servicesFilterCategory" onchange="renderAdminServices()" class="text-xs rounded-xl border border-slate-300 py-2 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+            <option value="all">All Categories</option>
+            <option value="Skin & Facials">Skin & Facials</option>
+            <option value="Hair Care & Spa">Hair Care & Spa</option>
+            <option value="Nail Artistry">Nail Artistry</option>
+            <option value="Bridal & Festive">Bridal & Festive</option>
+            <option value="Waxing & Threading">Waxing & Threading</option>
+          </select>
+          <button onclick="openModal('serviceModal')" class="px-4 py-2 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs shadow transition">
+            + Add Service
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Service Name</th>
+                <th class="py-3 px-4">Category</th>
+                <th class="py-3 px-4">Price</th>
+                <th class="py-3 px-4">Duration</th>
+                <th class="py-3 px-4">Badge / Highlight</th>
+                <th class="py-3 px-4">Hygiene Protocol Note</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminServicesTable" class="divide-y divide-slate-100">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. TAB: ACADEMY COURSES -->
+    <div id="tab-courses" class="admin-tab-pane hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Serene Professional Beauty Academy Courses</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Manage diploma & certified courses, batch dates, fees, and early-bird scholarship discounts.</p>
+        </div>
+        <button onclick="openModal('courseModal')" class="px-4 py-2.5 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs shadow transition">
+          + Add Course
+        </button>
+      </div>
+
+      <div id="adminCoursesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Populated via JS -->
+      </div>
+    </div>
+
+    <!-- 5. TAB: BOOKINGS CRM -->
+    <div id="tab-bookings" class="admin-tab-pane hidden space-y-6">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Appointment Bookings CRM</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Track, confirm, complete, or contact salon clients directly via WhatsApp.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="openManualBookingModal()" class="px-4 py-2 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs shadow transition flex items-center gap-1.5">
+              <span>+ Walk-in / Phone Slot</span>
+            </button>
+
+            <!-- View Mode Switcher -->
+            <div class="flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs">
+              <button type="button" id="btnViewTable" onclick="toggleBookingsView('table')" class="px-3 py-1.5 rounded-lg font-bold transition bg-white shadow text-slate-900">
+                📋 Table View
+              </button>
+              <button type="button" id="btnViewCalendar" onclick="toggleBookingsView('calendar')" class="px-3 py-1.5 rounded-lg font-semibold transition text-slate-600 hover:text-slate-900">
+                📆 Day Timeline
+              </button>
+            </div>
+
+            <a href="/api/admin/export/bookings.csv" download class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-300 transition flex items-center gap-1.5">
+              <span>📥 Export CSV</span>
+            </a>
+
+            <input type="text" id="bookingsSearchInput" oninput="renderAdminBookings()" placeholder="Search guest name, phone, or ID..." 
+                   class="text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 w-44 sm:w-56" />
+            <select id="bookingsFilterStatus" onchange="renderAdminBookings()" class="text-xs rounded-xl border border-slate-300 py-2 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="">All Statuses</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 1: TABLE -->
+      <div id="adminBookingsTableContainer" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Booking ID</th>
+                <th class="py-3 px-4">Guest & Contact</th>
+                <th class="py-3 px-4">Date & Slot</th>
+                <th class="py-3 px-4">Assigned Specialist</th>
+                <th class="py-3 px-4">Services</th>
+                <th class="py-3 px-4">Bill (₹)</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminBookingsTable" class="divide-y divide-slate-100">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VIEW 2: DAY TIMELINE CALENDAR -->
+      <div id="adminCalendarContainer" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Day Schedule & Specialist Station Allocation</h3>
+            <p class="text-xs text-slate-500">Visual timeline to prevent double-booking and track live sterilizations.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <label class="text-xs font-semibold text-slate-700">Select Date:</label>
+            <input type="date" id="calendarDateInput" onchange="fetchCalendarSchedule()" class="text-xs rounded-xl border border-slate-300 py-1.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500 font-semibold" />
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <div id="calendarTimelineGrid" class="min-w-[700px] space-y-2">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. TAB: ACADEMY INQUIRIES -->
+    <div id="tab-inquiries" class="admin-tab-pane hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Academy Career Counselling Inquiries & Leads</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Prospective students who requested course guidance, fee breakdowns, or scholarship details.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openModal('manualInquiryModal')" class="px-3.5 py-2 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs shadow transition flex items-center gap-1.5">
+            <span>+ Add Student Lead</span>
+          </button>
+          <a href="/api/admin/export/inquiries.csv" download class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-300 transition flex items-center gap-1.5">
+            <span>📥 Export Leads CSV</span>
+          </a>
+          <select id="inquiriesFilterStatus" onchange="renderAdminInquiries()" class="text-xs rounded-xl border border-slate-300 py-2 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+            <option value="">All Leads</option>
+            <option value="New">New</option>
+            <option value="Contacted">Contacted</option>
+            <option value="Enrolled">Enrolled</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Inquiry ID</th>
+                <th class="py-3 px-4">Student Name & Phone</th>
+                <th class="py-3 px-4">Course of Interest</th>
+                <th class="py-3 px-4">Preferred Timing / Notes</th>
+                <th class="py-3 px-4">Submitted</th>
+                <th class="py-3 px-4">Lead Status</th>
+                <th class="py-3 px-4 text-right">WhatsApp Lead</th>
+              </tr>
+            </thead>
+            <tbody id="adminInquiriesTable" class="divide-y divide-slate-100">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. TAB: CERTIFICATE REGISTRY -->
+    <div id="tab-certificates" class="admin-tab-pane hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Academy Certificate Verification Registry</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Certificates registered here can be instantly verified by students, salons, and employers on the public website.</p>
+        </div>
+        <button onclick="openModal('certModal')" class="px-4 py-2.5 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs shadow transition">
+          + Issue New Certificate
+        </button>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Certificate ID</th>
+                <th class="py-3 px-4">Student Name</th>
+                <th class="py-3 px-4">Graduation Course</th>
+                <th class="py-3 px-4">Grade / Standing</th>
+                <th class="py-3 px-4">Issuance Details</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminCertificatesTable" class="divide-y divide-slate-100">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. TAB: WHATSAPP MARKETING & BROADCASTS -->
+    <div id="tab-broadcast" class="admin-tab-pane hidden space-y-6">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">WhatsApp Marketing & Festive Broadcast Suite</h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              High-converting promotional messages ready to send to prospective brides, festive clients, and cosmetology students.
+            </p>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+            Direct WhatsApp Web Integration
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Campaign 1: Navratri & Festive Glam -->
+        <div class="bg-white rounded-2xl border border-champagne-300 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 uppercase">
+              Festive Campaign
+            </span>
+            <span class="text-xs text-slate-400 font-semibold">Coupon: SERENE20</span>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base">🌸 Navratri Dandiya Glamour (Flat 20% Off)</h3>
+          <textarea id="broadcastText1" rows="5" class="w-full text-xs font-mono p-3 rounded-xl border border-slate-300 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500">🌸 Hey beautiful! Ready to dazzle this Navratri? ✨
+
+Serene Salon & Academy brings you our exclusive Festive Glow Makeover with Flat 20% Off!
+💃 Waterproof HD Makeup + Hairdo + Chaniya Choli Draping
+💆‍♀️ Pre-Garba Hydra-Glow Medi-Facial
+💅 Acrylic Extensions & Glitter Art
+
+Book using coupon code *SERENE20* at:
+https://serenesalonacademy.com
+
+Autoclave sterilized tools & clinical hygiene guaranteed!
+📍 Opp. Shell Petrol Pump, Makarpura, Vadodara.
+Call: +91 6203060789</textarea>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+            <input type="tel" id="broadcastPhone1" placeholder="Recipient Mobile (e.g. 9876543210)" class="text-xs rounded-xl border border-slate-300 py-1.5 px-3 w-48 font-mono" />
+            <div class="flex items-center gap-2">
+              <button onclick="copyBroadcastText('broadcastText1')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">Copy</button>
+              <button onclick="sendBroadcastWhatsApp('broadcastPhone1', 'broadcastText1')" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1">
+                <span>Send WhatsApp</span>
+                <span>↗</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campaign 2: Royal Bridal Bookings -->
+        <div class="bg-white rounded-2xl border border-champagne-300 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200 uppercase">
+              Wedding Season
+            </span>
+            <span class="text-xs text-slate-400 font-semibold">Coupon: BRIDAL15</span>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base">👰 Royal Bridal HD & Airbrush by Rashmi Sah</h3>
+          <textarea id="broadcastText2" rows="5" class="w-full text-xs font-mono p-3 rounded-xl border border-slate-300 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500">👑 Congratulations on your upcoming wedding! 💍
+
+Turn your dream bridal look into reality with Master Educator Rashmi Sah at Serene Salon & Academy Vadodara.
+✨ Complete Royal HD & Airbrush Base
+✨ Floral Hairstyling, Lenses & Luxury Lashes
+✨ Saree & Lehenga Draping with Jewellery Pinning
+✨ Complimentary Skin Prep Consultation
+
+Enjoy 15% Early-Bird discount with code *BRIDAL15*!
+Reserve your wedding dates early before slots fill up:
+Call/WhatsApp: +91 6203060789
+Location: Near Shell Petrol Pump, Makarpura, Vadodara</textarea>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+            <input type="tel" id="broadcastPhone2" placeholder="Recipient Mobile (e.g. 9876543210)" class="text-xs rounded-xl border border-slate-300 py-1.5 px-3 w-48 font-mono" />
+            <div class="flex items-center gap-2">
+              <button onclick="copyBroadcastText('broadcastText2')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">Copy</button>
+              <button onclick="sendBroadcastWhatsApp('broadcastPhone2', 'broadcastText2')" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1">
+                <span>Send WhatsApp</span>
+                <span>↗</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campaign 3: Post-Festive Hair Spa & Detox -->
+        <div class="bg-white rounded-2xl border border-champagne-300 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 uppercase">
+              Hair Therapy
+            </span>
+            <span class="text-xs text-slate-400 font-semibold">Hair Special</span>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base">💆‍♀️ Insta Care Hair Spa & Keratin Revival</h3>
+          <textarea id="broadcastText3" rows="5" class="w-full text-xs font-mono p-3 rounded-xl border border-slate-300 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500">✨ Give your locks the luxury revival they deserve! 🌿
+
+Post-festive styling, dust, and heat can damage your hair. Restore intense gloss & strength with Serene Salon's signature:
+💆‍♀️ Insta Care Hair Spa (Up to Below-Waist Length)
+🌿 Keratin Bond-Repair Deep Masque
+💆‍♀️ Cranial Acupressure Relaxation
+💇‍♀️ Designer Haircut & Salon Blowdry
+
+Rated 5.0 ★ across 1,551+ reviews on Justdial!
+Special package price starts at just ₹1,450.
+Book your slot today: +91 6203060789</textarea>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+            <input type="tel" id="broadcastPhone3" placeholder="Recipient Mobile (e.g. 9876543210)" class="text-xs rounded-xl border border-slate-300 py-1.5 px-3 w-48 font-mono" />
+            <div class="flex items-center gap-2">
+              <button onclick="copyBroadcastText('broadcastText3')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">Copy</button>
+              <button onclick="sendBroadcastWhatsApp('broadcastPhone3', 'broadcastText3')" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1">
+                <span>Send WhatsApp</span>
+                <span>↗</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campaign 4: Academy Admissions & Scholarship -->
+        <div class="bg-white rounded-2xl border border-champagne-300 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase">
+              Student Outreach
+            </span>
+            <span class="text-xs text-slate-400 font-semibold">20% Scholarship</span>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base">🎓 Serene Cosmetology Academy Admissions Open</h3>
+          <textarea id="broadcastText4" rows="5" class="w-full text-xs font-mono p-3 rounded-xl border border-slate-300 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500">🎓 Start Your Journey into the ₹50,000 Cr Beauty Industry! 💄
+
+Admissions are now open for the upcoming batch at Serene Professional Beauty Academy Vadodara!
+🏆 Complete Pro Cosmetology & Salon Management (16 Weeks)
+💄 Master Bridal HD & Editorial Makeup (6 Weeks)
+💅 Acrylic Nail Extension & 3D Art Pro (3 Weeks)
+
+✓ 100% Practical Training on Live Models
+✓ Direct Mentorship by Rashmi Sah
+✓ Government & Lakmé standard syllabus
+✓ 20% Early-Bird Scholarship for this batch!
+
+Book your free career counseling session today:
+Call/WhatsApp: +91 6203060789</textarea>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+            <input type="tel" id="broadcastPhone4" placeholder="Recipient Mobile (e.g. 9876543210)" class="text-xs rounded-xl border border-slate-300 py-1.5 px-3 w-48 font-mono" />
+            <div class="flex items-center gap-2">
+              <button onclick="copyBroadcastText('broadcastText4')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">Copy</button>
+              <button onclick="sendBroadcastWhatsApp('broadcastPhone4', 'broadcastText4')" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1">
+                <span>Send WhatsApp</span>
+                <span>↗</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. TAB: REVIEWS & TESTIMONIALS -->
+    <div id="tab-reviews" class="admin-tab-pane hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Client Reviews & Testimonials</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Verified 5.0 ★ feedback from Justdial and direct salon guests.</p>
+        </div>
+        <button onclick="openModal('reviewModal')" class="px-4 py-2.5 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs shadow transition">
+          + Add Testimonial
+        </button>
+      </div>
+
+      <div id="adminReviewsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Populated via JS -->
+      </div>
+    </div>
+
+    <!-- 9. TAB: SALON SETTINGS -->
+    <div id="tab-settings" class="admin-tab-pane hidden space-y-6">
+      <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-4xl space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Salon & Business Profile Settings</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Update contact numbers, address, WhatsApp triggers, and change your Admin PIN.</p>
+        </div>
+
+        <form id="settingsForm" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Salon Name</label>
+              <input type="text" id="settingSalonName" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Founder / Master Educator</label>
+              <input type="text" id="settingFounder" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tagline</label>
+            <input type="text" id="settingTagline" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Primary Phone Number</label>
+              <input type="text" id="settingPhone" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">WhatsApp Business Number (digits only, e.g. 916203060789)</label>
+              <input type="text" id="settingWhatsapp" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Physical Address (Vadodara)</label>
+            <input type="text" id="settingAddress" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Salon Timings</label>
+              <input type="text" id="settingTimings" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">UPI ID for Advance Payments</label>
+              <input type="text" id="settingUpiId" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+            </div>
+          </div>
+
+          <div class="border-t border-slate-200 pt-4">
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Security & Access</h3>
+            <div class="max-w-xs">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Change Admin PIN (4-6 digits)</label>
+              <input type="password" id="settingAdminPin" placeholder="Enter new PIN" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-mono tracking-widest" />
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs shadow transition">
+              Save Settings
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODALS -->
+  <!-- ============================================================== -->
+
+  <!-- 1. MODAL: ADD / EDIT FESTIVE OFFER -->
+  <div id="offerModal" class="fixed inset-0 z-50 bg-espresso-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-champagne-300 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="offerModalTitle" class="font-editorial text-2xl font-bold text-espresso-950">Add Festive Offer</h3>
+        <button onclick="closeModal('offerModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+      <form id="offerForm" class="space-y-3.5">
+        <input type="hidden" id="offerEditId" />
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Campaign Title *</label>
+          <input type="text" id="offerTitleInput" required placeholder="e.g. Navratri Dandiya Glamour Flat 20% Off" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Promo Coupon Code *</label>
+            <input type="text" id="offerCodeInput" required placeholder="e.g. NAVRATRI20" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Discount % *</label>
+            <input type="number" id="offerDiscountInput" required min="1" max="90" placeholder="20" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Min. Booking Value (₹)</label>
+            <input type="number" id="offerMinBookingInput" placeholder="1000" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Valid Till Date</label>
+            <input type="date" id="offerValidTillInput" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Highlight Badge</label>
+          <input type="text" id="offerBadgeInput" placeholder="e.g. Festive Special / Early-Bird" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Description / T&C</label>
+          <textarea id="offerDescInput" rows="2" placeholder="e.g. Applicable on all Luxury Facials & Hair Spa bookings." 
+                    class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"></textarea>
+        </div>
+        <div class="flex items-center gap-6 pt-1">
+          <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+            <input type="checkbox" id="offerIsBannerCheckbox" class="rounded text-champagne-600 focus:ring-champagne-500" />
+            <span>Show on Top Announcement Banner</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+            <input type="checkbox" id="offerActiveCheckbox" checked class="rounded text-emerald-600 focus:ring-emerald-500" />
+            <span>Active Campaign</span>
+          </label>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('offerModal')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition">Save Offer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. MODAL: ADD / EDIT SERVICE -->
+  <div id="serviceModal" class="fixed inset-0 z-50 bg-espresso-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-champagne-300 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="serviceModalTitle" class="font-editorial text-2xl font-bold text-espresso-950">Add Salon Service</h3>
+        <button onclick="closeModal('serviceModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+      <form id="serviceForm" class="space-y-3.5">
+        <input type="hidden" id="serviceEditId" />
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Service Name *</label>
+          <input type="text" id="serviceNameInput" required placeholder="e.g. Signature Luxury Hydra-Glow Facial" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Category *</label>
+            <select id="serviceCategoryInput" required class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="Skin & Facials">Skin & Facials</option>
+              <option value="Hair Care & Spa">Hair Care & Spa</option>
+              <option value="Nail Artistry">Nail Artistry</option>
+              <option value="Bridal & Festive">Bridal & Festive</option>
+              <option value="Waxing & Threading">Waxing & Threading</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Price (₹) *</label>
+            <input type="number" id="servicePriceInput" required min="1" placeholder="2000" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Duration (minutes) *</label>
+            <input type="number" id="serviceDurationInput" required min="10" placeholder="60" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Badge / Tag</label>
+            <input type="text" id="serviceBadgeInput" placeholder="e.g. Most Booked / Festive Special" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Clinical Hygiene Protocol Note</label>
+          <input type="text" id="serviceHygieneInput" placeholder="e.g. Autoclaved Pouched Shears + Disposable Cape" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Description</label>
+          <textarea id="serviceDescInput" rows="2" placeholder="Describe the treatment benefits and technique." 
+                    class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"></textarea>
+        </div>
+        <div class="flex items-center gap-2 pt-1">
+          <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+            <input type="checkbox" id="serviceActiveCheckbox" checked class="rounded text-emerald-600 focus:ring-emerald-500" />
+            <span>Active on Public Rate Card</span>
+          </label>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('serviceModal')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition">Save Service</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. MODAL: ADD / EDIT COURSE -->
+  <div id="courseModal" class="fixed inset-0 z-50 bg-espresso-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-champagne-300 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="courseModalTitle" class="font-editorial text-2xl font-bold text-espresso-950">Add Academy Course</h3>
+        <button onclick="closeModal('courseModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+      <form id="courseForm" class="space-y-3.5">
+        <input type="hidden" id="courseEditId" />
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Course Title *</label>
+          <input type="text" id="courseTitleInput" required placeholder="e.g. Master Bridal & HD Makeup Diploma" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Duration *</label>
+            <input type="text" id="courseDurationInput" required placeholder="e.g. 6 Weeks • Intensive" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Level *</label>
+            <input type="text" id="courseLevelInput" required placeholder="e.g. Foundation to Advanced" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Standard Fee (₹) *</label>
+            <input type="number" id="courseFeeInput" required placeholder="28000" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Early-Bird Discounted Fee (₹)</label>
+            <input type="number" id="courseEarlyBirdInput" placeholder="22400" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Next Batch Schedule</label>
+          <input type="text" id="courseBatchInput" placeholder="e.g. 1st & 15th Every Month" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Curriculum Highlights (one per line)</label>
+          <textarea id="courseHighlightsInput" rows="3" placeholder="Live Hands-on Client Practice&#10;Mentorship by Rashmi Sah&#10;Portfolio Photo Shoot" 
+                    class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"></textarea>
+        </div>
+        <div class="flex items-center gap-2 pt-1">
+          <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+            <input type="checkbox" id="courseActiveCheckbox" checked class="rounded text-emerald-600 focus:ring-emerald-500" />
+            <span>Active for Enrollment</span>
+          </label>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('courseModal')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition">Save Course</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. MODAL: ISSUE CERTIFICATE -->
+  <div id="certModal" class="fixed inset-0 z-50 bg-espresso-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-champagne-300 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-editorial text-2xl font-bold text-espresso-950">Issue Student Certificate</h3>
+        <button onclick="closeModal('certModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+      <form id="certForm" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Certificate Unique ID *</label>
+          <input type="text" id="certIdInput" required placeholder="e.g. SSA-2026-125" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Student Full Name *</label>
+          <input type="text" id="certStudentInput" required placeholder="e.g. Priya Sharma" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Graduation Course *</label>
+          <input type="text" id="certCourseInput" required placeholder="e.g. Complete Pro Cosmetology & Salon Management Diploma" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Grade / Distinction *</label>
+            <input type="text" id="certGradeInput" required placeholder="Distinction (A+)" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Issue Date & Signatory</label>
+            <input type="text" id="certIssuedInput" placeholder="November 2026 • Signed by Rashmi Sah" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('certModal')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition">Issue Certificate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. MODAL: ADD TESTIMONIAL -->
+  <div id="reviewModal" class="fixed inset-0 z-50 bg-espresso-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-champagne-300 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-editorial text-2xl font-bold text-espresso-950">Add Customer Testimonial</h3>
+        <button onclick="closeModal('reviewModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+      <form id="reviewForm" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Reviewer Name *</label>
+          <input type="text" id="reviewNameInput" required placeholder="e.g. Heena Parekh" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Rating *</label>
+            <select id="reviewRatingInput" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="5">5.0 ★★★★★</option>
+              <option value="4">4.0 ★★★★☆</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Source / Verification</label>
+            <input type="text" id="reviewSourceInput" placeholder="Verified Justdial Review" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Tags (comma separated)</label>
+          <input type="text" id="reviewTagsInput" placeholder="Hygienic salon, Experienced staff, Great offers" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Review Quote *</label>
+          <textarea id="reviewQuoteInput" required rows="3" placeholder="Write the client's verified experience here..." 
+                    class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('reviewModal')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition">Add Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD MANUAL / WALK-IN BOOKING -->
+  <div id="manualBookingModal" class="fixed inset-0 z-50 bg-espresso-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-champagne-300 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-editorial text-2xl font-bold text-espresso-950">New Walk-in / Phone Booking</h3>
+        <button onclick="closeModal('manualBookingModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <form id="manualBookingForm" class="space-y-3.5">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Guest Full Name *</label>
+            <input type="text" id="manualGuestName" required placeholder="e.g. Pooja Shah" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile / WhatsApp *</label>
+            <input type="tel" id="manualGuestPhone" required placeholder="10-digit number" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-mono" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Primary Treatment *</label>
+          <select id="manualServiceSelect" required class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Appointment Date *</label>
+            <input type="date" id="manualDate" required class="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Time Slot *</label>
+            <select id="manualTime" class="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="10:30 AM">10:30 AM</option>
+              <option value="11:30 AM">11:30 AM</option>
+              <option value="12:30 PM">12:30 PM</option>
+              <option value="02:00 PM">02:00 PM</option>
+              <option value="03:30 PM">03:30 PM</option>
+              <option value="04:30 PM">04:30 PM</option>
+              <option value="06:00 PM">06:00 PM</option>
+              <option value="07:00 PM">07:00 PM</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Assigned Specialist</label>
+            <select id="manualStylist" class="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="Rashmi Sah (Founder & Master Artist)">Rashmi Sah (Founder)</option>
+              <option value="Senior Skin & Laser Aesthetician">Senior Skin Specialist</option>
+              <option value="Senior Hair & Balayage Expert">Senior Hair Expert</option>
+              <option value="Senior Nail & Lash Technician">Nail & Lash Tech</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Initial Status</label>
+            <select id="manualStatus" class="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="Confirmed">Confirmed</option>
+              <option value="Completed">Completed (Walk-in Paid)</option>
+              <option value="Pending">Pending Confirmation</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Special Discount (₹)</label>
+            <input type="number" id="manualDiscount" min="0" placeholder="0" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Promo Code / Reason</label>
+            <input type="text" id="manualPromo" placeholder="WALKIN / FESTIVE" 
+                   class="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 uppercase font-mono focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Reception Notes</label>
+          <input type="text" id="manualNotes" placeholder="e.g. Walk-in client referred by Justdial, paid via UPI." 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('manualBookingModal')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition">Create Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD MANUAL STUDENT LEAD -->
+  <div id="manualInquiryModal" class="fixed inset-0 z-50 bg-espresso-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-champagne-300 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-editorial text-2xl font-bold text-espresso-950">Add Student Counseling Lead</h3>
+        <button onclick="closeModal('manualInquiryModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <form id="manualInquiryForm" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Student Full Name *</label>
+          <input type="text" id="manualInqName" required placeholder="e.g. Mansi Joshi" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile / WhatsApp *</label>
+          <input type="tel" id="manualInqPhone" required placeholder="10-digit number" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-mono" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Course of Interest</label>
+          <select id="manualInqCourse" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Preferred Timing</label>
+            <select id="manualInqBatch" class="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="Morning Batch (10 AM - 1 PM)">Morning Batch</option>
+              <option value="Afternoon Batch (2 PM - 5 PM)">Afternoon Batch</option>
+              <option value="Weekend Intensive">Weekend Intensive</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Lead Status</label>
+            <select id="manualInqStatus" class="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="New">New Lead</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Enrolled">Enrolled</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Notes / Scholarship Details</label>
+          <textarea id="manualInqNotes" rows="2" placeholder="e.g. Visited academy with parents, offered 20% early-bird discount." 
+                    class="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('manualInquiryModal')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition">Add Student Lead</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. MODAL: DIGITAL APPOINTMENT RECEIPT & INVOICE -->
+  <div id="receiptModal" class="fixed inset-0 z-50 bg-espresso-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-champagne-300 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-editorial text-2xl font-bold text-espresso-950">Appointment Receipt</h3>
+        <button onclick="closeModal('receiptModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <div id="printableReceiptArea" class="p-6 rounded-2xl bg-champagne-50/50 border border-champagne-300 space-y-4 text-xs text-slate-800">
+        <!-- Receipt Header -->
+        <div class="text-center border-b border-champagne-200 pb-3 space-y-1">
+          <div class="w-10 h-10 rounded-full bg-espresso-950 text-champagne-300 font-serif font-bold text-lg flex items-center justify-center mx-auto">
+            S
+          </div>
+          <h4 class="font-editorial text-xl font-bold text-espresso-950">Serene Salon & Academy</h4>
+          <p class="text-[11px] text-slate-500">Opp. Shell Petrol Pump, Makarpura, Vadodara • +91 6203060789</p>
+          <div class="inline-block px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold mt-1">
+            ✓ 100% Autoclaved Sterile Station Assigned
+          </div>
+        </div>
+
+        <!-- Meta Details -->
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div><strong>Booking ID:</strong> <span id="recBookingId" class="font-mono font-bold text-espresso-950">#SSA-XXXX</span></div>
+          <div class="text-right"><strong>Date:</strong> <span id="recDate">--</span></div>
+          <div><strong>Guest:</strong> <span id="recGuestName" class="font-bold">--</span></div>
+          <div class="text-right"><strong>Time Slot:</strong> <span id="recTime">--</span></div>
+          <div><strong>Contact:</strong> <span id="recPhone" class="font-mono">--</span></div>
+          <div class="text-right"><strong>Specialist:</strong> <span id="recStylist">--</span></div>
+        </div>
+
+        <!-- Services Breakdown -->
+        <div class="border-t border-b border-champagne-200 py-2 space-y-1.5">
+          <div class="font-bold text-[11px] uppercase tracking-wider text-slate-500">Treatments Reserved</div>
+          <div id="recServicesList" class="space-y-1">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Totals -->
+        <div class="space-y-1 text-xs">
+          <div class="flex justify-between text-slate-600">
+            <span>Subtotal:</span>
+            <span id="recSubtotal">₹0</span>
+          </div>
+          <div id="recDiscountRow" class="flex justify-between text-emerald-800 font-semibold hidden">
+            <span>Festive Discount (<span id="recPromoCode"></span>):</span>
+            <span id="recDiscount">-₹0</span>
+          </div>
+          <div class="flex justify-between text-sm font-bold text-espresso-950 pt-1 border-t border-champagne-200">
+            <span>Total Bill:</span>
+            <span id="recTotal" class="text-base text-emerald-800">₹0</span>
+          </div>
+          <div class="text-[10px] text-slate-400 text-center pt-2 italic">
+            Thank you for choosing Serene Salon & Academy Vadodara!
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+        <button type="button" onclick="closeModal('receiptModal')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Close</button>
+        <button type="button" onclick="printReceipt()" class="px-5 py-2 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition flex items-center gap-1.5">
+          <span>🖨️ Print Receipt</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION BANNER -->
+  <div id="adminToast" class="fixed bottom-6 right-6 z-50 hidden bg-espresso-900 text-champagne-100 px-5 py-3.5 rounded-2xl shadow-2xl border border-champagne-500 flex items-center gap-3 text-xs font-semibold">
+    <span class="text-champagne-400 text-base">✓</span>
+    <span id="adminToastMsg">Success</span>
+  </div>
+
+  <!-- LOAD ADMIN JAVASCRIPT CONTROLLER -->
+  <script src="/js/admin.js"></script>
+</body>
+</html>
+

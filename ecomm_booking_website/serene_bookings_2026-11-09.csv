@@ -1,0 +1,6 @@
+Booking ID,Guest Name,Phone,Date,Time,Stylist,Services,Subtotal,Discount,Promo Code,Total,Status,Notes,Created At
+SSA-3973,"Test Guest Nikita","+91 9998887777",2026-11-20,"02:00 PM","Rashmi Sah (Founder & Master Artist)","Signature Luxury Hydra-Glow Facial",2000,400,"SERENE20",1600,Confirmed,"",2026-11-09T16:09:54.465Z
+SSA-3373,"Test Guest Nikita","+91 9998887777",2026-11-20,"02:00 PM","Rashmi Sah (Founder & Master Artist)","Signature Luxury Hydra-Glow Facial",2000,400,"SERENE20",1600,Confirmed,"",2026-11-09T14:37:55.201Z
+SSA-3298,"Test Guest Nikita","+91 9998887777",2026-11-20,"02:00 PM","Rashmi Sah (Founder & Master Artist)","Signature Luxury Hydra-Glow Facial",2000,400,"SERENE20",1600,Confirmed,"",2026-11-09T09:52:23.685Z
+SSA-8492,"Ananya Sharma","+91 9876543210",2026-11-12,"04:00 PM","Rashmi Sah (Founder & Master Artist)","Signature Luxury Hydra-Glow Facial; Advance Designer Hair Cut & Blowdry Styling",2650,530,"SERENE20",2120,Confirmed,"Prefers gentle pressure for facial extraction.",2026-11-09T10:30:00Z
+SSA-9104,"Pooja Vora","+91 9825123456",2026-11-13,"11:30 AM","Senior Nail & Lash Technician","Acrylic Permanent Nail Extensions + Gel Art",1800,0,"",1800,Pending,"Wants French ombré gel finish.",2026-11-09T11:15:00Z

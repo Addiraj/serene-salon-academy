@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Serene Salon & Academy | Luxury Women's Salon & Beauty Academy in Vadodara</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            champagne: {
+              50: '#FBF8F3',
+              100: '#F5EFE4',
+              200: '#EADBC2',
+              300: '#DFC49B',
+              400: '#D2AC74',
+              500: '#C59653',
+              600: '#AA7B3B',
+              700: '#88602E',
+              800: '#6B4B26',
+              900: '#4F371D'
+            },
+            espresso: {
+              800: '#261E1B',
+              900: '#181210',
+              950: '#0F0B0A'
+            },
+            blush: {
+              50: '#FDF8F7',
+              100: '#F9ECE9',
+              200: '#F2D5CF'
+            }
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #FBF8F3;
+      color: #261E1B;
+    }
+    .font-editorial {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+    .glass-panel {
+      background: rgba(251, 248, 243, 0.88);
+      backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-champagne-300 selection:text-espresso-950 min-h-screen flex flex-col justify-between">
+
+  <!-- TOP DYNAMIC FESTIVE OFFER & HYGIENE BANNER -->
+  <aside id="festiveBannerBar" class="bg-espresso-950 text-champagne-200 text-xs py-2 px-4 text-center border-b border-champagne-800/40 relative z-50">
+    <div class="flex items-center justify-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span class="font-semibold tracking-wide">Vadodara's Clinical-Sterilization Luxury Women's Salon & Academy</span>
+      <span class="hidden sm:inline text-champagne-300">• Authentic Mono-Dose Treatments</span>
+    </div>
+  </aside>
+
+  <!-- STICKY NAVIGATION HEADER -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-champagne-200/80 shadow-sm transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Monogram Crest & Brand Identity -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-full border border-champagne-400/80 bg-espresso-950 flex items-center justify-center text-champagne-300 font-serif text-2xl font-bold shadow-md group-hover:scale-105 transition">
+          S
+        </div>
+        <div class="flex flex-col">
+          <span class="font-editorial text-2xl sm:text-3xl font-bold tracking-tight text-espresso-950 leading-none">
+            Serene
+          </span>
+          <span class="text-[10px] sm:text-xs font-semibold tracking-widest uppercase text-champagne-700 mt-0.5">
+            Salon & Academy • Vadodara
+          </span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-espresso-800">
+        <button data-nav="servicesSection" class="nav-scroll-btn hover:text-champagne-800 transition py-1">Services & Rate Card</button>
+        <button data-nav="hygieneSection" class="nav-scroll-btn hover:text-champagne-800 transition py-1">5-Pillar Hygiene</button>
+        <button data-nav="academySection" class="nav-scroll-btn hover:text-champagne-800 transition py-1">Beauty Academy</button>
+        <button data-nav="lookbookSection" class="nav-scroll-btn hover:text-champagne-800 transition py-1">Lookbook</button>
+        <button data-nav="reviewsSection" class="nav-scroll-btn hover:text-champagne-800 transition py-1">Verified 5.0 ★ Reviews</button>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="openMyBookingsBtn" class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-espresso-800 hover:bg-champagne-200/60 border border-champagne-300 transition">
+          <span>📅 My Bookings</span>
+        </button>
+
+        <a href="/admin" target="_blank" class="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-champagne-800 bg-champagne-100 hover:bg-champagne-200 border border-champagne-300 transition">
+          <span>👑 Admin Portal</span>
+        </a>
+
+        <button id="openCartDrawerBtn" class="relative px-4 py-2.5 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-100 text-xs sm:text-sm font-semibold shadow-md transition flex items-center gap-2">
+          <span>Cart / Book</span>
+          <span id="cartCountBadge" class="bg-champagne-500 text-espresso-950 text-[11px] font-bold px-1.5 py-0.2 rounded-full">1</span>
+        </button>
+
+        <!-- Mobile Menu Hamburger -->
+        <button id="mobileMenuToggleBtn" class="lg:hidden p-2 rounded-xl text-espresso-900 hover:bg-champagne-200/60">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Collapsible Navigation Menu -->
+    <div id="mobileMenuPanel" class="lg:hidden hidden bg-champagne-50 border-b border-champagne-200 px-4 py-4 space-y-3 text-sm">
+      <button data-nav="servicesSection" class="nav-scroll-btn block w-full text-left font-semibold text-espresso-900 py-1">Signature Rate Card</button>
+      <button data-nav="hygieneSection" class="nav-scroll-btn block w-full text-left font-semibold text-espresso-900 py-1">5-Pillar Clinical Hygiene</button>
+      <button data-nav="academySection" class="nav-scroll-btn block w-full text-left font-semibold text-espresso-900 py-1">Cosmetology Academy</button>
+      <button data-nav="lookbookSection" class="nav-scroll-btn block w-full text-left font-semibold text-espresso-900 py-1">Lookbook Gallery</button>
+      <button data-nav="reviewsSection" class="nav-scroll-btn block w-full text-left font-semibold text-espresso-900 py-1">1,551+ Justdial Reviews</button>
+      <div class="pt-2 border-t border-champagne-200 flex flex-col gap-2">
+        <button onclick="document.getElementById('myBookingsModal').classList.remove('hidden'); document.getElementById('mobileMenuPanel').classList.add('hidden');" class="text-left font-semibold text-espresso-900 py-1">
+          📅 Lookup My Bookings
+        </button>
+        <a href="/admin" target="_blank" class="text-left font-bold text-champagne-800 py-1">
+          👑 Salon Owner Admin Portal ↗
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="relative bg-espresso-950 text-white overflow-hidden">
+      <!-- Background Image -->
+      <div class="absolute inset-0 opacity-40">
+        <img src="/images/hero-sanctuary.jpg" alt="Serene Salon Luxury Sanctuary Vadodara" class="w-full h-full object-cover" />
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-r from-espresso-950 via-espresso-950/90 to-transparent"></div>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Left Editorial Column -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-champagne-900/60 border border-champagne-500/40 text-champagne-300 text-xs font-semibold backdrop-blur-md">
+            <span>🛡️ Medical-Grade Autoclave Sterilization</span>
+            <span class="text-champagne-400">• Vadodara Benchmark</span>
+          </div>
+
+          <h1 class="font-editorial text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] text-champagne-100">
+            Where Clinical Hygiene Meets Couture Beauty & Mastery.
+          </h1>
+
+          <p class="text-sm sm:text-base text-champagne-200/80 max-w-xl font-light leading-relaxed">
+            Vadodara’s trusted sanctuary for restorative hair rituals, Hydra-Glow medi-facials, permanent nail artistry, and career-launching cosmetology education led by <strong>Rashmi Sah</strong>.
+          </p>
+
+          <!-- Social Proof Pills -->
+          <div class="flex flex-wrap items-center gap-4 pt-2 text-xs text-champagne-300">
+            <div class="flex items-center gap-1.5 bg-espresso-900/80 px-3 py-1.5 rounded-xl border border-champagne-700/50">
+              <span class="text-amber-400 font-bold">★ 5.0</span>
+              <span>1,551+ Verified Justdial Reviews</span>
+            </div>
+            <div class="flex items-center gap-1.5 bg-espresso-900/80 px-3 py-1.5 rounded-xl border border-champagne-700/50">
+              <span class="text-emerald-400">✓</span>
+              <span>100% Sealed Mono-Dose Products</span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-4">
+            <button data-nav="servicesSection" class="nav-scroll-btn px-6 py-3.5 rounded-xl bg-champagne-500 hover:bg-champagne-400 text-espresso-950 font-bold text-sm shadow-lg transition">
+              Explore Rate Card & Book
+            </button>
+            <button data-nav="academySection" class="nav-scroll-btn px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-champagne-100 font-semibold text-sm border border-champagne-400/30 backdrop-blur-sm transition">
+              Browse Academy Diplomas
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Quick-Appointment Finder Card -->
+        <div class="lg:col-span-5">
+          <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-champagne-300/80 text-espresso-900 space-y-4">
+            <div class="border-b border-champagne-200 pb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-champagne-700">Instant Online Slot</span>
+              <h2 class="font-editorial text-2xl font-bold text-espresso-950">Reserve Your Sanctuary Slot</h2>
+            </div>
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-espresso-800 mb-1">Select Signature Treatment</label>
+                <select id="quickServiceSelect" class="w-full text-xs rounded-xl border border-champagne-300 py-2.5 px-3 bg-champagne-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500">
+                  <!-- Populated via JS -->
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-espresso-800 mb-1">Preferred Date</label>
+                  <input type="date" id="quickDateInput" class="w-full text-xs rounded-xl border border-champagne-300 py-2.5 px-3 bg-champagne-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-espresso-800 mb-1">Stylist / Artist</label>
+                  <select id="quickStylistSelect" class="w-full text-xs rounded-xl border border-champagne-300 py-2.5 px-3 bg-champagne-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500">
+                    <option value="Rashmi Sah (Founder & Master Artist)">Rashmi Sah (Founder)</option>
+                    <option value="Senior Skin & Laser Aesthetician">Senior Skin Specialist</option>
+                    <option value="Senior Hair & Balayage Expert">Senior Hair Expert</option>
+                    <option value="Senior Nail & Lash Technician">Nail & Lash Artist</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <button id="quickBookLaunchBtn" class="w-full py-3.5 bg-espresso-900 hover:bg-espresso-950 text-champagne-200 rounded-xl font-bold text-xs sm:text-sm tracking-wide shadow-md transition">
+              Continue to Instant Booking →
+            </button>
+
+            <div class="text-[11px] text-espresso-800/70 text-center flex items-center justify-center gap-1.5">
+              <span>🔒 Zero advance deposit required</span>
+              <span>•</span>
+              <span>Autoclaved kit assigned</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENCHMARK EXCELLENCE RIBBON -->
+    <section class="bg-champagne-100/90 border-b border-champagne-200 py-3.5 px-4">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-around gap-4 text-xs font-semibold text-espresso-900 text-center">
+        <div class="flex items-center gap-1.5">
+          <span class="text-champagne-700 font-bold">✓</span>
+          <span>100% Autoclaved & Sealed Pouches</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-champagne-700 font-bold">✓</span>
+          <span>Strict Zero Double-Dipping Waxing</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-champagne-700 font-bold">✓</span>
+          <span>Certified Single-Use Disposable Capes</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-champagne-700 font-bold">✓</span>
+          <span>Government & Lakmé Benchmarked Academy</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE SALON SERVICES & RATE CARD SECTION -->
+    <section id="servicesSection" class="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-champagne-700">Official Rate Card & Treatments</span>
+          <h2 class="font-editorial text-3xl sm:text-4xl font-bold text-espresso-950 mt-1">
+            Signature Salon Services & Rate Card
+          </h2>
+          <p class="text-xs sm:text-sm text-espresso-800/80 mt-1.5 max-w-xl">
+            Transparent pricing, authentic botanical and dermatological formulations, backed by hospital-grade sterilization protocols.
+          </p>
+        </div>
+
+        <!-- Search and Sort -->
+        <div class="flex flex-wrap items-center gap-3">
+          <input type="text" id="serviceSearchInput" placeholder="Search facial, haircut, acrylic nails..." 
+                 class="text-xs rounded-xl border border-champagne-300 py-2.5 px-3.5 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500 w-52 sm:w-64 shadow-sm" />
+          <select id="serviceSortSelect" class="text-xs rounded-xl border border-champagne-300 py-2.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500 shadow-sm">
+            <option value="recommended">Recommended</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="duration">Shortest Duration</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div id="serviceCategoryTabs" class="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
+        <button data-category="all" class="service-cat-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition bg-espresso-900 text-champagne-200 shadow">
+          All Services
+        </button>
+        <button data-category="Skin & Facials" class="service-cat-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition bg-white border border-champagne-300 text-espresso-800 hover:bg-champagne-100">
+          Skin & Facials
+        </button>
+        <button data-category="Hair Care & Spa" class="service-cat-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition bg-white border border-champagne-300 text-espresso-800 hover:bg-champagne-100">
+          Hair Care & Spa
+        </button>
+        <button data-category="Nail Artistry" class="service-cat-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition bg-white border border-champagne-300 text-espresso-800 hover:bg-champagne-100">
+          Nail Artistry
+        </button>
+        <button data-category="Bridal & Festive" class="service-cat-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition bg-white border border-champagne-300 text-espresso-800 hover:bg-champagne-100">
+          Bridal & Festive
+        </button>
+        <button data-category="Waxing & Threading" class="service-cat-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition bg-white border border-champagne-300 text-espresso-800 hover:bg-champagne-100">
+          Waxing & Threading
+        </button>
+      </div>
+
+      <!-- Services Grid (Populated dynamically via JS) -->
+      <div id="servicesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Injected via app.js -->
+      </div>
+    </section>
+
+    <!-- 5-STAR CLINICAL HYGIENE & SAFETY SECTION -->
+    <section id="hygieneSection" class="py-16 bg-espresso-950 text-champagne-50 relative overflow-hidden">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-champagne-400">Clinical-Standard Guarantee</span>
+          <h2 class="font-editorial text-3xl sm:text-4xl font-bold text-champagne-100">
+            Our 5-Pillar Gold Hygiene & Sterilization Protocol
+          </h2>
+          <p class="text-xs sm:text-sm text-champagne-200/80 font-light">
+            Why 1,551+ Vadodara women trust Serene. Click any protocol below to view our strict station preparation procedure.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <button type="button" data-hygiene="Autoclave Class B Sterilization cycle at 134°C kills 100% of bacterial and viral spores. Sealed in sterile pouches and unsealed only in front of the client." class="hygiene-card-btn text-left p-5 rounded-2xl bg-espresso-900 border border-champagne-800/80 hover:border-champagne-500 transition space-y-2">
+            <span class="text-2xl">🔬</span>
+            <h3 class="font-bold text-sm text-champagne-200">Autoclave & UV-C Tool Pouches</h3>
+            <p class="text-xs text-champagne-300/70">Medical grade sealed instrument pouches opened before your eyes.</p>
+          </button>
+
+          <button type="button" data-hygiene="Fresh single-use biodegradable client capes, neck strips, spatula, and pedicure tub liners to eliminate cross-contamination risk." class="hygiene-card-btn text-left p-5 rounded-2xl bg-espresso-900 border border-champagne-800/80 hover:border-champagne-500 transition space-y-2">
+            <span class="text-2xl">🌱</span>
+            <h3 class="font-bold text-sm text-champagne-200">Single-Use Disposable Kits</h3>
+            <p class="text-xs text-champagne-300/70">Fresh capes, biodegradable towels, and disposable pedicure tub liners.</p>
+          </button>
+
+          <button type="button" data-hygiene="Factory-sealed mono-dose ampoules and facial sachets prevent product oxidation, tampering, or dilution." class="hygiene-card-btn text-left p-5 rounded-2xl bg-espresso-900 border border-champagne-800/80 hover:border-champagne-500 transition space-y-2">
+            <span class="text-2xl">🧴</span>
+            <h3 class="font-bold text-sm text-champagne-200">Mono-Dose Authentic Products</h3>
+            <p class="text-xs text-champagne-300/70">Zero bulk decanting. 100% authentic sealed international cosmetic formulas.</p>
+          </button>
+
+          <button type="button" data-hygiene="Styling chairs, shampoo basins, and manicure stations are disinfected with hospital-grade surface wipes between every guest." class="hygiene-card-btn text-left p-5 rounded-2xl bg-espresso-900 border border-champagne-800/80 hover:border-champagne-500 transition space-y-2">
+            <span class="text-2xl">✨</span>
+            <h3 class="font-bold text-sm text-champagne-200">Between-Guest Disinfection</h3>
+            <p class="text-xs text-champagne-300/70">Chairs, backwash units, and manicure stations wiped between every guest visit.</p>
+          </button>
+        </div>
+
+        <div id="hygieneDetailBox" class="p-4 rounded-xl bg-champagne-950/90 border border-champagne-600/50 text-xs text-champagne-200 text-center max-w-2xl mx-auto shadow-inner">
+          <strong>Selected Protocol:</strong> Autoclave Class B Sterilization cycle at 134°C kills 100% of bacterial and viral spores. Sealed in sterile pouches and unsealed only in front of the client.
+        </div>
+      </div>
+    </section>
+
+    <!-- SERENE BEAUTY & COSMETOLOGY ACADEMY SECTION -->
+    <section id="academySection" class="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        
+        <!-- Left Column: Academy Visual & Highlights -->
+        <div class="lg:col-span-5 space-y-6">
+          <span class="text-xs font-bold uppercase tracking-wider text-champagne-700">Lakmé & VLCC Standard Vocational Training</span>
+          <h2 class="font-editorial text-3xl sm:text-4xl font-bold text-espresso-950">
+            Serene Professional Beauty Academy
+          </h2>
+          <p class="text-xs sm:text-sm text-espresso-800/80 leading-relaxed">
+            Gain mastery in bridal makeup, clinical cosmetology, advance hair coloring, and acrylic nail sculpting under the direct mentorship of <strong>Rashmi Sah</strong>.
+          </p>
+
+          <div class="relative rounded-2xl overflow-hidden shadow-xl border border-champagne-300">
+            <img src="/images/academy-masterclass.jpg" alt="Academy Masterclass Session Vadodara" class="w-full h-64 object-cover" />
+            <div class="absolute bottom-3 left-3 right-3 bg-espresso-950/80 backdrop-blur-md p-3 rounded-xl text-white text-xs border border-champagne-400/30">
+              <span class="font-bold text-champagne-300">Live Hands-on Model Training:</span> Every student practices real-world salon protocols on live models.
+            </div>
+          </div>
+
+          <!-- Certificate Verification Widget -->
+          <div class="bg-champagne-100/70 border border-champagne-300 rounded-2xl p-5 space-y-3 shadow-sm">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">📜</span>
+              <div>
+                <h4 class="font-bold text-xs text-espresso-950 uppercase tracking-wider">Online Certificate Verification</h4>
+                <p class="text-[11px] text-espresso-800/70">Verify graduate credentials & authenticity</p>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="certVerifyInput" placeholder="Try ID: SSA-2026-104" 
+                     class="flex-1 text-xs rounded-xl border border-champagne-300 py-2.5 px-3 uppercase font-mono font-bold bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+              <button id="certVerifyBtn" class="px-4 py-2.5 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 text-xs font-bold transition">
+                Verify
+              </button>
+            </div>
+            <div id="certVerifyResult" class="hidden"></div>
+          </div>
+        </div>
+
+        <!-- Right Column: Courses & Interactive Batch Form -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="flex items-center justify-between">
+            <h3 class="font-editorial text-2xl font-bold text-espresso-950">Professional Diploma & Certification Programs</h3>
+            <span class="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              Early-Bird Scholarships Active
+            </span>
+          </div>
+
+          <!-- Dynamic Courses List -->
+          <div id="academyCoursesList" class="space-y-4">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- Career Counseling / Batch Inquiry Form -->
+          <div class="bg-white rounded-2xl border border-champagne-300 p-6 shadow-sm space-y-4">
+            <div class="border-b border-champagne-200 pb-2">
+              <h4 class="font-editorial text-2xl font-bold text-espresso-950">Request Free Career Counselling & Early-Bird Scholarship</h4>
+              <p class="text-xs text-espresso-800/70">Get curriculum syllabus, fee installments, and 1-on-1 counseling with Rashmi Sah.</p>
+            </div>
+
+            <form id="academyInquiryForm" class="space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-espresso-800 mb-1">Your Full Name *</label>
+                  <input type="text" id="inquiryNameInput" required placeholder="e.g. Diya Patel" 
+                         class="w-full text-xs rounded-xl border border-champagne-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 bg-champagne-50/40" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-espresso-800 mb-1">Mobile / WhatsApp Number *</label>
+                  <input type="tel" id="inquiryPhoneInput" required placeholder="e.g. 9876543210" 
+                         class="w-full text-xs rounded-xl border border-champagne-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 bg-champagne-50/40 font-mono" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-espresso-800 mb-1">Course of Interest</label>
+                  <select id="inquiryCourseSelect" class="w-full text-xs rounded-xl border border-champagne-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 bg-white">
+                    <!-- Populated via JS -->
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-espresso-800 mb-1">Preferred Batch Timing</label>
+                  <select id="inquiryTimeSelect" class="w-full text-xs rounded-xl border border-champagne-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 bg-white">
+                    <option value="Morning Batch (10 AM - 1 PM)">Morning Batch (10 AM - 1 PM)</option>
+                    <option value="Afternoon Batch (2 PM - 5 PM)">Afternoon Batch (2 PM - 5 PM)</option>
+                    <option value="Weekend Intensive">Weekend Intensive Track</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-espresso-800 mb-1">Career Goal / Questions</label>
+                <input type="text" id="inquiryNotesInput" placeholder="e.g. Planning to start a salon or interested in installment plans." 
+                       class="w-full text-xs rounded-xl border border-champagne-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 bg-champagne-50/40" />
+              </div>
+
+              <button type="submit" class="w-full py-3 bg-espresso-900 hover:bg-espresso-950 text-champagne-200 rounded-xl font-bold text-xs tracking-wide shadow transition">
+                Submit Inquiry for 20% Early-Bird Scholarship →
+              </button>
+            </form>
+
+            <div id="academyInquirySuccessBox" class="hidden"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOCIAL MEDIA LOOKBOOK & PORTFOLIO SECTION -->
+    <section id="lookbookSection" class="py-16 bg-champagne-100/60 border-y border-champagne-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-champagne-700">Client Transformations</span>
+            <h2 class="font-editorial text-3xl sm:text-4xl font-bold text-espresso-950 mt-1">
+              Social Media Lookbook & Transformations
+            </h2>
+            <p class="text-xs sm:text-sm text-espresso-800/80 mt-1">
+              Follow <strong>@serenesalonacademy</strong> on Instagram for daily beauty reels and bridal makeovers.
+            </p>
+          </div>
+          <a href="https://www.instagram.com/serenesalonacademy/?hl=en" target="_blank" class="px-4 py-2 rounded-xl bg-white border border-champagne-300 text-espresso-900 text-xs font-bold hover:bg-champagne-50 transition shadow-sm inline-flex items-center gap-1.5 self-start sm:self-auto">
+            <span>Instagram Feed ↗</span>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Lookbook 1: Bridal -->
+          <div class="bg-white rounded-3xl overflow-hidden border border-champagne-200 shadow-sm group flex flex-col">
+            <div class="relative h-64 overflow-hidden">
+              <img src="/images/lookbook-bridal.jpg" alt="Bridal & Navratri Makeover" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+              <div class="absolute top-3 left-3 bg-espresso-950/80 text-champagne-300 text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-champagne-400/30">
+                Bridal & Festive
+              </div>
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 class="font-editorial text-2xl font-bold text-espresso-950">Bridal & Navratri Early-Bird Makeovers</h3>
+                <p class="text-xs text-espresso-800/80 mt-1">Waterproof HD & Airbrush finish with traditional hairdo and chaniya choli pinning.</p>
+              </div>
+              <div class="pt-3 border-t border-champagne-200 flex items-center justify-between">
+                <span class="font-bold text-sm text-espresso-900">From ₹2,200</span>
+                <button type="button" data-quick-add="srv-bridal-hd" class="quick-add-look-btn text-xs font-bold text-champagne-800 hover:text-champagne-950 underline underline-offset-4">
+                  Book This Look →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lookbook 2: Nails -->
+          <div class="bg-white rounded-3xl overflow-hidden border border-champagne-200 shadow-sm group flex flex-col">
+            <div class="relative h-64 overflow-hidden">
+              <img src="/images/lookbook-nails.jpg" alt="Acrylic Permanent Nail Artistry" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+              <div class="absolute top-3 left-3 bg-espresso-950/80 text-champagne-300 text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-champagne-400/30">
+                Nail Artistry
+              </div>
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 class="font-editorial text-2xl font-bold text-espresso-950">Permanent Acrylic Nail Extensions & Gel Art</h3>
+                <p class="text-xs text-espresso-800/80 mt-1">Sculpted permanent extensions, chip-free gel colors, chrome, and French tips.</p>
+              </div>
+              <div class="pt-3 border-t border-champagne-200 flex items-center justify-between">
+                <span class="font-bold text-sm text-espresso-900">From ₹1,400</span>
+                <button type="button" data-quick-add="srv-acrylic-perm" class="quick-add-look-btn text-xs font-bold text-champagne-800 hover:text-champagne-950 underline underline-offset-4">
+                  Book This Look →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lookbook 3: Hair Spa & Balayage -->
+          <div class="bg-white rounded-3xl overflow-hidden border border-champagne-200 shadow-sm group flex flex-col">
+            <div class="relative h-64 overflow-hidden">
+              <img src="/images/lookbook-hair.jpg" alt="Insta Care Hair Spa" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+              <div class="absolute top-3 left-3 bg-espresso-950/80 text-champagne-300 text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-champagne-400/30">
+                Hair Care & Spa
+              </div>
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 class="font-editorial text-2xl font-bold text-espresso-950">Insta Care Hair Spa & Dimensional Highlights</h3>
+                <p class="text-xs text-espresso-800/80 mt-1">Specialty deep conditioning for long hair and bond-strengthened balayage.</p>
+              </div>
+              <div class="pt-3 border-t border-champagne-200 flex items-center justify-between">
+                <span class="font-bold text-sm text-espresso-900">From ₹1,450</span>
+                <button type="button" data-quick-add="srv-hair-spa" class="quick-add-look-btn text-xs font-bold text-champagne-800 hover:text-champagne-950 underline underline-offset-4">
+                  Book This Look →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VERIFIED 1,551+ CUSTOMER REVIEWS SECTION -->
+    <section id="reviewsSection" class="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-champagne-700">Grounded Trust</span>
+          <h2 class="font-editorial text-3xl sm:text-4xl font-bold text-espresso-950 mt-1">
+            Rated 5.0 ★ Across 1,551+ Reviews
+          </h2>
+          <p class="text-xs sm:text-sm text-espresso-800/80 mt-1">
+            Verified client testimonials highlighting cleanliness, friendly hospitality, and luxury hair & skin treatments.
+          </p>
+        </div>
+        <button id="openLeaveReviewBtn" class="px-4 py-2.5 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 text-xs font-bold transition shadow-sm self-start sm:self-auto">
+          + Leave a Review
+        </button>
+      </div>
+
+      <!-- Tag Filters -->
+      <div id="reviewTagFilters" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <button data-review-tag="all" class="review-filter-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap bg-espresso-900 text-champagne-200 shadow transition">
+          All Reviews
+        </button>
+        <button data-review-tag="Hygienic salon" class="review-filter-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap bg-white border border-champagne-300 text-espresso-800 hover:bg-champagne-100 transition">
+          Hygienic salon
+        </button>
+        <button data-review-tag="Clean equipment" class="review-filter-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap bg-white border border-champagne-300 text-espresso-800 hover:bg-champagne-100 transition">
+          Clean equipment
+        </button>
+        <button data-review-tag="Experienced staff" class="review-filter-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap bg-white border border-champagne-300 text-espresso-800 hover:bg-champagne-100 transition">
+          Experienced staff
+        </button>
+        <button data-review-tag="Reasonably priced" class="review-filter-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap bg-white border border-champagne-300 text-espresso-800 hover:bg-champagne-100 transition">
+          Reasonably priced
+        </button>
+        <button data-review-tag="Great offers" class="review-filter-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap bg-white border border-champagne-300 text-espresso-800 hover:bg-champagne-100 transition">
+          Great offers
+        </button>
+      </div>
+
+      <!-- Reviews Grid -->
+      <div id="reviewsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Populated via JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- LOCATION, HOURS & DIRECT CONTACT FOOTER -->
+  <footer class="bg-espresso-950 text-champagne-100 border-t border-champagne-800/40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      
+      <!-- Brand & Story -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-champagne-600 flex items-center justify-center text-espresso-950 font-serif font-bold text-xl">
+            S
+          </div>
+          <span class="font-editorial text-2xl font-bold text-champagne-100">Serene Salon & Academy</span>
+        </div>
+        <p class="text-xs text-champagne-200/80 leading-relaxed font-light">
+          Vadodara’s premier clinical-standard women's salon and Lakmé-benchmarked cosmetology training academy led by <strong>Rashmi Sah</strong>.
+        </p>
+        <div class="pt-1">
+          <a href="/admin" target="_blank" class="text-xs font-semibold text-champagne-400 hover:text-champagne-300 underline">
+            👑 Salon Owner Admin Dashboard ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- Salon Hours & Timings -->
+      <div class="space-y-3">
+        <h4 class="font-editorial text-xl font-bold text-champagne-200">Opening Hours</h4>
+        <div class="text-xs text-champagne-200/80 space-y-1.5">
+          <p><strong>Monday – Sunday:</strong></p>
+          <p class="salon-timings-text font-mono text-champagne-300">10:00 AM – 08:30 PM</p>
+          <p class="text-[11px] text-champagne-400 pt-2">Sterilization cycles run 30 mins prior to opening and following every booking.</p>
+        </div>
+      </div>
+
+      <!-- Salon Address & Location -->
+      <div class="space-y-3">
+        <h4 class="font-editorial text-xl font-bold text-champagne-200">Vadodara Sanctuary</h4>
+        <p class="salon-address-text text-xs text-champagne-200/80 leading-relaxed">
+          Opp. Shell Petrol Pump, Makarpura Industrial Estate, Manjalpur, Vadodara, Gujarat 390010
+        </p>
+        <div class="pt-1 text-xs">
+          <a href="https://www.justdial.com/Vadodara/Serene-Salon-Academy-Near-Shell-Petrol-Pump-Makarpura-Industrial-Estate/0265PX265-X265-220827151238-Q4G8_BZDET" target="_blank" class="text-champagne-400 hover:underline">
+            View on Justdial Directory ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- Direct Contact & WhatsApp -->
+      <div class="space-y-3">
+        <h4 class="font-editorial text-xl font-bold text-champagne-200">Direct Contact</h4>
+        <div class="text-xs space-y-2">
+          <p>
+            <span class="text-champagne-400">Phone:</span>
+            <a href="tel:+916203060789" class="salon-phone-text font-bold text-champagne-200 hover:underline ml-1">+91 6203060789</a>
+          </p>
+          <div class="pt-2">
+            <a href="https://wa.me/916203060789" target="_blank" class="salon-wa-link inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow">
+              <span>Chat on WhatsApp</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-champagne-900/60 py-6 text-center text-xs text-champagne-300/60">
+      © 2026 Serene Salon & Academy. All Rights Reserved. • Clinical Autoclave Protocol Active.
+    </div>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- MODALS & DRAWERS -->
+  <!-- ============================================================== -->
+
+  <!-- BOOKING CART & MULTI-STEP CHECKOUT DRAWER MODAL -->
+  <div id="bookingDrawerModal" class="fixed inset-0 z-50 hidden bg-espresso-950/70 backdrop-blur-sm flex justify-end">
+    <div class="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col justify-between overflow-hidden">
+      
+      <!-- Drawer Header -->
+      <div class="p-5 border-b border-champagne-200 flex items-center justify-between bg-champagne-50">
+        <div>
+          <span class="text-[10px] font-bold text-champagne-700 uppercase tracking-wider">Sanctuary Reservation</span>
+          <h3 class="font-editorial text-2xl font-bold text-espresso-950">Your Appointment Booking</h3>
+        </div>
+        <button id="closeCartDrawerBtn" class="w-8 h-8 rounded-full bg-white border border-champagne-300 flex items-center justify-center text-espresso-800 hover:bg-champagne-100 font-bold">
+          ✕
+        </button>
+      </div>
+
+      <!-- Drawer Body -->
+      <div class="p-5 overflow-y-auto space-y-5 flex-1">
+        
+        <!-- Selected Services List -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-espresso-900 uppercase tracking-wider">Selected Treatments</label>
+            <span id="cartTotalDuration" class="text-xs text-espresso-800/70 font-medium">0 mins</span>
+          </div>
+          <div id="cartItemsContainer" class="space-y-2">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Promo / Voucher Code -->
+        <div class="p-3.5 rounded-xl bg-champagne-50 border border-champagne-200 space-y-2">
+          <label class="block text-xs font-bold text-espresso-900">Festive Voucher / Coupon Code</label>
+          <div class="flex gap-2">
+            <input type="text" id="promoCodeInput" placeholder="Try: SERENE20" 
+                   class="flex-1 text-xs rounded-xl border border-champagne-300 py-2 px-3 uppercase font-mono font-bold bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+            <button type="button" id="applyPromoBtn" class="px-4 py-2 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 text-xs font-bold transition">
+              Apply
+            </button>
+          </div>
+          <div id="promoCodeResult" class="hidden"></div>
+        </div>
+
+        <!-- Date, Time Slot & Specialist Selection -->
+        <div class="space-y-3 pt-1">
+          <label class="block text-xs font-bold text-espresso-900 uppercase tracking-wider">Schedule & Specialist</label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-espresso-800/80 mb-1">Appointment Date</label>
+              <input type="date" id="drawerDateInput" class="w-full text-xs rounded-xl border border-champagne-300 py-2 px-2.5 bg-champagne-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+            </div>
+            <div>
+              <label class="block text-[11px] text-espresso-800/80 mb-1">Time Slot</label>
+              <select id="drawerTimeSelect" class="w-full text-xs rounded-xl border border-champagne-300 py-2 px-2.5 bg-champagne-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500">
+                <option value="10:30 AM">10:30 AM</option>
+                <option value="11:30 AM">11:30 AM</option>
+                <option value="12:30 PM">12:30 PM</option>
+                <option value="02:00 PM">02:00 PM</option>
+                <option value="03:30 PM">03:30 PM</option>
+                <option value="04:30 PM">04:30 PM</option>
+                <option value="06:00 PM">06:00 PM</option>
+                <option value="07:00 PM">07:00 PM</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] text-espresso-800/80 mb-1">Assigned Specialist</label>
+            <select id="drawerStylistSelect" class="w-full text-xs rounded-xl border border-champagne-300 py-2 px-3 bg-champagne-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="Rashmi Sah (Founder & Master Artist)">Rashmi Sah (Founder & Master Artist)</option>
+              <option value="Senior Skin & Laser Aesthetician">Senior Skin Specialist</option>
+              <option value="Senior Hair & Balayage Expert">Senior Hair Expert</option>
+              <option value="Senior Nail & Lash Technician">Nail & Lash Specialist</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Client Contact Details -->
+        <div class="space-y-3 pt-1">
+          <label class="block text-xs font-bold text-espresso-900 uppercase tracking-wider">Your Contact Details</label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-espresso-800/80 mb-1">Full Name *</label>
+              <input type="text" id="guestNameInput" required placeholder="e.g. Ananya Patel" class="w-full text-xs rounded-xl border border-champagne-300 py-2 px-3 bg-champagne-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+            </div>
+            <div>
+              <label class="block text-[11px] text-espresso-800/80 mb-1">Mobile / WhatsApp *</label>
+              <input type="tel" id="guestPhoneInput" required placeholder="10-digit number" class="w-full text-xs rounded-xl border border-champagne-300 py-2 px-3 bg-champagne-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-mono" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] text-espresso-800/80 mb-1">Special Preferences / Skin Allergy Notes</label>
+            <input type="text" id="guestNotesInput" placeholder="e.g. Sensitive scalp, extra gentle extraction..." class="w-full text-xs rounded-xl border border-champagne-300 py-2 px-3 bg-champagne-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+          </div>
+        </div>
+
+        <!-- Instant Booking Confirmation Box -->
+        <div id="bookingConfirmationBox" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-300 space-y-2"></div>
+      </div>
+
+      <!-- Drawer Footer Totals & Confirm Button -->
+      <div class="p-5 border-t border-champagne-200 bg-champagne-50/80 space-y-3">
+        <div class="space-y-1 text-xs">
+          <div class="flex items-center justify-between text-espresso-800/70">
+            <span>Subtotal</span>
+            <span id="cartSubtotalAmount">₹0</span>
+          </div>
+          <div id="cartDiscountRow" class="hidden flex items-center justify-between text-emerald-800 font-semibold">
+            <span>Promotional Discount</span>
+            <span id="cartDiscountAmount">-₹0</span>
+          </div>
+          <div class="flex items-center justify-between text-base font-bold text-espresso-950 pt-1 border-t border-champagne-200">
+            <span>Total Payable at Salon</span>
+            <span id="cartFinalAmount" class="text-xl font-editorial text-espresso-950">₹0</span>
+          </div>
+        </div>
+
+        <button type="button" id="confirmBookingBtn" class="w-full py-3.5 bg-espresso-900 hover:bg-espresso-950 text-champagne-200 rounded-xl font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+          <span>Confirm Sterile Slot & Generate WhatsApp Link</span>
+          <span>→</span>
+        </button>
+
+        <div class="text-[11px] text-center text-espresso-800/70">
+          ✓ 100% Sterile Kit Reserved • Pay After Treatment at Salon
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY SAVED APPOINTMENTS MODAL -->
+  <div id="myBookingsModal" class="fixed inset-0 z-50 hidden bg-espresso-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-champagne-300 space-y-4 max-h-[85vh] flex flex-col justify-between">
+      <div class="flex items-center justify-between border-b border-champagne-200 pb-3">
+        <div>
+          <span class="text-[10px] font-bold text-champagne-700 uppercase tracking-wider">Client Self-Service</span>
+          <h3 class="font-editorial text-2xl font-bold text-espresso-950">Lookup My Bookings</h3>
+        </div>
+        <button id="closeMyBookingsModalBtn" class="w-8 h-8 rounded-full bg-champagne-100 text-espresso-900 font-bold flex items-center justify-center hover:bg-champagne-200">✕</button>
+      </div>
+
+      <div class="space-y-3 flex-1 overflow-y-auto">
+        <div class="flex gap-2">
+          <input type="text" id="myBookingsQueryInput" placeholder="Enter Mobile Number or Booking ID..." 
+                 class="flex-1 text-xs rounded-xl border border-champagne-300 py-2.5 px-3 bg-champagne-50/50 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-mono" />
+          <button id="searchMyBookingsBtn" class="px-4 py-2.5 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition">
+            Search
+          </button>
+        </div>
+
+        <div id="myBookingsResultsList" class="space-y-3 pt-2">
+          <p class="text-xs text-espresso-800/70 text-center py-6">Enter your 10-digit mobile number to view all your upcoming and past bookings.</p>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-champagne-200 flex justify-end">
+        <button onclick="document.getElementById('myBookingsModal').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-champagne-100 hover:bg-champagne-200 text-espresso-900 text-xs font-bold">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEAVE A REVIEW MODAL -->
+  <div id="leaveReviewModal" class="fixed inset-0 z-50 hidden bg-espresso-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-champagne-300 space-y-4">
+      <div class="flex items-center justify-between border-b border-champagne-200 pb-3">
+        <h3 class="font-editorial text-2xl font-bold text-espresso-950">Share Your Experience</h3>
+        <button id="closeLeaveReviewModalBtn" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <form id="leaveReviewForm" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Your Name *</label>
+          <input type="text" id="clientReviewNameInput" required placeholder="e.g. Priya Shah" 
+                 class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Star Rating</label>
+            <select id="clientReviewRatingInput" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="5">5.0 ★★★★★</option>
+              <option value="4">4.0 ★★★★☆</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Primary Highlight</label>
+            <select id="clientReviewTagInput" class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500">
+              <option value="Hygienic salon">Hygienic salon</option>
+              <option value="Experienced staff">Experienced staff</option>
+              <option value="Clean equipment">Clean equipment</option>
+              <option value="Reasonably priced">Reasonably priced</option>
+              <option value="Luxurious vibe">Luxurious vibe</option>
+              <option value="Great offers">Great offers</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Your Review *</label>
+          <textarea id="clientReviewQuoteInput" required rows="3" placeholder="Tell us how you enjoyed your treatment, the hygiene, and the stylists!" 
+                    class="w-full text-xs rounded-xl border border-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="document.getElementById('leaveReviewModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition">Submit Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- INSTANT UPI QR CODE ADVANCE PAYMENT MODAL -->
+  <div id="upiModal" class="fixed inset-0 z-50 hidden bg-espresso-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-champagne-300 space-y-4 text-center">
+      <div class="flex items-center justify-between border-b border-champagne-200 pb-3">
+        <h3 class="font-editorial text-2xl font-bold text-espresso-950">Pay via UPI QR</h3>
+        <button onclick="document.getElementById('upiModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <div class="space-y-3">
+        <p class="text-xs text-espresso-800">Scan with any UPI App (GPay, PhonePe, Paytm, BHIM)</p>
+        
+        <!-- QR Code Image -->
+        <div class="p-3 bg-white rounded-2xl border-2 border-champagne-300 inline-block shadow-inner">
+          <img id="upiQrCodeImg" src="" alt="UPI QR Code" class="w-48 h-48 mx-auto" />
+        </div>
+
+        <div class="p-3 bg-champagne-50 rounded-xl border border-champagne-200 space-y-1 text-xs">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Payable Amount:</span>
+            <span id="upiAmountText" class="font-bold text-emerald-800 text-sm">₹0</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Booking Ref:</span>
+            <span id="upiBookingRefText" class="font-mono font-bold text-espresso-950">#SSA-XXXX</span>
+          </div>
+          <div class="flex items-center justify-between pt-1 border-t border-champagne-200/80">
+            <span class="text-slate-500">UPI ID:</span>
+            <span class="font-mono font-bold text-champagne-800 flex items-center gap-1">
+              <span>6203060789@upi</span>
+              <button onclick="navigator.clipboard.writeText('6203060789@upi'); showToast('UPI ID copied!');" class="text-[10px] underline text-espresso-800">Copy</button>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 space-y-2">
+        <button type="button" onclick="confirmUpiPaymentDone()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md transition">
+          ✓ I Have Completed Payment
+        </button>
+        <button type="button" onclick="document.getElementById('upiModal').classList.add('hidden')" class="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-700">
+          Pay at Salon Reception Instead
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFICIAL DIGITAL GRADUATION DIPLOMA / CERTIFICATE MODAL -->
+  <div id="officialCertModal" class="fixed inset-0 z-50 hidden bg-espresso-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl border border-champagne-400 space-y-5 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-champagne-200 pb-2">
+        <span class="text-xs font-bold text-champagne-700 uppercase tracking-wider">Official Verified Diploma</span>
+        <button onclick="document.getElementById('officialCertModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <!-- Printable Certificate Border & Layout -->
+      <div id="printableCertArea" class="relative p-8 rounded-2xl border-4 border-double border-champagne-400 bg-gradient-to-b from-champagne-50 via-white to-champagne-50 text-center space-y-5 shadow-lg">
+        <div class="w-16 h-16 rounded-full bg-espresso-950 text-champagne-300 font-serif font-bold text-3xl flex items-center justify-center mx-auto border-2 border-champagne-400 shadow">
+          S
+        </div>
+
+        <div>
+          <h2 class="font-editorial text-2xl sm:text-3xl font-bold tracking-widest text-espresso-950 uppercase">
+            Serene Professional Beauty Academy
+          </h2>
+          <p class="text-[11px] font-semibold text-champagne-700 tracking-widest uppercase mt-0.5">
+            Vadodara, Gujarat • Centre of Cosmetology & Aesthetic Mastery
+          </p>
+        </div>
+
+        <div class="text-xs text-slate-600 italic">This is to certify that</div>
+
+        <div>
+          <h3 id="certModalStudent" class="font-editorial text-3xl sm:text-4xl font-bold text-espresso-950 border-b border-champagne-300 inline-block px-8 pb-1">
+            Student Name
+          </h3>
+        </div>
+
+        <div class="text-xs text-slate-700 max-w-lg mx-auto leading-relaxed">
+          has successfully satisfied all rigorous theoretical, clinical sterilization, and live model practical requirements for graduation in:
+        </div>
+
+        <div class="p-3 bg-champagne-100/70 rounded-xl border border-champagne-300 max-w-md mx-auto">
+          <h4 id="certModalCourse" class="font-editorial text-xl font-bold text-espresso-950">
+            Course Title
+          </h4>
+        </div>
+
+        <div class="flex items-center justify-around gap-4 pt-4 border-t border-champagne-200 text-xs">
+          <div>
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">Academic Standing</div>
+            <div id="certModalGrade" class="font-bold text-emerald-800 text-sm">Distinction (A+)</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">Certificate ID</div>
+            <div id="certModalId" class="font-mono font-bold text-espresso-950">SSA-2026-XXXX</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">Master Signatory</div>
+            <div class="font-serif italic font-bold text-espresso-950 text-sm">Rashmi Sah</div>
+            <div class="text-[9px] text-slate-400">Founder & Director</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="document.getElementById('officialCertModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Close</button>
+        <button type="button" onclick="printOfficialCertificate()" class="px-5 py-2.5 rounded-xl bg-espresso-900 text-champagne-200 text-xs font-bold hover:bg-espresso-950 transition flex items-center gap-1.5 shadow">
+          <span>🖨️ Print Official Certificate</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FESTIVE WELCOME PRIVILEGE POPUP MODAL -->
+  <div id="festiveWelcomeModal" class="fixed inset-0 z-50 hidden bg-espresso-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-gradient-to-b from-champagne-50 via-white to-champagne-50 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border-2 border-champagne-400 text-center space-y-4 relative">
+      <button onclick="dismissFestiveWelcome()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-champagne-100 hover:bg-champagne-200 text-espresso-950 font-bold flex items-center justify-center">✕</button>
+      <div class="w-14 h-14 rounded-2xl bg-champagne-100 border border-champagne-300 flex items-center justify-center text-champagne-800 text-2xl mx-auto shadow-inner">
+        ✨
+      </div>
+      <div>
+        <span class="text-[10px] font-bold text-champagne-700 uppercase tracking-widest bg-champagne-200/60 px-2.5 py-0.5 rounded-full border border-champagne-300">
+          Vadodara Festive Privilege
+        </span>
+        <h3 id="festivePopupTitle" class="font-editorial text-3xl font-bold text-espresso-950 mt-1">
+          Festive Glamour & Glow
+        </h3>
+        <p id="festivePopupDesc" class="text-xs text-espresso-800/80 mt-1">
+          Enjoy flat 20% discount on Signature Hydra-Glow Facials, Insta Hair Spa, and Acrylic Nail Artistry!
+        </p>
+      </div>
+      <div class="p-3.5 bg-champagne-100/70 rounded-2xl border border-dashed border-champagne-400 flex items-center justify-between">
+        <div class="text-left">
+          <div class="text-[10px] text-slate-500 uppercase font-semibold">Festive Coupon Code</div>
+          <div id="festivePopupCode" class="font-mono text-lg font-extrabold text-espresso-950">SERENE20</div>
+        </div>
+        <button onclick="claimFestiveCoupon()" class="px-3.5 py-2 rounded-xl bg-champagne-600 hover:bg-champagne-700 text-white font-bold text-xs shadow transition">
+          Claim & Copy Code
+        </button>
+      </div>
+      <div class="pt-1">
+        <button onclick="claimFestiveCouponAndBook()" class="w-full py-3 bg-espresso-900 hover:bg-espresso-950 text-champagne-200 rounded-xl font-bold text-xs tracking-wide shadow-md transition">
+          Apply Coupon & Reserve Sanctuary Slot →
+        </button>
+      </div>
+      <div class="text-[10px] text-slate-400">
+        * Valid for online bookings this festive season. Medical-grade autoclave sterilization guaranteed.
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING WHATSAPP & QUICK ACTION PILL -->
+  <aside class="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2.5">
+    <!-- WhatsApp Floating Action -->
+    <a href="https://wa.me/916203060789?text=Hello%20Serene%20Salon%20%26%20Academy!%20I%20would%20like%20to%20inquire%20about%20booking%20an%20appointment." 
+       target="_blank" rel="noopener noreferrer" 
+       class="salon-wa-link w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition duration-300"
+       title="Chat on WhatsApp">
+      <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.164.573 4.195 1.572 5.952l-1.674 6.111 6.278-1.646c1.706.93 3.65 1.583 5.824 1.583 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z"/>
+      </svg>
+    </a>
+
+    <!-- Sticky Reserve Button -->
+    <button onclick="document.getElementById('bookingDrawerModal').classList.remove('hidden')" class="px-4 py-2.5 rounded-full bg-espresso-900 hover:bg-espresso-950 text-champagne-200 text-xs font-bold shadow-xl border border-champagne-400/50 flex items-center gap-1.5 transition">
+      <span>✨ Book Slot</span>
+    </button>
+  </aside>
+
+  <!-- TOAST NOTIFICATION BANNER -->
+  <aside id="toastBanner" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden bg-espresso-900 text-champagne-100 px-6 py-3 rounded-2xl shadow-2xl border border-champagne-400 flex items-center gap-2 text-xs font-semibold">
+    <span class="text-champagne-400">✓</span>
+    <span id="toastMessageText">Notification</span>
+  </aside>
+
+  <!-- LOAD APP SCRIPT -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
+
