@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Tag, Calendar, Clock, User, Phone, CheckCircle2, QrCode, Sparkles } from 'lucide-react';
+import { 
+  X, Trash2, Tag, Calendar, Clock, User, Phone, CheckCircle2, 
+  QrCode, Sparkles, Copy, Check, ExternalLink, ShieldCheck, Smartphone 
+} from 'lucide-react';
 import CaptchaWidget from './CaptchaWidget';
 
 export default function BookingDrawer({ 
@@ -41,6 +44,10 @@ export default function BookingDrawer({
 
   // UPI QR Modal state
   const [showUpiModal, setShowUpiModal] = useState(false);
+  const [upiTab, setUpiTab] = useState('paytm'); // 'paytm' | 'dynamic'
+  const [utrInput, setUtrInput] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
+  const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
 
   if (!isOpen) return null;
 
@@ -142,11 +149,45 @@ export default function BookingDrawer({
     }
   };
 
-  const upiQrUrl = confirmedBooking 
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-        `upi://pay?pa=6203060789@upi&pn=Serene%20Salon&am=${confirmedBooking.total}&tn=Booking%20${confirmedBooking.id}`
-      )}`
+  const upiId = '6203060789@ptaxis';
+  const payeeName = 'RASHMI KUMARI';
+  const upiDeepLink = confirmedBooking 
+    ? `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${confirmedBooking.total}&tn=${encodeURIComponent(`Booking #${confirmedBooking.id}`)}`
+    : `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}`;
+
+  const dynamicQrUrl = confirmedBooking 
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiDeepLink)}`
     : '';
+
+  const handleCopyUpi = () => {
+    navigator.clipboard.writeText(upiId);
+    setIsCopied(true);
+    showToast(`UPI ID "${upiId}" copied to clipboard!`);
+    setTimeout(() => setIsCopied(false), 2500);
+  };
+
+  const handleConfirmUpiPayment = async () => {
+    if (!confirmedBooking) return;
+    setIsConfirmingPayment(true);
+    try {
+      await fetch(`/api/bookings/${confirmedBooking.id}/payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentMethod: 'Paytm UPI QR',
+          utrNumber: utrInput.trim(),
+          amount: confirmedBooking.total
+        })
+      });
+      showToast('Payment confirmed! Salon reception has been notified.');
+      setShowUpiModal(false);
+    } catch (err) {
+      showToast('Payment marked as complete.');
+      setShowUpiModal(false);
+    } finally {
+      setIsConfirmingPayment(false);
+    }
+  };
 
   return (
     <>
@@ -441,67 +482,197 @@ export default function BookingDrawer({
       {/* UPI QR Payment Modal */}
       {showUpiModal && confirmedBooking && (
         <div className="fixed inset-0 z-50 bg-espresso-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-champagne-300 space-y-4 text-center">
-            <div className="flex items-center justify-between border-b border-champagne-200 pb-3">
-              <h3 className="font-editorial text-2xl font-bold text-espresso-950">Pay via UPI QR</h3>
-              <button onClick={() => setShowUpiModal(false)} className="text-slate-400 hover:text-slate-600 font-bold">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-md w-full shadow-2xl border border-champagne-300 space-y-4 max-h-[95vh] overflow-y-auto">
+            
+            {/* Header: Verified Merchant Info */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5 text-left">
+                <div className="w-10 h-10 rounded-full bg-[#002e6e] text-white font-bold text-sm flex items-center justify-center shadow-xs">
+                  RK
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-slate-900 text-sm">RASHMI KUMARI</span>
+                    <span className="w-4 h-4 bg-blue-600 rounded-full text-white text-[10px] flex items-center justify-center font-bold" title="Verified Merchant">
+                      ✓
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 font-medium">Paytm UPI • Serene Salon & Academy</div>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setShowUpiModal(false)} 
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3">
-              <p className="text-xs text-espresso-800">Scan with any UPI App (GPay, PhonePe, Paytm, BHIM)</p>
-              
-              <div className="p-3 bg-white rounded-2xl border-2 border-champagne-300 inline-block shadow-inner">
-                <img src={upiQrUrl} alt="UPI QR Code" className="w-48 h-48 mx-auto" />
+            {/* Payable Amount & Reference Banner */}
+            <div className="bg-gradient-to-r from-champagne-50 to-champagne-100/70 p-3.5 rounded-2xl border border-champagne-300 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Bill Payable</span>
+                <div className="font-editorial text-2xl font-bold text-espresso-950">
+                  ₹{confirmedBooking.total.toLocaleString('en-IN')}
+                </div>
               </div>
-
-              <div className="p-3 bg-champagne-50 rounded-xl border border-champagne-200 space-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Payable Amount:</span>
-                  <span className="font-bold text-emerald-800 text-sm">₹{confirmedBooking.total.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Booking Ref:</span>
-                  <span className="font-mono font-bold text-espresso-950">#{confirmedBooking.id}</span>
-                </div>
-                <div className="flex items-center justify-between pt-1 border-t border-champagne-200/80">
-                  <span className="text-slate-500">UPI ID:</span>
-                  <span className="font-mono font-bold text-champagne-800 flex items-center gap-1">
-                    <span>6203060789@upi</span>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText('6203060789@upi');
-                        showToast('UPI ID copied!');
-                      }}
-                      className="text-[10px] underline text-espresso-800"
-                    >
-                      Copy
-                    </button>
-                  </span>
+              <div className="text-right">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Booking Ref</span>
+                <div className="font-mono font-bold text-espresso-900 text-xs bg-white px-2 py-0.5 rounded-md border border-champagne-300 mt-0.5">
+                  #{confirmedBooking.id}
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 space-y-2">
-              <button 
-                type="button" 
-                onClick={() => {
-                  setShowUpiModal(false);
-                  showToast('Thank you! Payment notification sent to salon.');
-                }}
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md transition"
+            {/* QR View Mode Tabs */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setUpiTab('paytm')}
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
+                  upiTab === 'paytm' 
+                    ? 'bg-white text-slate-900 shadow-xs' 
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
               >
-                ✓ I Have Completed Payment
+                Paytm Official QR
               </button>
-              <button 
-                type="button" 
-                onClick={() => setShowUpiModal(false)}
-                className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-700"
+              <button
+                type="button"
+                onClick={() => setUpiTab('dynamic')}
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
+                  upiTab === 'dynamic' 
+                    ? 'bg-white text-slate-900 shadow-xs' 
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
               >
-                Pay at Salon Reception Instead
+                Auto-Amount QR (₹{confirmedBooking.total})
               </button>
             </div>
+
+            {/* QR Scanner Display Area */}
+            <div className="text-center space-y-2">
+              {upiTab === 'paytm' ? (
+                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                  <img 
+                    src="/images/serene-upi-qr.jpg" 
+                    alt="Paytm UPI QR Code - Rashmi Kumari" 
+                    className="max-h-64 sm:max-h-72 mx-auto rounded-xl shadow-xs object-contain"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-2 font-medium">
+                    Official Paytm QR standee of salon founder Rashmi Kumari
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                  <div className="p-3 bg-white rounded-2xl border-2 border-champagne-300 inline-block shadow-inner">
+                    <img 
+                      src={dynamicQrUrl} 
+                      alt={`Dynamic UPI QR for ₹${confirmedBooking.total}`} 
+                      className="w-48 h-48 mx-auto" 
+                    />
+                  </div>
+                  <div className="text-[11px] text-emerald-800 font-semibold bg-emerald-50 py-1 px-2.5 rounded-lg border border-emerald-200 inline-block">
+                    ✓ Scanning auto-fills ₹{confirmedBooking.total.toLocaleString('en-IN')} & Ref #{confirmedBooking.id}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Direct Tap to Pay on Mobile */}
+            <div>
+              <a
+                href={upiDeepLink}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition"
+              >
+                <Smartphone className="w-4 h-4" />
+                <span>Tap to Open UPI App (GPay / PhonePe / Paytm)</span>
+              </a>
+            </div>
+
+            {/* Copyable UPI ID Box */}
+            <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase font-semibold block">Payee VPA / UPI ID</span>
+                <span className="font-mono font-bold text-slate-900 text-xs">6203060789@ptaxis</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyUpi}
+                className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs flex items-center gap-1 shadow-xs transition"
+              >
+                {isCopied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="text-emerald-700 font-bold">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Supported Payment Apps Icons */}
+            <div className="flex items-center justify-center gap-3 pt-1 text-[11px] text-slate-500">
+              <span className="font-semibold text-slate-400">Works with:</span>
+              <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-bold text-[10px]">Paytm</span>
+              <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold text-[10px]">PhonePe</span>
+              <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">GPay</span>
+              <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-bold text-[10px]">BHIM</span>
+            </div>
+
+            {/* Transaction Confirmation / UTR Input */}
+            <div className="pt-2 border-t border-slate-100 space-y-2.5">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                  UPI Transaction Ref / UTR Number (Optional)
+                </label>
+                <input 
+                  type="text"
+                  value={utrInput}
+                  onChange={(e) => setUtrInput(e.target.value)}
+                  placeholder="e.g. 4312XXXXXXXX (from your payment receipt)"
+                  className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-mono"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <button 
+                  type="button" 
+                  disabled={isConfirmingPayment}
+                  onClick={handleConfirmUpiPayment}
+                  className="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{isConfirmingPayment ? 'Recording Payment...' : '✓ I Have Completed Payment'}</span>
+                </button>
+
+                <a 
+                  href={`https://wa.me/916203060789?text=${encodeURIComponent(
+                    `Hello Rashmi Kumari (Serene Salon & Academy)! I have completed UPI payment of ₹${confirmedBooking.total} for Booking #${confirmedBooking.id} (Name: ${confirmedBooking.guestName}, Phone: ${confirmedBooking.guestPhone}).${utrInput ? ` UTR/Ref: ${utrInput}` : ''}`
+                  )}`}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5"
+                >
+                  <span>Share Payment Proof on WhatsApp</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+
+                <button 
+                  type="button" 
+                  onClick={() => setShowUpiModal(false)}
+                  className="w-full py-1 text-xs font-semibold text-slate-400 hover:text-slate-600"
+                >
+                  Pay at Salon Reception Instead
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
       )}

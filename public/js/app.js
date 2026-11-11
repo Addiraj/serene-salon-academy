@@ -681,8 +681,8 @@ function openUpiPaymentModal(id, amount) {
   document.getElementById('upiAmountText').textContent = `₹${(amount || 0).toLocaleString('en-IN')}`;
   document.getElementById('upiBookingRefText').textContent = `#${id}`;
 
-  const upiUri = `upi://pay?pa=6203060789@upi&pn=Serene%20Salon&am=${amount}&tn=Booking%20${id}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUri)}`;
+  const upiUri = `upi://pay?pa=6203060789@ptaxis&pn=RASHMI%20%20KUMARI&am=${amount}&tn=Booking%20${id}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiUri)}`;
   document.getElementById('upiQrCodeImg').src = qrUrl;
 
   modal.classList.remove('hidden');

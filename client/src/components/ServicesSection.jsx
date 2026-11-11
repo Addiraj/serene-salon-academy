@@ -1,36 +1,78 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Clock, ShieldCheck, Check, Plus, ShoppingBag, Sparkles } from 'lucide-react';
+import { Search, Clock, ShieldCheck, Check, Plus, ShoppingBag, Sparkles, Filter, X } from 'lucide-react';
 
 const CATEGORIES = [
   'All Services',
-  'Skin & Facials',
-  'Hair Care & Spa',
+  'Facials & Clean-Up',
+  'Hydra & Clinical',
+  'Hair Cut & Spa',
+  'Hair Color & Styling',
+  'Bridal & Party Makeup',
   'Nail Artistry',
-  'Bridal & Festive',
-  'Waxing & Threading'
+  'Waxing & Threading',
+  'Body Spa & Pedicure'
 ];
 
-export default function ServicesSection({ services, cart, onToggleService, onOpenCart }) {
+export default function ServicesSection({ services = [], cart = [], onToggleService, onOpenCart }) {
   const [selectedCategory, setSelectedCategory] = useState('All Services');
+  const [selectedSubCategory, setSelectedSubCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('recommended');
 
-  const filteredServices = useMemo(() => {
-    return services.filter(s => {
-      const matchCat = selectedCategory === 'All Services' || s.category === selectedCategory;
-      const q = searchQuery.toLowerCase().trim();
-      const matchQuery = !q || 
-        s.name.toLowerCase().includes(q) || 
-        (s.description || '').toLowerCase().includes(q) ||
-        s.category.toLowerCase().includes(q);
-      return matchCat && matchQuery;
-    }).sort((a, b) => {
-      if (sortBy === 'price-asc') return a.price - b.price;
-      if (sortBy === 'price-desc') return b.price - a.price;
-      if (sortBy === 'duration') return a.duration - b.duration;
-      return 0;
+  // Compute category counts
+  const categoryCounts = useMemo(() => {
+    const counts = { 'All Services': services.length };
+    CATEGORIES.slice(1).forEach(cat => {
+      counts[cat] = services.filter(s => s.category === cat).length;
     });
-  }, [services, selectedCategory, searchQuery, sortBy]);
+    return counts;
+  }, [services]);
+
+  // Compute available subcategories for the active category
+  const availableSubCategories = useMemo(() => {
+    if (selectedCategory === 'All Services') {
+      const set = new Set();
+      services.forEach(s => {
+        if (s.subCategory) set.add(s.subCategory);
+      });
+      return ['All', ...Array.from(set)];
+    }
+    const set = new Set();
+    services
+      .filter(s => s.category === selectedCategory)
+      .forEach(s => {
+        if (s.subCategory) set.add(s.subCategory);
+      });
+    return ['All', ...Array.from(set)];
+  }, [services, selectedCategory]);
+
+  // Handle switching category
+  const handleCategoryChange = (cat) => {
+    setSelectedCategory(cat);
+    setSelectedSubCategory('All');
+  };
+
+  // Filtered and sorted services
+  const filteredServices = useMemo(() => {
+    return services
+      .filter(s => {
+        const matchCat = selectedCategory === 'All Services' || s.category === selectedCategory;
+        const matchSubCat = selectedSubCategory === 'All' || s.subCategory === selectedSubCategory;
+        const q = searchQuery.toLowerCase().trim();
+        const matchQuery = !q ||
+          s.name.toLowerCase().includes(q) ||
+          (s.description || '').toLowerCase().includes(q) ||
+          (s.category || '').toLowerCase().includes(q) ||
+          (s.subCategory || '').toLowerCase().includes(q);
+        return matchCat && matchSubCat && matchQuery;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'price-asc') return a.price - b.price;
+        if (sortBy === 'price-desc') return b.price - a.price;
+        if (sortBy === 'duration') return a.duration - b.duration;
+        return 0;
+      });
+  }, [services, selectedCategory, selectedSubCategory, searchQuery, sortBy]);
 
   const cartTotal = useMemo(() => {
     const items = cart.map(id => services.find(s => s.id === id)).filter(Boolean);
@@ -46,17 +88,17 @@ export default function ServicesSection({ services, cart, onToggleService, onOpe
     <section id="servicesSection" className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
       
       {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
           <span className="text-xs font-bold uppercase tracking-wider text-champagne-700 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-champagne-600" />
-            <span>Enrich-Grade Visual Rate Card & Treatment Menu</span>
+            <span>Official Price List & Clinical Treatment Menu</span>
           </span>
           <h2 className="font-editorial text-3xl sm:text-4xl font-bold text-espresso-950 mt-1">
             Signature Salon Rituals & Treatments
           </h2>
-          <p className="text-xs sm:text-sm text-espresso-800/80 mt-1.5 max-w-xl">
-            Authentic botanical and dermatological formulations with photographic transparency, backed by Vadodara’s highest autoclave sterilization standards.
+          <p className="text-xs sm:text-sm text-espresso-800/80 mt-1.5 max-w-2xl">
+            Explore authentic services from our master-trained cosmetologists. Every ritual includes photographic transparency and 100% autoclave sterilization pouches opened live before your appointment.
           </p>
         </div>
 
@@ -68,14 +110,23 @@ export default function ServicesSection({ services, cart, onToggleService, onOpe
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search facials, hair spa, nails..."
-              className="text-xs rounded-xl border border-champagne-300 py-2.5 pl-9 pr-3.5 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500 w-52 sm:w-64 shadow-xs"
+              placeholder="Search facials, balayage, waxing..."
+              className="text-xs rounded-xl border border-champagne-300 py-2.5 pl-9 pr-8 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500 w-56 sm:w-64 shadow-xs"
             />
+            {searchQuery && (
+              <button 
+                type="button" 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
           <select 
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="text-xs rounded-xl border border-champagne-300 py-2.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500 shadow-xs font-medium text-espresso-900"
+            className="text-xs rounded-xl border border-champagne-300 py-2.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-500 shadow-xs font-medium text-espresso-900 cursor-pointer"
           >
             <option value="recommended">Recommended Rituals</option>
             <option value="price-asc">Price: Low to High</option>
@@ -85,34 +136,104 @@ export default function ServicesSection({ services, cart, onToggleService, onOpe
         </div>
       </div>
 
-      {/* Category Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
-        {CATEGORIES.map(cat => (
+      {/* Main Category Filter Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-3 scrollbar-none">
+        {CATEGORIES.map(cat => {
+          const count = categoryCounts[cat] || 0;
+          const isActive = selectedCategory === cat;
+          return (
+            <button
+              key={cat}
+              onClick={() => handleCategoryChange(cat)}
+              className={`px-4 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2 ${
+                isActive
+                  ? 'bg-espresso-950 text-champagne-100 shadow-md transform scale-[1.02]'
+                  : 'bg-white text-espresso-800 hover:bg-champagne-100 border border-champagne-300/80 shadow-xs'
+              }`}
+            >
+              <span>{cat}</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                isActive ? 'bg-champagne-500/20 text-champagne-200' : 'bg-champagne-100 text-espresso-900'
+              }`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Subcategory Chips (when multiple subcategories exist) */}
+      {availableSubCategories.length > 2 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-4 mb-6 scrollbar-none">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-1 shrink-0">
+            <Filter className="w-3 h-3 text-champagne-600" />
+            <span>Filter:</span>
+          </span>
+          {availableSubCategories.map(sub => {
+            const isSubActive = selectedSubCategory === sub;
+            return (
+              <button
+                key={sub}
+                type="button"
+                onClick={() => setSelectedSubCategory(sub)}
+                className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition duration-150 ${
+                  isSubActive
+                    ? 'bg-champagne-600 text-white font-bold shadow-xs'
+                    : 'bg-champagne-50/70 hover:bg-champagne-100 text-espresso-800 border border-champagne-200/80'
+                }`}
+              >
+                {sub === 'All' ? `All ${selectedCategory === 'All Services' ? 'Types' : selectedCategory}` : sub}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Result Count Banner */}
+      <div className="flex items-center justify-between text-xs text-slate-500 mb-6 px-1">
+        <span>
+          Showing <strong className="text-espresso-950">{filteredServices.length}</strong> rituals
+          {selectedCategory !== 'All Services' && <> in <strong className="text-champagne-700">{selectedCategory}</strong></>}
+          {selectedSubCategory !== 'All' && <> • <span className="font-semibold">{selectedSubCategory}</span></>}
+          {searchQuery && <> for "<span className="italic">{searchQuery}</span>"</>}
+        </span>
+        {(selectedCategory !== 'All Services' || selectedSubCategory !== 'All' || searchQuery) && (
           <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition duration-200 ${
-              selectedCategory === cat
-                ? 'bg-espresso-950 text-champagne-100 shadow-sm'
-                : 'bg-white text-espresso-800 hover:bg-champagne-100 border border-champagne-300'
-            }`}
+            type="button"
+            onClick={() => {
+              setSelectedCategory('All Services');
+              setSelectedSubCategory('All');
+              setSearchQuery('');
+            }}
+            className="text-champagne-700 hover:text-champagne-900 font-semibold underline text-xs"
           >
-            {cat}
+            Reset Filters
           </button>
-        ))}
+        )}
       </div>
 
       {/* Services Grid (Enrich-Style Image-Based Visual Cards) */}
       {filteredServices.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-champagne-200 shadow-sm">
           <p className="font-editorial text-2xl font-bold text-espresso-900">No matching rituals found</p>
-          <p className="text-xs text-espresso-800/70 mt-1">Try clearing your search query or switching to "All Services".</p>
+          <p className="text-xs text-espresso-800/70 mt-1">Try clearing your search query or switching to another category.</p>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedCategory('All Services');
+              setSelectedSubCategory('All');
+              setSearchQuery('');
+            }}
+            className="mt-4 px-5 py-2 rounded-xl bg-espresso-950 text-champagne-200 text-xs font-semibold hover:bg-black"
+          >
+            View All Services
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {filteredServices.map(s => {
             const inCart = cart.includes(s.id);
-            const serviceImg = s.image || '/images/hero-sanctuary.jpg';
+            const serviceImg = s.image || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80';
 
             return (
               <div 
@@ -128,24 +249,37 @@ export default function ServicesSection({ services, cart, onToggleService, onOpe
                   <img 
                     src={serviceImg} 
                     alt={s.name}
-                    className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                     loading="lazy"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80';
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-espresso-950/80 via-transparent to-black/30"></div>
 
-                  {/* Overlaid Category & Badge Tags */}
+                  {/* Overlaid Category & Subcategory Tags */}
                   <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
-                    <span className="px-2.5 py-1 rounded-full bg-espresso-950/80 backdrop-blur-md text-champagne-200 text-[10px] font-bold tracking-wide border border-champagne-500/30">
-                      {s.category}
-                    </span>
-                    <span className="text-[10px] font-bold text-white bg-red-600/90 backdrop-blur-md px-2.5 py-1 rounded-full shadow-sm">
-                      {s.badge || 'Vadodara Special'}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="px-2.5 py-1 rounded-full bg-espresso-950/80 backdrop-blur-md text-champagne-200 text-[10px] font-bold tracking-wide border border-champagne-500/30">
+                        {s.category}
+                      </span>
+                      {s.subCategory && (
+                        <span className="px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-md text-espresso-900 text-[9px] font-semibold">
+                          {s.subCategory}
+                        </span>
+                      )}
+                    </div>
+                    {s.badge && (
+                      <span className="text-[10px] font-bold text-white bg-red-600/90 backdrop-blur-md px-2.5 py-1 rounded-full shadow-sm shrink-0">
+                        {s.badge}
+                      </span>
+                    )}
                   </div>
 
                   {/* Price Tag Overlaid on Image Corner */}
-                  <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-lg border border-champagne-200">
-                    <div className="text-[9px] uppercase font-bold text-espresso-800/70 tracking-wider">Starting at</div>
+                  <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-lg border border-champagne-200 text-right">
+                    <div className="text-[9px] uppercase font-bold text-espresso-800/70 tracking-wider">Official Rate</div>
                     <div className="font-editorial text-xl font-bold text-espresso-950 leading-none">
                       ₹{s.price.toLocaleString('en-IN')}
                     </div>
@@ -230,7 +364,7 @@ export default function ServicesSection({ services, cart, onToggleService, onOpe
             <button
               type="button"
               onClick={onOpenCart}
-              className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-champagne-500 to-champagne-600 hover:from-champagne-400 hover:to-champagne-500 text-espresso-950 font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-champagne-500 to-champagne-600 hover:from-champagne-400 hover:to-champagne-500 text-espresso-950 font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition transform hover:-translate-y-0.5 cursor-pointer"
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Review Bag & Select Slot →</span>

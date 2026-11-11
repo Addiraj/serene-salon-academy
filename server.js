@@ -3,6 +3,14 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
+// Statically bundle default DB for Vercel Serverless Function file tracing
+let DEFAULT_DB = {};
+try {
+  DEFAULT_DB = require('./data/db.json');
+} catch (e) {
+  DEFAULT_DB = { services: [], bookings: [], offers: [], courses: [], settings: {} };
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SEED_DB_PATH = path.join(__dirname, 'data', 'db.json');
@@ -33,13 +41,15 @@ function readDb() {
     if (process.env.VERCEL && !fs.existsSync(DB_PATH)) {
       if (fs.existsSync(SEED_DB_PATH)) {
         fs.copyFileSync(SEED_DB_PATH, DB_PATH);
+      } else {
+        fs.writeFileSync(DB_PATH, JSON.stringify(DEFAULT_DB, null, 2), 'utf-8');
       }
     }
     if (!fs.existsSync(DB_PATH)) {
       if (fs.existsSync(SEED_DB_PATH)) {
         return JSON.parse(fs.readFileSync(SEED_DB_PATH, 'utf-8'));
       }
-      return {};
+      return DEFAULT_DB;
     }
     const data = fs.readFileSync(DB_PATH, 'utf-8');
     return JSON.parse(data);
@@ -50,7 +60,7 @@ function readDb() {
         return JSON.parse(fs.readFileSync(SEED_DB_PATH, 'utf-8'));
       } catch (e) {}
     }
-    return {};
+    return DEFAULT_DB;
   }
 }
 
@@ -437,8 +447,8 @@ app.post('/api/offers/validate', (req, res) => {
   if (!code) return res.status(400).json({ success: false, message: 'Please enter a coupon code.' });
 
   const db = readDb();
-  const cleanCode = code.trim().toUpperCase();
-  const offer = (db.offers || []).find(o => o.active && o.code.toUpperCase() === cleanCode);
+  const cleanCode = (code || '').trim().toUpperCase();
+  const offer = (db.offers || []).find(o => o.active && o.code && o.code.toUpperCase() === cleanCode);
 
   if (!offer) {
     return res.status(404).json({ success: false, message: 'Invalid or expired promo code.' });
@@ -704,6 +714,21 @@ app.patch('/api/bookings/:id/status', (req, res) => {
   booking.status = status;
   writeDb(db);
   res.json({ success: true, booking });
+});
+
+app.post('/api/bookings/:id/payment', (req, res) => {
+  const { paymentMethod, utrNumber, amount } = req.body;
+  const db = readDb();
+  const booking = (db.bookings || []).find(b => b.id === req.params.id);
+  if (!booking) return res.status(404).json({ success: false, message: 'Booking not found' });
+
+  booking.paymentMethod = paymentMethod || 'UPI QR';
+  booking.paymentStatus = 'Paid (Pending Verification)';
+  booking.utrNumber = utrNumber || '';
+  booking.paidAmount = Number(amount) || booking.total || 0;
+  booking.paidAt = new Date().toISOString();
+  writeDb(db);
+  res.json({ success: true, booking, message: 'Payment recorded successfully' });
 });
 
 app.delete('/api/bookings/:id', (req, res) => {

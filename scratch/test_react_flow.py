@@ -6,7 +6,7 @@ BASE_URL = 'http://localhost:3000'
 
 def test_get(path, expected_code=200, check_str=None):
     url = f"{BASE_URL}{path}"
-    req = urllib.request.Request(url, headers={'User-Agent': 'TestRunner'})
+    req = urllib.request.Request(url, headers={'User-Agent': 'TestRunner', 'Connection': 'close'})
     try:
         with urllib.request.urlopen(req) as resp:
             status = resp.status
@@ -24,7 +24,7 @@ def test_get(path, expected_code=200, check_str=None):
 def test_post(path, data, expected_code=200):
     url = f"{BASE_URL}{path}"
     payload = json.dumps(data).encode('utf-8')
-    req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'})
+    req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'Connection': 'close'})
     try:
         with urllib.request.urlopen(req) as resp:
             status = resp.status
