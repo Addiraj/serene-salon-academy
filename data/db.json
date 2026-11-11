@@ -1818,6 +1818,42 @@
   ],
   "bookings": [
     {
+      "id": "SSA-1902",
+      "guestName": "Ananya Patel",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-20",
+      "time": "02:00 PM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "Signature Luxury Hydra-Glow Facial"
+      ],
+      "subtotal": 0,
+      "discount": 0,
+      "promoCode": "",
+      "total": 0,
+      "status": "Confirmed",
+      "notes": "Enrich-inspired luxury appointment",
+      "createdAt": "2026-11-11T10:49:20.297Z"
+    },
+    {
+      "id": "SSA-7111",
+      "guestName": "Pooja Shah",
+      "guestPhone": "+91 9876543210",
+      "date": "2026-11-11",
+      "time": "11:00 AM",
+      "stylist": "Rashmi Sah (Founder & Master Artist)",
+      "services": [
+        "VIP First Visit Consultation & Treatment Selection"
+      ],
+      "subtotal": 549,
+      "discount": 0,
+      "promoCode": "FIRSTVISIT",
+      "total": 549,
+      "status": "Pending",
+      "notes": "First Visit Priority Request (Enrich-Style Booking)",
+      "createdAt": "2026-11-11T10:49:20.166Z"
+    },
+    {
       "id": "SSA-3373",
       "guestName": "Pakhi_Bondya",
       "guestPhone": "7461048307",
@@ -2247,6 +2283,16 @@
     }
   ],
   "inquiries": [
+    {
+      "id": "INQ-102",
+      "name": "Pooja Trivedi",
+      "phone": "+91 9988776655",
+      "course": "Master Bridal & HD Airbrush Artistry Diploma",
+      "preferredTime": "Morning Batch (10 AM - 1 PM)",
+      "notes": "",
+      "status": "New",
+      "createdAt": "2026-11-11T10:49:20.307Z"
+    },
     {
       "id": "INQ-425",
       "name": "Pooja Trivedi",
