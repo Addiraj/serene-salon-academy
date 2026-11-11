@@ -1,10 +1,34 @@
 # Serene Salon & Academy — Full-Stack Booking Platform & Dynamic Admin Dashboard
 
-A luxury salon and cosmetology training academy web application for **Serene Salon & Academy** (Vadodara, Gujarat), featuring a high-performance customer booking experience, instant UPI QR payments, verifiable digital graduation diplomas, and an all-in-one salon management and WhatsApp marketing admin dashboard.
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Addiraj%2Fserene--salon--academy-181717?style=flat&logo=github)](https://github.com/Addiraj/serene-salon-academy)
+[![Vercel Deployment Ready](https://img.shields.io/badge/Vercel-Deployment%20Ready-000000?style=flat&logo=vercel)](https://vercel.com/new/clone?repository-url=https://github.com/Addiraj/serene-salon-academy)
+
+A luxury salon and cosmetology training academy web application for **Serene Salon & Academy** (Vadodara, Gujarat), featuring a high-performance customer booking experience, official 123-service image rate card, verified Paytm UPI QR payments (`6203060789@ptaxis`), OTP-based privilege customer accounts, verifiable digital graduation diplomas, and an all-in-one salon management and WhatsApp marketing admin dashboard.
 
 ---
 
-## 🌟 Quick Start
+## 🚀 Live Cloud Deployment (Vercel)
+
+This repository is pre-configured for zero-configuration deployment on **Vercel** with full Serverless Express backend and Vite React frontend support.
+
+### Option A: One-Click Deploy via Vercel Dashboard (Recommended)
+1. Open your Vercel Dashboard at [https://vercel.com/new](https://vercel.com/new).
+2. Select or import the GitHub repository: **`Addiraj/serene-salon-academy`**.
+3. Vercel automatically detects [`vercel.json`](./vercel.json) — leave all build settings as default.
+4. Click **Deploy**. Your site will be live worldwide in ~45 seconds with free SSL!
+
+### Option B: Deploy via Vercel CLI
+```bash
+# 1. Login to Vercel
+npx vercel login
+
+# 2. Deploy to Production
+npx vercel --prod
+```
+
+---
+
+## 🌟 Local Quick Start
 
 The server is currently running and can be started anytime using:
 
