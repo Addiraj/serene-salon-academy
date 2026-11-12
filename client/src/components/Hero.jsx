@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Star, Award, CheckCircle2, ArrowRight, Lock } from 'lucide-react';
 
-export default function Hero({ services, onQuickBook, onScrollTo }) {
+export default function Hero({ services, onQuickBook, onScrollTo, settings }) {
   const [selectedService, setSelectedService] = useState('');
   const [selectedDate, setSelectedDate] = useState(() => {
     return new Date(Date.now() + 86400000).toISOString().split('T')[0];
@@ -31,10 +31,20 @@ export default function Hero({ services, onQuickBook, onScrollTo }) {
           
           {/* Left Editorial Column */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-champagne-900/60 border border-champagne-500/40 text-champagne-300 text-xs font-semibold backdrop-blur-md">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Medical-Grade Autoclave Sterilization</span>
-              <span className="text-champagne-400">• Vadodara Benchmark</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full p-1 bg-gradient-to-tr from-champagne-400 via-champagne-200 to-amber-500 shadow-lg flex items-center justify-center overflow-hidden shrink-0 bg-white/95">
+                <img 
+                  src={settings?.logoUrl || '/images/serene-logo.png'} 
+                  alt="Rashmi's Serene Salon & Academy Logo" 
+                  className="w-full h-full object-contain filter drop-shadow-xs"
+                  onError={(e) => { e.currentTarget.src = '/images/serene-logo.png'; }}
+                />
+              </div>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-champagne-900/60 border border-champagne-500/40 text-champagne-300 text-xs font-semibold backdrop-blur-md">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Medical-Grade Autoclave Sterilization</span>
+                <span className="text-champagne-400">• Vadodara Benchmark</span>
+              </div>
             </div>
 
             <h1 className="font-editorial text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] text-champagne-100">

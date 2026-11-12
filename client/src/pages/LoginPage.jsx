@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Phone, ArrowLeft, ArrowRight, CheckCircle2, Sparkles, ShieldCheck, Star } from 'lucide-react';
 import CaptchaWidget from '../components/CaptchaWidget';
 
-export default function LoginPage({ onNavigate, onAuthSuccess, showToast }) {
+export default function LoginPage({ onNavigate, onAuthSuccess, showToast, settings }) {
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState('phone'); // 'phone' | 'otp'
@@ -132,13 +132,31 @@ export default function LoginPage({ onNavigate, onAuthSuccess, showToast }) {
 
           <div 
             onClick={() => onNavigate('home')}
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center gap-2.5 cursor-pointer group"
           >
-            <div className="w-8 h-8 rounded-full bg-espresso-950 text-champagne-300 font-serif font-bold text-sm flex items-center justify-center">
-              S
-            </div>
+            {settings?.logoUrl ? (
+              <div className="w-9 h-9 rounded-full p-0.5 bg-gradient-to-tr from-champagne-400 via-champagne-200 to-amber-500 shadow-xs flex items-center justify-center overflow-hidden shrink-0 bg-white">
+                <img 
+                  src={settings.logoUrl} 
+                  alt="Serene Logo" 
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const fb = e.currentTarget.nextElementSibling;
+                    if (fb) fb.style.display = 'flex';
+                  }}
+                />
+                <div className="hidden w-full h-full rounded-full bg-espresso-950 items-center justify-center text-champagne-300 font-serif font-bold text-sm">
+                  S
+                </div>
+              </div>
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-espresso-950 text-champagne-300 font-serif font-bold text-sm flex items-center justify-center">
+                S
+              </div>
+            )}
             <span className="font-editorial text-xl font-bold text-espresso-950">
-              Serene Salon & Academy
+              {settings?.salonName || 'Serene Salon & Academy'}
             </span>
           </div>
 

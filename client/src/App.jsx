@@ -53,6 +53,13 @@ export default function App() {
   const [services, setServices] = useState([]);
   const [courses, setCourses] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [settings, setSettings] = useState({
+    salonName: 'Serene Salon & Academy',
+    tagline: 'Where Clinical Hygiene Meets Couture Beauty & Mastery',
+    founder: 'Rashmi Sah',
+    phone: '+91 6203060789',
+    logoUrl: '/images/serene-logo.png'
+  });
 
   // Cart & Booking State
   const [cart, setCart] = useState([]); // Array of service IDs
@@ -120,17 +127,19 @@ export default function App() {
   // Fetch initial public data
   const fetchData = useCallback(async () => {
     try {
-      const [resOffers, resServices, resCourses, resReviews] = await Promise.all([
+      const [resOffers, resServices, resCourses, resReviews, resSettings] = await Promise.all([
         fetch('/api/offers').then(r => r.json()).catch(() => ({ offers: [] })),
         fetch('/api/services').then(r => r.json()).catch(() => ({ services: [] })),
         fetch('/api/courses').then(r => r.json()).catch(() => ({ courses: [] })),
-        fetch('/api/reviews').then(r => r.json()).catch(() => ({ reviews: [] }))
+        fetch('/api/reviews').then(r => r.json()).catch(() => ({ reviews: [] })),
+        fetch('/api/settings').then(r => r.json()).catch(() => ({ settings: {} }))
       ]);
 
       if (resOffers.offers) setOffers(resOffers.offers);
       if (resServices.services) setServices(resServices.services);
       if (resCourses.courses) setCourses(resCourses.courses);
       if (resReviews.reviews) setReviews(resReviews.reviews);
+      if (resSettings.settings) setSettings(prev => ({ ...prev, ...resSettings.settings }));
 
       // Check for welcome popup offer
       const activeBanner = (resOffers.offers || []).find(o => o.isBanner && o.active) || (resOffers.offers || [])[0];
@@ -248,6 +257,7 @@ export default function App() {
         <AdminDashboard 
           onExitAdmin={() => navigate('home')} 
           showToast={showToast} 
+          onSettingsUpdate={(updated) => setSettings(prev => ({ ...prev, ...updated }))}
         />
         {toastMessage && (
           <aside className="fixed bottom-6 right-6 z-50 bg-espresso-950 text-champagne-100 px-5 py-3.5 rounded-2xl shadow-2xl border border-champagne-400 flex items-center gap-3 animate-slide-up text-sm font-medium">
@@ -267,6 +277,7 @@ export default function App() {
           onNavigate={navigate}
           onAuthSuccess={handleAuthSuccess}
           showToast={showToast}
+          settings={settings}
         />
         {toastMessage && (
           <aside className="fixed bottom-6 right-6 z-50 bg-espresso-950 text-champagne-100 px-5 py-3.5 rounded-2xl shadow-2xl border border-champagne-400 flex items-center gap-3 animate-slide-up text-sm font-medium">
@@ -287,6 +298,7 @@ export default function App() {
           onAuthSuccess={handleAuthSuccess}
           showToast={showToast}
           initialPhone={signupPrefillPhone}
+          settings={settings}
         />
         {toastMessage && (
           <aside className="fixed bottom-6 right-6 z-50 bg-espresso-950 text-champagne-100 px-5 py-3.5 rounded-2xl shadow-2xl border border-champagne-400 flex items-center gap-3 animate-slide-up text-sm font-medium">
@@ -313,6 +325,7 @@ export default function App() {
           currentUser={currentUser}
           onNavigate={navigate}
           onOpenProfile={() => setIsProfileDrawerOpen(true)}
+          settings={settings}
         />
 
         {/* Hero Section */}
@@ -320,6 +333,7 @@ export default function App() {
           services={services}
           onQuickBook={handleQuickBook}
           onScrollTo={scrollToSection}
+          settings={settings}
         />
 
         {/* Enrich-Style High-Conversion Split Booking Request Card */}
@@ -363,6 +377,7 @@ export default function App() {
       <Footer 
         onToggleAdmin={() => navigate('admin')}
         onNavigate={navigate}
+        settings={settings}
       />
 
       {/* Floating Action Buttons */}

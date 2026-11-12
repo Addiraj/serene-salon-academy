@@ -23,7 +23,8 @@
       "bgImage": "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1000&q=80"
     },
     "upiName": "RASHMI KUMARI",
-    "upiQrImage": "/images/serene-upi-qr.jpg"
+    "upiQrImage": "/images/serene-upi-qr.jpg",
+    "logoUrl": "/images/serene-logo.png"
   },
   "offers": [
     {

@@ -10,7 +10,8 @@ export default function Navbar({
   isAdminView,
   currentUser,
   onNavigate,
-  onOpenProfile
+  onOpenProfile,
+  settings
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const bannerOffer = offers.find(o => o.isBanner && o.active) || offers.find(o => o.active);
@@ -52,17 +53,35 @@ export default function Navbar({
       <header className="sticky top-0 z-40 glass-panel border-b border-champagne-200/80 shadow-xs transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           
-          {/* Brand Monogram Crest */}
+          {/* Brand Monogram Crest & Dynamic Logo */}
           <div 
             onClick={() => {
               if (isAdminView) onToggleAdmin(false);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }} 
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group"
           >
-            <div className="w-11 h-11 rounded-full border border-champagne-400/80 bg-espresso-950 flex items-center justify-center text-champagne-300 font-serif text-2xl font-bold shadow-md group-hover:scale-105 transition">
-              S
-            </div>
+            {settings?.logoUrl ? (
+              <div className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full p-0.5 bg-gradient-to-tr from-champagne-400/60 via-champagne-200 to-amber-500/60 shadow-sm group-hover:scale-105 transition-transform duration-300 flex items-center justify-center overflow-hidden shrink-0 bg-white">
+                <img 
+                  src={settings.logoUrl} 
+                  alt={settings?.salonName || 'Serene Salon & Academy'} 
+                  className="w-full h-full object-contain filter drop-shadow-xs"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const fallback = e.currentTarget.nextElementSibling;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+                <div className="hidden w-full h-full rounded-full bg-espresso-950 items-center justify-center text-champagne-300 font-serif text-xl font-bold">
+                  S
+                </div>
+              </div>
+            ) : (
+              <div className="w-11 h-11 rounded-full border border-champagne-400/80 bg-espresso-950 flex items-center justify-center text-champagne-300 font-serif text-2xl font-bold shadow-md group-hover:scale-105 transition shrink-0">
+                S
+              </div>
+            )}
             <div className="flex flex-col">
               <span className="font-editorial text-2xl sm:text-3xl font-bold tracking-tight text-espresso-950 leading-none">
                 Serene

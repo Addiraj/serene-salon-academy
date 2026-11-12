@@ -2,7 +2,7 @@ import React from 'react';
 import { Phone, MapPin, Clock, Crown } from 'lucide-react';
 import { InstagramIcon, FacebookIcon } from './SocialIcons';
 
-export default function Footer({ onToggleAdmin, onNavigate }) {
+export default function Footer({ onToggleAdmin, onNavigate, settings }) {
   return (
     <footer className="bg-espresso-950 text-champagne-100 border-t border-champagne-800/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -10,11 +10,29 @@ export default function Footer({ onToggleAdmin, onNavigate }) {
         {/* Brand & Story */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-champagne-600 flex items-center justify-center text-espresso-950 font-serif font-bold text-xl">
-              S
-            </div>
+            {settings?.logoUrl ? (
+              <div className="w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-champagne-400 via-champagne-200 to-amber-500 shadow-md flex items-center justify-center overflow-hidden shrink-0 bg-white">
+                <img 
+                  src={settings.logoUrl} 
+                  alt={settings?.salonName || 'Serene Salon & Academy'} 
+                  className="w-full h-full object-contain filter drop-shadow-xs"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const fallback = e.currentTarget.nextElementSibling;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+                <div className="hidden w-full h-full rounded-full bg-champagne-600 items-center justify-center text-espresso-950 font-serif font-bold text-xl">
+                  S
+                </div>
+              </div>
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-champagne-600 flex items-center justify-center text-espresso-950 font-serif font-bold text-xl shrink-0">
+                S
+              </div>
+            )}
             <span className="font-editorial text-2xl font-bold text-champagne-100">
-              Serene Salon & Academy
+              {settings?.salonName || 'Serene Salon & Academy'}
             </span>
           </div>
           <p className="text-xs text-champagne-200/80 leading-relaxed font-light">

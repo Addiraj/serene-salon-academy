@@ -19,8 +19,8 @@ const DB_PATH = process.env.VERCEL
   : SEED_DB_PATH;
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 // Serve React production build if available, with fallback to public
 const clientDistPath = path.join(__dirname, 'client', 'dist');
@@ -94,6 +94,52 @@ app.put('/api/settings', (req, res) => {
   writeDb(db);
   const { adminPin, ...publicSettings } = db.settings;
   res.json({ success: true, settings: publicSettings });
+});
+
+// Upload or update salon logo (base64 or custom URL)
+app.post('/api/upload-logo', (req, res) => {
+  try {
+    const { imageBase64 } = req.body;
+    if (!imageBase64) {
+      return res.status(400).json({ success: false, message: 'No image provided' });
+    }
+
+    const db = readDb();
+    
+    // Check if base64 data URI
+    const matches = typeof imageBase64 === 'string' && imageBase64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (matches && matches.length === 3) {
+      const buffer = Buffer.from(matches[2], 'base64');
+      const filename = `serene-logo-custom.png`;
+      const publicPath = path.join(__dirname, 'public', 'images', filename);
+      const clientDistPath = path.join(__dirname, 'client', 'dist', 'images', filename);
+      const clientPublicPath = path.join(__dirname, 'client', 'public', 'images', filename);
+
+      let savedToFile = false;
+      try {
+        if (fs.existsSync(path.dirname(publicPath))) fs.writeFileSync(publicPath, buffer);
+        if (fs.existsSync(path.dirname(clientDistPath))) fs.writeFileSync(clientDistPath, buffer);
+        if (fs.existsSync(path.dirname(clientPublicPath))) fs.writeFileSync(clientPublicPath, buffer);
+        savedToFile = true;
+      } catch (writeErr) {
+        // e.g. on serverless read-only /tmp environment
+        console.warn('Could not write logo to static folders, storing data URI directly', writeErr.message);
+      }
+
+      const logoUrl = savedToFile ? `/images/${filename}?t=${Date.now()}` : imageBase64;
+      db.settings.logoUrl = logoUrl;
+      writeDb(db);
+      return res.json({ success: true, logoUrl, message: 'Logo updated successfully!' });
+    } else {
+      // Plain URL string
+      db.settings.logoUrl = imageBase64;
+      writeDb(db);
+      return res.json({ success: true, logoUrl: imageBase64, message: 'Logo updated successfully!' });
+    }
+  } catch (err) {
+    console.error('Error in /api/upload-logo:', err);
+    return res.status(500).json({ success: false, message: 'Failed to process logo update' });
+  }
 });
 
 app.post('/api/admin/verify-pin', (req, res) => {
