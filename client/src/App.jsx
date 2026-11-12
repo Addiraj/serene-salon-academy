@@ -151,6 +151,21 @@ export default function App() {
     fetchData();
   }, [fetchData]);
 
+  // Handle Google "Book Now" deep links (?action=book, #book, etc.)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hasBookAction = params.get('action') === 'book' || window.location.hash === '#book' || params.get('utm_action') === 'book';
+    if (hasBookAction) {
+      setTimeout(() => {
+        const target = document.getElementById('quickBookingSection') || document.getElementById('servicesSection');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+          showToast('Welcome from Google! Choose your salon rituals or request your appointment below.');
+        }
+      }, 700);
+    }
+  }, [showToast]);
+
   // Cart operations
   const handleToggleService = (serviceId) => {
     setCart(prev => {
