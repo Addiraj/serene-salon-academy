@@ -434,6 +434,209 @@ app.get('/api/admin/stats', (req, res) => {
 });
 
 // ==========================================
+// 2B. INVOICE & FINANCIAL REVENUE ANALYTICS
+// ==========================================
+app.get('/api/admin/invoices/analytics', (req, res) => {
+  const db = readDb();
+  const bookings = db.bookings || [];
+  const servicesList = db.services || [];
+  const settings = db.settings || {};
+  const invSettings = settings.invoiceSettings || {};
+
+  const taxPercent = Number(invSettings.taxPercent) || 18;
+  const isTaxInclusive = (invSettings.taxMode || 'inclusive') === 'inclusive';
+  const enableGst = invSettings.enableGst !== false;
+
+  const validBookings = bookings.filter(b => b.status !== 'Cancelled');
+  
+  let totalInvoicedRevenue = 0;
+  let realizedRevenue = 0;
+  let pendingReceivables = 0;
+  let totalPaidCount = 0;
+  let totalPendingCount = 0;
+
+  const paymentModes = { 'Paytm UPI': 0, 'Cash': 0, 'Credit/Debit Card': 0, 'Other': 0 };
+  const statusCounts = { 'Paid': 0, 'Pending': 0, 'Partial': 0, 'Cancelled': 0 };
+  const categoryRevenue = {};
+
+  const serviceMap = new Map();
+  servicesList.forEach(s => {
+    if (s && s.name) serviceMap.set(s.name.toLowerCase().trim(), s);
+  });
+
+  bookings.forEach(b => {
+    const total = Number(b.total) || 0;
+    const isCancelled = b.status === 'Cancelled';
+    const isPaid = b.paymentStatus === 'Paid' || b.status === 'Completed';
+
+    if (isCancelled) {
+      statusCounts['Cancelled']++;
+      return;
+    }
+
+    totalInvoicedRevenue += total;
+
+    if (isPaid) {
+      realizedRevenue += total;
+      totalPaidCount++;
+      statusCounts['Paid']++;
+    } else if (b.paymentStatus === 'Partial') {
+      const paid = Number(b.paidAmount) || 0;
+      realizedRevenue += paid;
+      pendingReceivables += (total - paid);
+      statusCounts['Partial']++;
+    } else {
+      pendingReceivables += total;
+      totalPendingCount++;
+      statusCounts['Pending']++;
+    }
+
+    // Payment mode attribution
+    const mode = b.paymentMethod || (b.utrNumber ? 'Paytm UPI' : 'Cash');
+    if (paymentModes[mode] !== undefined) {
+      paymentModes[mode] += total;
+    } else {
+      paymentModes['Other'] = (paymentModes['Other'] || 0) + total;
+    }
+
+    // Service category attribution
+    (b.services || []).forEach(sName => {
+      const match = serviceMap.get(String(sName).toLowerCase().trim());
+      const cat = match ? match.category : 'General Salon & Grooming';
+      const itemPrice = match ? (Number(match.price) || 0) : Math.round(total / Math.max(1, (b.services || []).length));
+      categoryRevenue[cat] = (categoryRevenue[cat] || 0) + itemPrice;
+    });
+  });
+
+  // Calculate Tax / GST
+  let totalGstAccrued = 0;
+  let taxableRevenue = totalInvoicedRevenue;
+  if (enableGst && taxPercent > 0) {
+    if (isTaxInclusive) {
+      taxableRevenue = Math.round((totalInvoicedRevenue / (1 + taxPercent / 100)) * 100) / 100;
+      totalGstAccrued = Math.round((totalInvoicedRevenue - taxableRevenue) * 100) / 100;
+    } else {
+      totalGstAccrued = Math.round((totalInvoicedRevenue * (taxPercent / 100)) * 100) / 100;
+    }
+  }
+
+  const averageOrderValue = validBookings.length > 0
+    ? Math.round(totalInvoicedRevenue / validBookings.length)
+    : 0;
+
+  // Monthly trends (group by YYYY-MM)
+  const monthlyTrendsMap = {};
+  validBookings.forEach(b => {
+    const rawDate = b.date || b.createdAt;
+    let monthKey = 'Current';
+    if (rawDate) {
+      try {
+        const d = new Date(rawDate);
+        if (!isNaN(d.getTime())) {
+          monthKey = d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+        }
+      } catch (e) {}
+    }
+    monthlyTrendsMap[monthKey] = (monthlyTrendsMap[monthKey] || 0) + (Number(b.total) || 0);
+  });
+
+  const monthlyTrends = Object.entries(monthlyTrendsMap).map(([month, amount]) => ({
+    month,
+    amount
+  }));
+
+  res.json({
+    success: true,
+    analytics: {
+      totalInvoicedRevenue,
+      realizedRevenue,
+      pendingReceivables,
+      taxableRevenue,
+      totalGstAccrued,
+      cgstAccrued: Math.round((totalGstAccrued / 2) * 100) / 100,
+      sgstAccrued: Math.round((totalGstAccrued / 2) * 100) / 100,
+      averageOrderValue,
+      totalInvoicesCount: validBookings.length,
+      paidInvoicesCount: totalPaidCount,
+      pendingInvoicesCount: totalPendingCount,
+      cancelledInvoicesCount: statusCounts['Cancelled'],
+      statusCounts,
+      paymentModes,
+      categoryRevenue,
+      monthlyTrends
+    }
+  });
+});
+
+// Single Booking Invoice Detailed Payload
+app.get('/api/invoices/:bookingId', (req, res) => {
+  const db = readDb();
+  const booking = (db.bookings || []).find(b => b.id === req.params.bookingId);
+  if (!booking) {
+    return res.status(404).json({ success: false, message: 'Invoice / Booking not found' });
+  }
+
+  const settings = db.settings || {};
+  const invoiceSettings = settings.invoiceSettings || {};
+  const servicesList = db.services || [];
+
+  const items = (booking.services || []).map(sName => {
+    const found = servicesList.find(s => s.name && s.name.toLowerCase().trim() === String(sName).toLowerCase().trim());
+    return {
+      name: sName,
+      category: found ? found.category : 'Salon Ritual',
+      price: found ? (Number(found.price) || 0) : 0,
+      duration: found ? found.duration : 45,
+      hygieneNote: found ? found.hygieneNote : 'Autoclaved Sealed Pouches Opened Live'
+    };
+  });
+
+  const total = Number(booking.total) || 0;
+  const taxPercent = Number(invoiceSettings.taxPercent) || 18;
+  const isTaxInclusive = (invoiceSettings.taxMode || 'inclusive') === 'inclusive';
+  const enableGst = invoiceSettings.enableGst !== false;
+
+  let subtotal = total;
+  let cgst = 0;
+  let sgst = 0;
+  let taxableAmount = total;
+
+  if (enableGst && taxPercent > 0) {
+    if (isTaxInclusive) {
+      taxableAmount = Math.round((total / (1 + taxPercent / 100)) * 100) / 100;
+      const gstTotal = total - taxableAmount;
+      cgst = Math.round((gstTotal / 2) * 100) / 100;
+      sgst = Math.round((gstTotal / 2) * 100) / 100;
+      subtotal = taxableAmount;
+    } else {
+      const gstTotal = Math.round((total * (taxPercent / 100)) * 100) / 100;
+      cgst = Math.round((gstTotal / 2) * 100) / 100;
+      sgst = Math.round((gstTotal / 2) * 100) / 100;
+      subtotal = total;
+    }
+  }
+
+  const invoiceNumber = `${invoiceSettings.invoicePrefix || 'SSA-INV-'}${booking.id.replace(/\D/g, '') || booking.id}`;
+
+  res.json({
+    success: true,
+    invoice: {
+      invoiceNumber,
+      booking,
+      items,
+      subtotal,
+      taxableAmount,
+      cgst,
+      sgst,
+      taxPercent,
+      enableGst,
+      total,
+      invoiceSettings
+    }
+  });
+});
+
+// ==========================================
 // 3. FESTIVE OFFERS & PROMOS
 // ==========================================
 app.get('/api/offers', (req, res) => {
@@ -763,15 +966,15 @@ app.patch('/api/bookings/:id/status', (req, res) => {
 });
 
 app.post('/api/bookings/:id/payment', (req, res) => {
-  const { paymentMethod, utrNumber, amount } = req.body;
+  const { paymentMethod, utrNumber, amount, status, paymentStatus } = req.body;
   const db = readDb();
   const booking = (db.bookings || []).find(b => b.id === req.params.id);
   if (!booking) return res.status(404).json({ success: false, message: 'Booking not found' });
 
-  booking.paymentMethod = paymentMethod || 'UPI QR';
-  booking.paymentStatus = 'Paid (Pending Verification)';
-  booking.utrNumber = utrNumber || '';
-  booking.paidAmount = Number(amount) || booking.total || 0;
+  if (paymentMethod) booking.paymentMethod = paymentMethod;
+  booking.paymentStatus = paymentStatus || status || 'Paid';
+  if (utrNumber !== undefined) booking.utrNumber = utrNumber;
+  if (amount !== undefined) booking.paidAmount = Number(amount);
   booking.paidAt = new Date().toISOString();
   writeDb(db);
   res.json({ success: true, booking, message: 'Payment recorded successfully' });

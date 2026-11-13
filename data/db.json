@@ -24,7 +24,13 @@
     },
     "upiName": "RASHMI KUMARI",
     "upiQrImage": "/images/serene-upi-qr.jpg",
-    "logoUrl": "/images/serene-logo.png"
+    "logoUrl": "/images/serene-logo.png",
+    "invoiceSettings": {
+      "theme": "royal-champagne",
+      "enableGst": true,
+      "taxPercent": 18,
+      "businessName": "Serene Salon & Academy"
+    }
   },
   "offers": [
     {

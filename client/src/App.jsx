@@ -452,6 +452,8 @@ export default function App() {
         user={currentUser}
         onLogout={handleLogout}
         showToast={showToast}
+        invoiceSettings={settings.invoiceSettings || {}}
+        services={services}
       />
 
       {/* My Bookings Lookup Modal */}
@@ -459,6 +461,8 @@ export default function App() {
         isOpen={isMyBookingsOpen}
         onClose={() => setIsMyBookingsOpen(false)}
         showToast={showToast}
+        invoiceSettings={settings.invoiceSettings || {}}
+        services={services}
       />
 
       {/* Festive Welcome Promo Popup */}

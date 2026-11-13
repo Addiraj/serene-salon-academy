@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { X, Search, Calendar, Clock, User, Phone, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, Search, Calendar, Clock, User, Phone, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
+import DynamicInvoiceModal from './DynamicInvoiceModal';
 
-export default function MyBookingsModal({ isOpen, onClose, showToast }) {
+export default function MyBookingsModal({ isOpen, onClose, showToast, invoiceSettings, services }) {
   const [query, setQuery] = useState('');
   const [bookings, setBookings] = useState([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedInvoiceBooking, setSelectedInvoiceBooking] = useState(null);
 
   if (!isOpen) return null;
 
@@ -132,14 +134,26 @@ export default function MyBookingsModal({ isOpen, onClose, showToast }) {
                       Total: ₹{(b.total || 0).toLocaleString('en-IN')}
                     </span>
 
-                    {b.status !== 'Cancelled' && (
+                    <div className="flex items-center gap-2">
                       <button 
-                        onClick={() => handleCancelBooking(b.id)}
-                        className="text-rose-600 hover:underline text-[11px] font-semibold"
+                        type="button"
+                        onClick={() => setSelectedInvoiceBooking(b)}
+                        className="px-2.5 py-1 rounded-lg bg-champagne-100 hover:bg-champagne-200 text-espresso-950 font-bold text-[11px] border border-champagne-300 transition flex items-center gap-1 shadow-xs"
+                        title="View Official Tax Invoice"
                       >
-                        Cancel Slot
+                        <FileText className="w-3 h-3 text-champagne-700" />
+                        <span>Tax Invoice</span>
                       </button>
-                    )}
+
+                      {b.status !== 'Cancelled' && (
+                        <button 
+                          onClick={() => handleCancelBooking(b.id)}
+                          className="text-rose-600 hover:underline text-[11px] font-semibold"
+                        >
+                          Cancel Slot
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))
@@ -156,6 +170,19 @@ export default function MyBookingsModal({ isOpen, onClose, showToast }) {
           </button>
         </div>
       </div>
+
+      {/* Dynamic Client Tax Invoice Modal */}
+      {selectedInvoiceBooking && (
+        <DynamicInvoiceModal
+          isOpen={!!selectedInvoiceBooking}
+          onClose={() => setSelectedInvoiceBooking(null)}
+          booking={selectedInvoiceBooking}
+          invoiceSettings={invoiceSettings}
+          services={services}
+          isAdmin={false}
+          showToast={showToast}
+        />
+      )}
     </div>
   );
 }

@@ -3,8 +3,10 @@ import {
   BarChart3, Gift, Scissors, GraduationCap, Calendar, MessageSquare, 
   Award, Star, Settings, Download, Plus, Clock, CheckCircle, RefreshCw, 
   Trash2, Edit, Printer, Send, Copy, Lock, LogOut, ArrowRight, ShieldCheck,
-  Sparkles, Upload, Image as ImageIcon
+  Sparkles, Upload, Image as ImageIcon, FileText, Receipt, PieChart, 
+  TrendingUp, DollarSign, CreditCard, Filter, Search, Eye
 } from 'lucide-react';
+import DynamicInvoiceModal from './DynamicInvoiceModal';
 
 export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdate }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -34,6 +36,12 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
   const [activeModal, setActiveModal] = useState(null); // 'offer' | 'service' | 'course' | 'cert' | 'manualBooking' | 'manualInquiry' | 'receipt'
   const [editingItem, setEditingItem] = useState(null);
   const [receiptBooking, setReceiptBooking] = useState(null);
+
+  // Invoices & Financial Analytics states
+  const [invoiceAnalytics, setInvoiceAnalytics] = useState(null);
+  const [invoiceSearchQuery, setInvoiceSearchQuery] = useState('');
+  const [invoiceStatusFilter, setInvoiceStatusFilter] = useState('All');
+  const [activeInvoiceBooking, setActiveInvoiceBooking] = useState(null);
 
   // Service tab search and form state
   const [serviceFilterCat, setServiceFilterCat] = useState('All');
@@ -144,7 +152,7 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
 
   const loadAllData = async () => {
     try {
-      const [st, ofs, srv, crs, bks, inqs, certs, revs, sets] = await Promise.all([
+      const [st, ofs, srv, crs, bks, inqs, certs, revs, sets, invAn] = await Promise.all([
         fetch('/api/admin/stats').then(r => r.json()),
         fetch('/api/offers?all=true').then(r => r.json()),
         fetch('/api/services?all=true').then(r => r.json()),
@@ -153,7 +161,8 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
         fetch('/api/inquiries').then(r => r.json()),
         fetch('/api/certificates').then(r => r.json()),
         fetch('/api/reviews?all=true').then(r => r.json()),
-        fetch('/api/settings').then(r => r.json())
+        fetch('/api/settings').then(r => r.json()),
+        fetch('/api/admin/invoices/analytics').then(r => r.json()).catch(() => ({ success: false }))
       ]);
 
       if (st.success) setStats(st.stats);
@@ -165,8 +174,31 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
       if (certs.success) setCertificates(certs.certificates);
       if (revs.success) setReviews(revs.reviews);
       if (sets.success) setSettings(sets.settings);
+      if (invAn && invAn.success) setInvoiceAnalytics(invAn.analytics);
     } catch (err) {
       console.error('Error loading admin data:', err);
+    }
+  };
+
+  const handleUpdateBookingPayment = async (bookingId, paymentData) => {
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentData)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, ...paymentData } : b));
+        setActiveInvoiceBooking(prev => prev && prev.id === bookingId ? { ...prev, ...paymentData } : prev);
+        if (showToast) showToast('Payment status updated successfully!');
+        
+        // Refresh analytics
+        const anRes = await fetch('/api/admin/invoices/analytics').then(r => r.json()).catch(() => null);
+        if (anRes && anRes.success) setInvoiceAnalytics(anRes.analytics);
+      }
+    } catch (err) {
+      if (showToast) showToast('Failed to update payment status.');
     }
   };
 
@@ -294,6 +326,7 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
               { id: 'services', label: '💇‍♀️ Rate Card' },
               { id: 'courses', label: '🎓 Academy Courses' },
               { id: 'bookings', label: '📅 Bookings CRM' },
+              { id: 'invoices', label: '🧾 Invoices & Analytics' },
               { id: 'inquiries', label: '💬 Student Leads' },
               { id: 'certificates', label: '📜 Certificates' },
               { id: 'broadcast', label: '📢 WhatsApp Marketing' },
@@ -898,12 +931,13 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
                           <td className="py-3 px-4 text-right space-x-1.5">
                             <button 
                               onClick={() => {
-                                setReceiptBooking(b);
-                                setActiveModal('receipt');
+                                setActiveInvoiceBooking(b);
                               }}
-                              className="px-2 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold text-[11px] hover:bg-slate-200 border border-slate-300 transition"
+                              className="px-2.5 py-1 rounded-lg bg-champagne-100 hover:bg-champagne-200 text-espresso-950 font-bold text-[11px] border border-champagne-300 transition inline-flex items-center gap-1 shadow-xs"
+                              title="Generate & View Official Tax Invoice"
                             >
-                              Receipt 📄
+                              <Receipt className="w-3 h-3 text-champagne-700" />
+                              <span>Invoice</span>
                             </button>
                             <a 
                               href={`https://wa.me/${(b.guestPhone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
@@ -995,6 +1029,361 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* 5B. TAB: INVOICES & FINANCIAL REVENUE ANALYTICS */}
+        {activeTab === 'invoices' && (
+          <div className="space-y-6">
+            {/* Top Hub Header & Export Action */}
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-champagne-500/20 text-champagne-900 border border-champagne-400 uppercase tracking-wider">
+                  Financial Hub & Invoicing
+                </span>
+                <h2 className="text-xl font-bold text-slate-900 mt-1 flex items-center gap-2">
+                  <Receipt className="w-5 h-5 text-champagne-700" />
+                  <span>Tax Invoices & Revenue Analytics Ledger</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Track real-time invoiced revenue, GST compliance (CGST/SGST), payment settlements, and category sales.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const headers = ['Invoice Number', 'Booking ID', 'Date', 'Time', 'Guest Name', 'Guest Phone', 'Stylist', 'Services', 'Subtotal (INR)', 'Discount (INR)', 'Total (INR)', 'Payment Status', 'Payment Method', 'UTR Number'];
+                    const rows = bookings.map(b => {
+                      const invId = `${settings?.invoiceSettings?.invoicePrefix || 'SSA-INV-'}${b.id.replace(/\D/g, '') || b.id}`;
+                      return [
+                        `"${invId}"`,
+                        `"${b.id}"`,
+                        `"${b.date || ''}"`,
+                        `"${b.time || ''}"`,
+                        `"${(b.guestName || '').replace(/"/g, '""')}"`,
+                        `"${b.guestPhone || ''}"`,
+                        `"${(b.stylist || '').replace(/"/g, '""')}"`,
+                        `"${(b.services || []).join(', ').replace(/"/g, '""')}"`,
+                        Number(b.subtotal || b.total || 0),
+                        Number(b.discount || 0),
+                        Number(b.total || 0),
+                        `"${b.paymentStatus || 'Pending'}"`,
+                        `"${b.paymentMethod || 'Paytm UPI'}"`,
+                        `"${b.utrNumber || ''}"`
+                      ].join(',');
+                    });
+                    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement('a');
+                    link.setAttribute('href', encodedUri);
+                    link.setAttribute('download', `Serene_Salon_Invoices_${new Date().toISOString().split('T')[0]}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showToast('Invoices ledger exported to CSV successfully!');
+                  }}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export Invoices CSV</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('settings')}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs border border-slate-300 transition flex items-center gap-1.5"
+                >
+                  <Settings className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Customize Template</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Financial KPI Cards Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Total Invoiced</span>
+                <div className="text-lg sm:text-2xl font-extrabold text-slate-900 mt-1 font-mono">
+                  ₹{(invoiceAnalytics?.totalInvoicedRevenue || 0).toLocaleString('en-IN')}
+                </div>
+                <span className="text-[10px] text-slate-400 block mt-0.5">{invoiceAnalytics?.totalInvoicesCount || 0} valid bookings</span>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Collected (Paid)</span>
+                <div className="text-lg sm:text-2xl font-extrabold text-emerald-700 mt-1 font-mono">
+                  ₹{(invoiceAnalytics?.realizedRevenue || 0).toLocaleString('en-IN')}
+                </div>
+                <span className="text-[10px] text-emerald-600 block mt-0.5">{invoiceAnalytics?.paidInvoicesCount || 0} invoices settled</span>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">Outstanding</span>
+                <div className="text-lg sm:text-2xl font-extrabold text-amber-600 mt-1 font-mono">
+                  ₹{(invoiceAnalytics?.pendingReceivables || 0).toLocaleString('en-IN')}
+                </div>
+                <span className="text-[10px] text-amber-700 block mt-0.5">{invoiceAnalytics?.pendingInvoicesCount || 0} pending balance</span>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">GST Accrued</span>
+                <div className="text-lg sm:text-2xl font-extrabold text-espresso-950 mt-1 font-mono">
+                  ₹{(invoiceAnalytics?.totalGstAccrued || 0).toLocaleString('en-IN')}
+                </div>
+                <span className="text-[10px] text-slate-400 block mt-0.5">CGST: ₹{invoiceAnalytics?.cgstAccrued || 0} • SGST: ₹{invoiceAnalytics?.sgstAccrued || 0}</span>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-champagne-800 block">Average Ticket (AOV)</span>
+                <div className="text-lg sm:text-2xl font-extrabold text-champagne-800 mt-1 font-mono">
+                  ₹{(invoiceAnalytics?.averageOrderValue || 0).toLocaleString('en-IN')}
+                </div>
+                <span className="text-[10px] text-slate-400 block mt-0.5">Per appointment visit</span>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Payment Modes</span>
+                <div className="text-xs text-slate-700 space-y-1 mt-1.5">
+                  <div className="flex justify-between"><span>UPI:</span><strong className="font-mono">₹{(invoiceAnalytics?.paymentModes?.['Paytm UPI'] || 0).toLocaleString('en-IN')}</strong></div>
+                  <div className="flex justify-between"><span>Cash:</span><strong className="font-mono">₹{(invoiceAnalytics?.paymentModes?.['Cash'] || 0).toLocaleString('en-IN')}</strong></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Visual Distribution Analytics Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              
+              {/* Category Sales Breakdown (8 cols) */}
+              <div className="lg:col-span-8 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                      <PieChart className="w-4 h-4 text-champagne-600" />
+                      <span>Invoiced Revenue by Service Category</span>
+                    </h3>
+                    <p className="text-[11px] text-slate-500">Sales distribution across rate card categories</p>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-slate-700">
+                    {Object.keys(invoiceAnalytics?.categoryRevenue || {}).length} Active Categories
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {Object.entries(invoiceAnalytics?.categoryRevenue || {}).map(([cat, amount]) => {
+                    const totalInv = invoiceAnalytics?.totalInvoicedRevenue || 1;
+                    const pct = Math.min(100, Math.round((amount / totalInv) * 100));
+                    return (
+                      <div key={cat} className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="font-semibold text-slate-800">{cat}</span>
+                          <span className="font-mono font-bold text-slate-900">
+                            ₹{amount.toLocaleString('en-IN')} <span className="text-slate-400 text-[10px]">({pct}%)</span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                          <div 
+                            className="bg-gradient-to-r from-champagne-500 to-amber-600 h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Status & Compliance Summary (4 cols) */}
+              <div className="lg:col-span-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 border-b border-slate-100 pb-3">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Statutory & Template Status</span>
+                  </h3>
+                  <div className="space-y-3 pt-3 text-xs">
+                    <div className="p-3 rounded-xl bg-champagne-50 border border-champagne-200 space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-champagne-800 tracking-wider block">Active Invoice Pattern</span>
+                      <div className="font-bold text-espresso-950 capitalize flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-champagne-600" />
+                        <span>{settings?.invoiceSettings?.theme || 'Royal Champagne'}</span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 block">Prefix: {settings?.invoiceSettings?.invoicePrefix || 'SSA-INV-'}</span>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-emerald-800 tracking-wider block">GST Tax Setting</span>
+                      <div className="font-bold text-emerald-950">
+                        {settings?.invoiceSettings?.enableGst ? `Enabled (${settings?.invoiceSettings?.taxPercent || 18}% ${settings?.invoiceSettings?.taxMode || 'inclusive'})` : 'Tax Exempt / Disabled'}
+                      </div>
+                      <span className="text-[10px] text-slate-600 font-mono block">GSTIN: {settings?.invoiceSettings?.gstin || 'Not Configured'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (bookings.length > 0) setActiveInvoiceBooking(bookings[0]);
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-espresso-950 hover:bg-black text-champagne-200 font-bold text-xs flex items-center justify-center gap-1.5 shadow transition"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Preview Sample Invoice</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Master Invoices Register Ledger Table */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
+              
+              {/* Table Search & Filter Bar */}
+              <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2 flex-1 max-w-md">
+                  <div className="relative w-full">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input 
+                      type="text" 
+                      placeholder="Search by Invoice #, Guest Name, Phone or Stylist..." 
+                      value={invoiceSearchQuery}
+                      onChange={(e) => setInvoiceSearchQuery(e.target.value)}
+                      className="w-full text-xs rounded-xl border border-slate-300 py-2 pl-9 pr-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Filter className="w-3.5 h-3.5 text-slate-400" />
+                  {['All', 'Paid', 'Pending', 'Cancelled'].map(st => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => setInvoiceStatusFilter(st)}
+                      className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                        invoiceStatusFilter === st
+                          ? 'bg-slate-900 text-white shadow'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {st}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Table Content */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-600">
+                  <thead className="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
+                    <tr>
+                      <th className="py-3 px-4">Invoice #</th>
+                      <th className="py-3 px-4">Guest Details</th>
+                      <th className="py-3 px-4">Appointment Date</th>
+                      <th className="py-3 px-4">Services Billed</th>
+                      <th className="py-3 px-4">Total Bill (₹)</th>
+                      <th className="py-3 px-4">Payment Status</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {bookings
+                      .filter(b => {
+                        if (invoiceStatusFilter === 'Paid') return b.paymentStatus === 'Paid' || b.status === 'Completed';
+                        if (invoiceStatusFilter === 'Pending') return b.paymentStatus !== 'Paid' && b.status !== 'Cancelled';
+                        if (invoiceStatusFilter === 'Cancelled') return b.status === 'Cancelled';
+                        return true;
+                      })
+                      .filter(b => {
+                        if (!invoiceSearchQuery.trim()) return true;
+                        const q = invoiceSearchQuery.toLowerCase();
+                        const invId = `${settings?.invoiceSettings?.invoicePrefix || 'SSA-INV-'}${b.id.replace(/\D/g, '') || b.id}`.toLowerCase();
+                        return invId.includes(q) ||
+                          (b.guestName || '').toLowerCase().includes(q) ||
+                          (b.guestPhone || '').includes(q) ||
+                          (b.stylist || '').toLowerCase().includes(q) ||
+                          (b.services || []).some(s => s.toLowerCase().includes(q));
+                      })
+                      .map(b => {
+                        const invNum = `${settings?.invoiceSettings?.invoicePrefix || 'SSA-INV-'}${b.id.replace(/\D/g, '') || b.id}`;
+                        const isPaid = b.paymentStatus === 'Paid' || b.status === 'Completed';
+                        return (
+                          <tr key={b.id} className="hover:bg-slate-50/70 transition">
+                            <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
+                              <div>#{invNum}</div>
+                              <span className="text-[10px] text-slate-400 font-normal">Ref: {b.id}</span>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="font-bold text-slate-900">{b.guestName}</div>
+                              <div className="text-[11px] text-slate-500 font-mono">{b.guestPhone}</div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="font-medium text-slate-800">{b.date}</div>
+                              <div className="text-[11px] text-slate-500">{b.time} • {b.stylist}</div>
+                            </td>
+                            <td className="py-3.5 px-4 max-w-xs truncate text-[11px]">
+                              {(b.services || []).join(', ')}
+                            </td>
+                            <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
+                              ₹{(b.total || 0).toLocaleString('en-IN')}
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                isPaid ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                                b.status === 'Cancelled' ? 'bg-slate-100 text-slate-600' :
+                                'bg-amber-50 text-amber-800 border border-amber-200'
+                              }`}>
+                                {isPaid ? '🟢 Paid' : b.status === 'Cancelled' ? '⚪ Cancelled' : '🟡 Pending'}
+                              </span>
+                              {b.utrNumber && (
+                                <div className="text-[10px] font-mono text-slate-400 mt-0.5">
+                                  UTR: {b.utrNumber}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
+                              <button
+                                type="button"
+                                onClick={() => setActiveInvoiceBooking(b)}
+                                className="px-2.5 py-1 rounded-lg bg-champagne-100 hover:bg-champagne-200 text-espresso-950 font-bold text-[11px] border border-champagne-300 transition inline-flex items-center gap-1 shadow-xs"
+                                title="View & Print Tax Invoice"
+                              >
+                                <Receipt className="w-3 h-3 text-champagne-700" />
+                                <span>Invoice</span>
+                              </button>
+
+                              {!isPaid && b.status !== 'Cancelled' && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateBookingPayment(b.id, { paymentStatus: 'Paid', paymentMethod: 'Cash' })}
+                                  className="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold text-[11px] border border-emerald-300 transition"
+                                  title="Mark invoice as paid"
+                                >
+                                  ✓ Mark Paid
+                                </button>
+                              )}
+
+                              <a
+                                href={`https://wa.me/${(b.guestPhone || '').replace(/\D/g, '')}?text=${encodeURIComponent(
+                                  `Hello ${b.guestName}! 🌸 Greetings from Serene Salon & Academy Vadodara! Your tax invoice #${invNum} is available: Total ₹${b.total}. Autoclaved sterile station reserved. View here: https://serene-salon-academy-nine.vercel.app`
+                                )}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] border border-slate-300 transition inline-block"
+                                title="Send WhatsApp summary"
+                              >
+                                💬
+                              </a>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1526,6 +1915,284 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
                 </div>
               </div>
 
+              {/* DYNAMIC TAX INVOICE & BILLING CUSTOMIZER STUDIO */}
+              <div className="p-5 sm:p-6 rounded-2xl border-2 border-champagne-300 bg-gradient-to-br from-champagne-50/60 via-white to-amber-50/40 space-y-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-champagne-200 pb-3">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <Receipt className="w-5 h-5 text-champagne-700" />
+                      <span>Dynamic Tax Invoice & Template Studio</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Change invoice themes, salon legal address, GST tax breakdown, sterilization seals, and policies dynamically.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (bookings.length > 0) setActiveInvoiceBooking(bookings[0]);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-champagne-100 hover:bg-champagne-200 text-espresso-950 font-bold text-xs border border-champagne-300 flex items-center gap-1.5 transition shadow-xs"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-champagne-700" />
+                    <span>Live Preview Invoice</span>
+                  </button>
+                </div>
+
+                {/* 1. Theme Selector */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+                    Select Invoice Design Pattern & Theme
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { id: 'royal-champagne', name: 'Royal Champagne', icon: '👑', desc: 'Gold foil accents, serif header, luxury aesthetic' },
+                      { id: 'modern-minimal', name: 'Modern Minimalist', icon: '⬛', desc: 'Crisp black & white typography, corporate clean' },
+                      { id: 'clinical-emerald', name: 'Clinical Sanctuary', icon: '🌿', desc: 'Hospital-grade mint & autoclave guarantee' },
+                      { id: 'thermal-pos', name: 'Thermal POS Slip', icon: '🧾', desc: 'Compact 80mm slip for counter receipt printers' }
+                    ].map(th => {
+                      const active = (settings?.invoiceSettings?.theme || 'royal-champagne') === th.id;
+                      return (
+                        <div
+                          key={th.id}
+                          onClick={() => {
+                            setSettings({
+                              ...settings,
+                              invoiceSettings: {
+                                ...(settings.invoiceSettings || {}),
+                                theme: th.id
+                              }
+                            });
+                          }}
+                          className={`p-3 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                            active
+                              ? 'border-champagne-600 bg-champagne-100/60 shadow-sm'
+                              : 'border-slate-200 bg-white hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg">{th.icon}</span>
+                            {active && <span className="text-[10px] font-bold bg-champagne-500 text-espresso-950 px-1.5 py-0.2 rounded-full">Active</span>}
+                          </div>
+                          <div className="mt-2">
+                            <span className="text-xs font-bold text-slate-900 block">{th.name}</span>
+                            <span className="text-[10px] text-slate-500 block mt-0.5 leading-snug">{th.desc}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 2. Business Details & Address */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Invoice Business Legal Name</label>
+                    <input 
+                      type="text" 
+                      value={settings?.invoiceSettings?.businessName || settings?.salonName || ''}
+                      onChange={(e) => setSettings({
+                        ...settings,
+                        invoiceSettings: { ...(settings.invoiceSettings || {}), businessName: e.target.value }
+                      })}
+                      className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Brand Tagline</label>
+                    <input 
+                      type="text" 
+                      value={settings?.invoiceSettings?.tagline || settings?.tagline || ''}
+                      onChange={(e) => setSettings({
+                        ...settings,
+                        invoiceSettings: { ...(settings.invoiceSettings || {}), tagline: e.target.value }
+                      })}
+                      className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" 
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Address Line 1 & Line 2</label>
+                    <input 
+                      type="text" 
+                      value={settings?.invoiceSettings?.addressLine1 || settings?.address || ''}
+                      onChange={(e) => setSettings({
+                        ...settings,
+                        invoiceSettings: { ...(settings.invoiceSettings || {}), addressLine1: e.target.value }
+                      })}
+                      placeholder="Street address, complex..."
+                      className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">City, State & Pin</label>
+                    <input 
+                      type="text" 
+                      value={settings?.invoiceSettings?.city ? `${settings.invoiceSettings.city}, ${settings.invoiceSettings.state} ${settings.invoiceSettings.pincode}` : 'Vadodara, Gujarat 390010'}
+                      onChange={(e) => {
+                        const parts = e.target.value.split(',');
+                        setSettings({
+                          ...settings,
+                          invoiceSettings: {
+                            ...(settings.invoiceSettings || {}),
+                            city: parts[0]?.trim() || 'Vadodara',
+                            state: parts[1]?.trim() || 'Gujarat'
+                          }
+                        });
+                      }}
+                      className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500" 
+                    />
+                  </div>
+                </div>
+
+                {/* 3. Tax / GST Statutory Configuration */}
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                      Tax & GST Compliance (Vadodara, Gujarat)
+                    </span>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={settings?.invoiceSettings?.enableGst !== false}
+                        onChange={(e) => setSettings({
+                          ...settings,
+                          invoiceSettings: { ...(settings.invoiceSettings || {}), enableGst: e.target.checked }
+                        })}
+                        className="rounded text-champagne-600 focus:ring-champagne-500"
+                      />
+                      <span className="text-xs font-semibold text-slate-700">Enable Tax Invoicing (GST)</span>
+                    </label>
+                  </div>
+
+                  {settings?.invoiceSettings?.enableGst !== false && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">GSTIN Number</label>
+                        <input 
+                          type="text" 
+                          value={settings?.invoiceSettings?.gstin || '24ABCDE1234F1Z5'}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            invoiceSettings: { ...(settings.invoiceSettings || {}), gstin: e.target.value }
+                          })}
+                          className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-mono uppercase" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">Total Tax Rate (%)</label>
+                        <input 
+                          type="number" 
+                          value={settings?.invoiceSettings?.taxPercent !== undefined ? settings.invoiceSettings.taxPercent : 18}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            invoiceSettings: { ...(settings.invoiceSettings || {}), taxPercent: Number(e.target.value) || 0 }
+                          })}
+                          className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-mono" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">Tax Pricing Mode</label>
+                        <select
+                          value={settings?.invoiceSettings?.taxMode || 'inclusive'}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            invoiceSettings: { ...(settings.invoiceSettings || {}), taxMode: e.target.value }
+                          })}
+                          className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-medium"
+                        >
+                          <option value="inclusive">GST Included in Displayed Price (Standard)</option>
+                          <option value="exclusive">GST Added Extra onto Subtotal</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Invoice Feature Toggles */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <label className="p-3 rounded-xl border border-slate-200 bg-white flex items-center gap-2.5 cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={settings?.invoiceSettings?.showSterilizationBadge !== false}
+                      onChange={(e) => setSettings({
+                        ...settings,
+                        invoiceSettings: { ...(settings.invoiceSettings || {}), showSterilizationBadge: e.target.checked }
+                      })}
+                      className="rounded text-champagne-600 focus:ring-champagne-500"
+                    />
+                    <div className="text-xs font-semibold text-slate-800">
+                      <span>Sterilization Guarantee Seal</span>
+                      <span className="text-[10px] text-slate-400 block font-normal">Autoclave assurance banner</span>
+                    </div>
+                  </label>
+
+                  <label className="p-3 rounded-xl border border-slate-200 bg-white flex items-center gap-2.5 cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={settings?.invoiceSettings?.showQrCode !== false}
+                      onChange={(e) => setSettings({
+                        ...settings,
+                        invoiceSettings: { ...(settings.invoiceSettings || {}), showQrCode: e.target.checked }
+                      })}
+                      className="rounded text-champagne-600 focus:ring-champagne-500"
+                    />
+                    <div className="text-xs font-semibold text-slate-800">
+                      <span>Paytm UPI QR Standee</span>
+                      <span className="text-[10px] text-slate-400 block font-normal">Scan & pay balance slip</span>
+                    </div>
+                  </label>
+
+                  <label className="p-3 rounded-xl border border-slate-200 bg-white flex items-center gap-2.5 cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={settings?.invoiceSettings?.showSignatory !== false}
+                      onChange={(e) => setSettings({
+                        ...settings,
+                        invoiceSettings: { ...(settings.invoiceSettings || {}), showSignatory: e.target.checked }
+                      })}
+                      className="rounded text-champagne-600 focus:ring-champagne-500"
+                    />
+                    <div className="text-xs font-semibold text-slate-800">
+                      <span>Authorized Signatory</span>
+                      <span className="text-[10px] text-slate-400 block font-normal">Rashmi Sah signature stamp</span>
+                    </div>
+                  </label>
+                </div>
+
+                {/* 5. Custom Thank You Note & Terms */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Client Thank You Note</label>
+                    <textarea 
+                      rows={2}
+                      value={settings?.invoiceSettings?.thankYouNote || 'Thank you for visiting Serene Salon & Academy! Where Clinical Hygiene Meets Couture Beauty.'}
+                      onChange={(e) => setSettings({
+                        ...settings,
+                        invoiceSettings: { ...(settings.invoiceSettings || {}), thankYouNote: e.target.value }
+                      })}
+                      className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Invoice Footer / Social Callout</label>
+                    <textarea 
+                      rows={2}
+                      value={settings?.invoiceSettings?.customFooterNote || 'Follow us on Instagram: @serenesalonacademy • Manjalpur, Vadodara'}
+                      onChange={(e) => setSettings({
+                        ...settings,
+                        invoiceSettings: { ...(settings.invoiceSettings || {}), customFooterNote: e.target.value }
+                      })}
+                      className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="pt-2">
                 <button 
                   type="submit"
@@ -1784,6 +2451,19 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
             </div>
           </div>
         </div>
+      )}
+      {/* Dynamic Tax Invoice Modal */}
+      {activeInvoiceBooking && (
+        <DynamicInvoiceModal 
+          isOpen={!!activeInvoiceBooking}
+          onClose={() => setActiveInvoiceBooking(null)}
+          booking={activeInvoiceBooking}
+          invoiceSettings={settings.invoiceSettings || {}}
+          services={services}
+          isAdmin={true}
+          onUpdatePayment={handleUpdateBookingPayment}
+          showToast={showToast}
+        />
       )}
     </div>
   );

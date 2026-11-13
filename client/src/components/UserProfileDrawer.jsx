@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Phone, Mail, Award, Calendar, Clock, Sparkles, LogOut, FileText, CheckCircle2 } from 'lucide-react';
+import DynamicInvoiceModal from './DynamicInvoiceModal';
 
-export default function UserProfileDrawer({ isOpen, onClose, user, onLogout, showToast }) {
+export default function UserProfileDrawer({ isOpen, onClose, user, onLogout, showToast, invoiceSettings, services }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedInvoiceBooking, setSelectedInvoiceBooking] = useState(null);
 
   useEffect(() => {
     if (!isOpen || !user) return;
@@ -144,14 +146,24 @@ export default function UserProfileDrawer({ isOpen, onClose, user, onLogout, sho
                   </div>
 
                   <div className="pt-2 flex items-center justify-between text-[11px]">
-                    <a
-                      href={`https://wa.me/916203060789?text=Hello%20Serene%20Salon!%20Regarding%20my%20booking%20${b.id}%20for%20${b.date}.`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-emerald-700 hover:text-emerald-800 font-bold underline"
-                    >
-                      WhatsApp Salon ↗
-                    </a>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedInvoiceBooking(b)}
+                        className="text-champagne-800 hover:text-espresso-950 font-bold underline flex items-center gap-1"
+                      >
+                        <FileText className="w-3 h-3 text-champagne-600" />
+                        <span>Tax Invoice 📄</span>
+                      </button>
+                      <a
+                        href={`https://wa.me/916203060789?text=Hello%20Serene%20Salon!%20Regarding%20my%20booking%20${b.id}%20for%20${b.date}.`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-emerald-700 hover:text-emerald-800 font-bold underline"
+                      >
+                        WhatsApp ↗
+                      </a>
+                    </div>
                     <span className="text-[10px] text-espresso-800/60">
                       Stylist: {b.stylist ? b.stylist.split('(')[0] : 'Master Artist'}
                     </span>
@@ -179,6 +191,19 @@ export default function UserProfileDrawer({ isOpen, onClose, user, onLogout, sho
         </div>
 
       </div>
+
+      {/* Dynamic Client Tax Invoice Modal */}
+      {selectedInvoiceBooking && (
+        <DynamicInvoiceModal
+          isOpen={!!selectedInvoiceBooking}
+          onClose={() => setSelectedInvoiceBooking(null)}
+          booking={selectedInvoiceBooking}
+          invoiceSettings={invoiceSettings}
+          services={services}
+          isAdmin={false}
+          showToast={showToast}
+        />
+      )}
     </div>
   );
 }
