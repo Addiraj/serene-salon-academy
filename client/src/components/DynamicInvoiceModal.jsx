@@ -11,7 +11,7 @@ const SERVICE_TERMS_PRESETS = {
     name: '📜 Standard Sanctuary Policies',
     defaultInclusions: 'Sterile Station Allocation, Autoclaved Implements & Single-Use Linens',
     terms: (adv, bal) => [
-      `Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
+      `Thank you for visiting Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
       `Salon management reserves the right to admission.`,
       `Only 1 benefit can be used at a time.`,
       `The remaining balance of ₹${(bal || 0).toLocaleString('en-IN')} is payable immediately upon completion of the service.`,
@@ -22,7 +22,7 @@ const SERVICE_TERMS_PRESETS = {
     name: '💄 Bridal & Engagement Makeup',
     defaultInclusions: 'Makeup Studio Products with Hair Extension & Draping',
     terms: (adv, bal) => [
-      `Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
+      `Thank you for visiting Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
       `The advance payment of ₹${(adv || 0).toLocaleString('en-IN')} is strictly non-refundable and non-transferable.`,
       `The remaining balance of ₹${(bal || 0).toLocaleString('en-IN')} must be paid immediately upon completion of the service.`,
       `The booking is confirmed upon receipt of the advance payment.`,
@@ -33,7 +33,7 @@ const SERVICE_TERMS_PRESETS = {
     name: '💆‍♀️ Facials & Clinical Skin Rituals',
     defaultInclusions: 'Hospital-Grade Autoclaved Sealed Pouches Opened Live in Client Presence',
     terms: (adv, bal) => [
-      `Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
+      `Thank you for visiting Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
       `100% Hospital-grade autoclave sterilized single-use sealed medical pouches are opened live before treatment.`,
       `The client must disclose any active retinoids, AHA/BHA chemical peels, or dermatological conditions.`,
       `Direct sunlight, steam, and sauna should be avoided for 24-48 hours post-treatment.`,
@@ -44,7 +44,7 @@ const SERVICE_TERMS_PRESETS = {
     name: '💇‍♀️ Hair Spa, Color & Smoothing',
     defaultInclusions: 'Authentic L’Oréal & Olaplex Professional Ampoules & Autoclaved Tools',
     terms: (adv, bal) => [
-      `Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
+      `Thank you for visiting Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
       `Preliminary strand and sensitivity patch test is performed prior to chemical coloring or smoothing.`,
       `For keratin and botox smoothing, water contact and tying or pinning hair should be avoided for 48 hours.`,
       `Post-treatment sulfate-free salon home-care regimen is recommended for treatment longevity.`,
@@ -55,7 +55,7 @@ const SERVICE_TERMS_PRESETS = {
     name: '💅 Acrylic & Gel Nail Artistry',
     defaultInclusions: 'Medical Sanitization, Premium Gel Polish & Cuticle Care',
     terms: (adv, bal) => [
-      `Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
+      `Thank you for visiting Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
       `Authentic acrylic and gel formulas applied with sterile sanitized nail implements.`,
       `Any accidental lifting or stone repair within 48 hours is retouched complimentary at our sanctuary.`,
       `Avoid using nail extensions as tools or exposing them to harsh chemical cleaning agents.`,
@@ -231,7 +231,7 @@ export default function DynamicInvoiceModal({
     }
   };
 
-  // Print Handler
+  // Print Handler (Single-Page A4 Guaranteed Fit)
   const handlePrint = () => {
     const el = document.getElementById('officialInvoiceContainer');
     if (!el) return;
@@ -246,27 +246,43 @@ export default function DynamicInvoiceModal({
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
             @page { 
-              size: A4; 
-              margin: 10mm 12mm; 
+              size: A4 portrait; 
+              margin: 4mm 6mm; 
             }
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-              color: #1a1a1a;
-              background: #fff;
+            * {
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
+              box-sizing: border-box;
             }
-            .gold-border { border: 2px solid #b38728; }
+            html, body { 
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #fff !important;
+              color: #1a1a1a;
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            }
+            .gold-border { border: 1.5px solid #b38728; }
             .gold-text { color: #b38728; }
             .gold-bg { background-color: #f7eedb; }
-            .gold-divider { height: 2px; background-color: #b38728; }
+            .gold-divider { height: 1.5px; background-color: #b38728; }
+            #officialInvoiceContainer {
+              border: 1.5px solid #b38728 !important;
+              border-radius: 12px !important;
+              box-shadow: none !important;
+              padding: 12px 18px !important;
+              margin: 0 auto !important;
+              width: 100% !important;
+              max-width: 100% !important;
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
             @media print {
               .no-print { display: none !important; }
-              body { padding: 0; margin: 0; }
+              body { padding: 0 !important; margin: 0 !important; }
             }
           </style>
         </head>
-        <body class="p-6">
+        <body class="p-1">
           ${el.innerHTML}
           <script>
             window.onload = function() {
@@ -282,7 +298,7 @@ export default function DynamicInvoiceModal({
 
   // WhatsApp Share
   const handleWhatsAppShare = () => {
-    const msg = `🌸 *RASHMIS SERENE SALON & ACADEMY VADODARA* 🌸\n` +
+    const msg = `🌸 *SERENE SALON & ACADEMY VADODARA* 🌸\n` +
       `*${invoiceTitle}*\n` +
       `BEAUTY • MAKEUP • PROFESSIONAL SERVICES (CIDESCO Certified)\n` +
       `----------------------------------------\n` +
@@ -297,7 +313,7 @@ export default function DynamicInvoiceModal({
       `💳 *Balance Payment Due:* ₹${balanceDue.toLocaleString('en-IN')}\n` +
       `----------------------------------------\n` +
       `📝 *Terms & Conditions:*\n` +
-      `• Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.\n` +
+      `• Thank you for visiting Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.\n` +
       termsList.slice(1, 4).map(t => `• ${t}`).join('\n') + `\n\n` +
       `✨ *Stay connected with Serene Salon & Academy!*\n` +
       `Follow our WhatsApp and Instagram channels to receive the latest updates on exclusive offers, special promotions, new services, beauty trends and exciting announcements.\n\n` +
@@ -537,57 +553,57 @@ export default function DynamicInvoiceModal({
           </div>
         )}
 
-        {/* Printable Official Invoice Body (Authentic Owner PDF Layout) */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100/60">
+        {/* Printable Official Invoice Body (Authentic Owner PDF Layout - Guaranteed Single Page A4 Fit) */}
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 bg-slate-100/60">
           <div 
             id="officialInvoiceContainer" 
-            className="p-8 sm:p-10 bg-white text-slate-900 border-2 border-[#b38728] shadow-2xl rounded-2xl max-w-2xl mx-auto space-y-6 text-xs leading-relaxed"
+            className="p-4 sm:p-5 bg-white text-slate-900 border-2 border-[#b38728] shadow-2xl rounded-2xl max-w-2xl mx-auto space-y-3 text-xs leading-normal"
           >
-            {/* 1. Header (Centered Gold Branding & CIDESCO Tagline) */}
-            <div className="text-center pb-2">
-              <div className="flex justify-center mb-2.5">
+            {/* 1. Header (Centered Gold Branding & CIDESCO Tagline - No Rashmis) */}
+            <div className="text-center pb-0.5">
+              <div className="flex justify-center mb-1">
                 <img 
                   src={invoiceSettings?.logoUrl || '/images/serene-logo.png'} 
                   alt="Serene Salon & Academy Logo" 
-                  className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full p-1 bg-white border border-[#b38728]/40 shadow-xs"
+                  className="w-12 h-12 sm:w-14 sm:h-14 object-contain rounded-full p-0.5 bg-white border border-[#b38728]/40 shadow-xs"
                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
               </div>
-              <h1 className="font-editorial text-2xl sm:text-3xl font-extrabold tracking-wider text-[#b38728] uppercase">
-                Rashmis Serene Salon & Academy
+              <h1 className="font-editorial text-2xl sm:text-2xl font-extrabold tracking-wider text-[#b38728] uppercase">
+                SERENE SALON & ACADEMY
               </h1>
-              <p className="text-[11px] sm:text-xs font-bold tracking-widest text-slate-800 uppercase mt-1">
+              <p className="text-[10px] sm:text-[11px] font-bold tracking-widest text-slate-800 uppercase mt-0.5">
                 BEAUTY • MAKEUP • PROFESSIONAL SERVICES (CIDESCO Certified)
               </p>
-              <p className="text-[10px] text-slate-600 mt-0.5">
+              <p className="text-[9px] sm:text-[9.5px] text-slate-600 mt-0.5">
                 Address: FF 16, Ramma Emperro, Makarpura Road, Beside Kabir Complex, Manjalpur, Vadodara
               </p>
-              <div className="w-full h-0.5 bg-[#b38728] my-3"></div>
+              <div className="w-full h-0.5 bg-[#b38728] my-1.5"></div>
             </div>
 
             {/* 2. Invoice Document Title */}
-            <div className="text-center py-1">
-              <h2 className="font-editorial text-lg sm:text-xl font-extrabold tracking-wide text-slate-900 uppercase">
+            <div className="text-center py-0.5">
+              <h2 className="font-editorial text-base sm:text-lg font-extrabold tracking-wide text-slate-900 uppercase">
                 {invoiceTitle}
               </h2>
             </div>
 
             {/* 3. Client Details & Invoice Details (Matching Salon POS Receipt) */}
             <div className="border border-[#e6d5b8] rounded-xl overflow-hidden shadow-xs">
-              <div className="grid grid-cols-2 bg-[#fbf6ec] border-b border-[#e6d5b8] px-4 py-2 font-bold text-[11px] uppercase tracking-wider text-[#996b1b]">
+              <div className="grid grid-cols-2 bg-[#fbf6ec] border-b border-[#e6d5b8] px-3 py-1 font-bold text-[10px] uppercase tracking-wider text-[#996b1b]">
                 <div>CLIENT DETAILS</div>
                 <div>INVOICE & BILLING DETAILS</div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 text-xs bg-[#fdfbf7]">
-                <div className="space-y-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2.5 text-[11px] bg-[#fdfbf7]">
+                <div className="space-y-0.5">
                   <div><strong>Name:</strong> <span>{booking.guestName}</span></div>
                   <div><strong>Contact:</strong> <span className="font-mono">{booking.guestPhone}</span></div>
                   {cleanNotes && (
-                    <div className="text-[11px] text-slate-600 italic pt-0.5">Note: {cleanNotes}</div>
+                    <div className="text-[10px] text-slate-600 italic pt-0.5">Note: {cleanNotes}</div>
                   )}
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <div><strong>Invoice Number:</strong> <span className="font-mono font-bold text-slate-900">#{booking.id}</span></div>
                   <div><strong>Billed On:</strong> <span className="font-semibold text-slate-900">{invoiceDate} {invoiceTime}</span></div>
                 </div>
@@ -595,24 +611,24 @@ export default function DynamicInvoiceModal({
             </div>
 
             {/* 4. Service Details Section */}
-            <div className="space-y-2">
-              <h3 className="font-bold text-[11px] uppercase tracking-wider text-[#996b1b]">
+            <div className="space-y-1">
+              <h3 className="font-bold text-[10px] uppercase tracking-wider text-[#996b1b]">
                 SERVICE DETAILS
               </h3>
               <div className="border border-slate-300 rounded-lg overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#181210] text-white text-[11px] uppercase font-semibold">
+                <table className="w-full text-left text-[11px]">
+                  <thead className="bg-[#181210] text-white text-[10px] uppercase font-semibold">
                     <tr>
-                      <th className="py-2.5 px-4 w-1/2">Service Details</th>
-                      <th className="py-2.5 px-4 w-1/2">Inclusions / Products Used</th>
+                      <th className="py-1 px-3 w-1/2">Service Details</th>
+                      <th className="py-1 px-3 w-1/2">Inclusions / Products Used</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-slate-200">
                     <tr>
-                      <td className="py-3 px-4 font-bold text-slate-900">
+                      <td className="py-1.5 px-3 font-bold text-slate-900">
                         {primaryServiceName}
                       </td>
-                      <td className="py-3 px-4 text-slate-700">
+                      <td className="py-1.5 px-3 text-slate-700">
                         {inclusionsText}
                       </td>
                     </tr>
@@ -622,70 +638,70 @@ export default function DynamicInvoiceModal({
             </div>
 
             {/* 5. Payment Summary Section */}
-            <div className="space-y-2">
-              <h3 className="font-bold text-[11px] uppercase tracking-wider text-[#996b1b]">
+            <div className="space-y-1">
+              <h3 className="font-bold text-[10px] uppercase tracking-wider text-[#996b1b]">
                 PAYMENT SUMMARY
               </h3>
               <div className="border border-slate-300 rounded-lg overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#181210] text-white text-[11px] uppercase font-semibold">
+                <table className="w-full text-left text-[11px]">
+                  <thead className="bg-[#181210] text-white text-[10px] uppercase font-semibold">
                     <tr>
-                      <th className="py-2.5 px-4 w-2/3">Description</th>
-                      <th className="py-2.5 px-4 w-1/3 text-right">Amount (₹)</th>
+                      <th className="py-1 px-3 w-2/3">Description</th>
+                      <th className="py-1 px-3 w-1/3 text-right">Amount (₹)</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-slate-200">
                     <tr>
-                      <td className="py-2.5 px-4 text-slate-800">Total Service Amount</td>
-                      <td className="py-2.5 px-4 text-right font-mono font-bold text-slate-900">
+                      <td className="py-1 px-3 text-slate-800">Total Service Amount</td>
+                      <td className="py-1 px-3 text-right font-mono font-bold text-slate-900">
                         ₹{totalAmount.toLocaleString('en-IN')}
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2.5 px-4 text-slate-800">Advance Payment Received</td>
-                      <td className="py-2.5 px-4 text-right font-mono font-bold text-emerald-800">
+                      <td className="py-1 px-3 text-slate-800">Advance Payment Received</td>
+                      <td className="py-1 px-3 text-right font-mono font-bold text-emerald-800">
                         ₹{advanceAmount.toLocaleString('en-IN')}
                       </td>
                     </tr>
                     <tr className="bg-[#f7eedb] font-bold text-slate-900">
-                      <td className="py-3 px-4 text-sm font-extrabold text-[#7a5412]">Balance Payment Due</td>
-                      <td className="py-3 px-4 text-right font-mono text-base font-extrabold text-[#7a5412]">
+                      <td className="py-1.5 px-3 text-xs font-extrabold text-[#7a5412]">Balance Payment Due</td>
+                      <td className="py-1.5 px-3 text-right font-mono text-sm font-extrabold text-[#7a5412]">
                         ₹{balanceDue.toLocaleString('en-IN')}
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              <p className="text-[11px] text-slate-600 italic pt-0.5">
+              <p className="text-[9.5px] text-slate-600 italic pt-0.5">
                 The remaining balance of <strong>₹{balanceDue.toLocaleString('en-IN')}</strong> is payable immediately upon completion of the service.
               </p>
             </div>
 
             {/* 6. Terms & Conditions Section (Service-Wise Dynamic) */}
-            <div className="space-y-2 pt-1">
-              <h3 className="font-bold text-[11px] uppercase tracking-wider text-[#996b1b]">
+            <div className="space-y-0.5 pt-0.5">
+              <h3 className="font-bold text-[10px] uppercase tracking-wider text-[#996b1b]">
                 TERMS & CONDITIONS
               </h3>
-              <ol className="list-decimal pl-5 space-y-1.5 text-[11px] text-slate-700 leading-relaxed">
+              <ol className="list-decimal pl-4 space-y-0.5 text-[9.5px] text-slate-700 leading-snug">
                 {termsList.map((term, idx) => (
-                  <li key={idx} className="pl-1">{term}</li>
+                  <li key={idx} className="pl-0.5">{term}</li>
                 ))}
               </ol>
             </div>
 
             {/* 7. Thank You Note & Stay Connected Section (Official Owner Requirement) */}
-            <div className="pt-4 space-y-3">
-              <div className="bg-[#fbf6ec] border border-[#e6d5b8] rounded-xl p-4 text-center space-y-2 shadow-xs">
-                <p className="font-editorial text-sm font-bold text-[#996b1b]">
+            <div className="pt-1.5 space-y-1.5">
+              <div className="bg-[#fbf6ec] border border-[#e6d5b8] rounded-xl p-2.5 text-center space-y-1 shadow-xs">
+                <p className="font-editorial text-xs font-bold text-[#996b1b]">
                   Stay connected with Serene Salon & Academy!
                 </p>
-                <p className="text-[11px] text-slate-700 leading-relaxed max-w-lg mx-auto">
+                <p className="text-[9.5px] text-slate-700 leading-tight max-w-lg mx-auto">
                   Follow our WhatsApp and Instagram channels to receive the latest updates on exclusive offers, special promotions, new services, beauty trends and exciting announcements.
                 </p>
-                <p className="text-xs font-bold text-pink-700 pt-0.5">
+                <p className="text-[9.5px] font-bold text-pink-700">
                   Don't miss out on our latest offers! 💖
                 </p>
-                <div className="flex items-center justify-center gap-3 pt-1 text-[11px] font-semibold text-slate-800 flex-wrap">
+                <div className="flex items-center justify-center gap-3 pt-0.5 text-[9.5px] font-semibold text-slate-800 flex-wrap">
                   <a 
                     href="https://www.instagram.com/serenesalonacademy/?hl=en" 
                     target="_blank" 
@@ -706,17 +722,17 @@ export default function DynamicInvoiceModal({
                 </div>
               </div>
 
-              <div className="w-full h-0.5 bg-[#b38728] mt-3 mb-2"></div>
+              <div className="w-full h-0.5 bg-[#b38728] my-1"></div>
 
-              {/* 8. Footer (Salon Name & Address) */}
-              <div className="text-center text-[11px] text-slate-600 space-y-0.5">
+              {/* 8. Footer (Salon Name & Address - No Rashmis) */}
+              <div className="text-center text-[9.5px] text-slate-600 space-y-0.5">
                 <p className="font-bold tracking-widest uppercase text-slate-800">
-                  Rashmis Serene Salon & Academy
+                  Serene Salon & Academy
                 </p>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[9px] text-slate-500">
                   Address: FF 16, Ramma Emperro, Makarpura Road, Beside Kabir Complex, Manjalpur, Vadodara
                 </p>
-                <p className="text-[10px] text-slate-500 pt-0.5">
+                <p className="text-[9px] text-slate-500">
                   For more information connect our Instagram ID: <strong className="text-slate-900">@serenesalonacademy</strong> or WhatsApp: <strong className="text-slate-900">+91 6203060789</strong>
                 </p>
               </div>
