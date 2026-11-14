@@ -5,16 +5,27 @@ import {
   Sparkles, Phone, MessageCircle
 } from 'lucide-react';
 
-// Preset Terms & Conditions by Service Category
+// Preset Terms & Conditions by Service Category (Matching Owner Reference & POS Receipt)
 const SERVICE_TERMS_PRESETS = {
+  'standard-salon': {
+    name: '📜 Standard Sanctuary Policies',
+    defaultInclusions: 'Sterile Station Allocation, Autoclaved Implements & Single-Use Linens',
+    terms: (adv, bal) => [
+      `Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
+      `Salon management reserves the right to admission.`,
+      `Only 1 benefit can be used at a time.`,
+      `The remaining balance of ₹${(bal || 0).toLocaleString('en-IN')} is payable immediately upon completion of the service.`,
+      `All instruments are hospital-grade autoclave sterilized in single-use sealed medical pouches.`
+    ]
+  },
   'bridal-makeup': {
     name: '💄 Bridal & Engagement Makeup',
     defaultInclusions: 'Makeup Studio Products with Hair Extension & Draping',
     terms: (adv, bal) => [
+      `Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
       `The advance payment of ₹${(adv || 0).toLocaleString('en-IN')} is strictly non-refundable and non-transferable.`,
       `The remaining balance of ₹${(bal || 0).toLocaleString('en-IN')} must be paid immediately upon completion of the service.`,
       `The booking is confirmed upon receipt of the advance payment.`,
-      `The client is requested to arrive on time for the scheduled appointment.`,
       `Personal belongings, including jewellery, valuables and other items, must be kept safely by the client. Serene Salon & Academy will not be responsible for any loss or damage to personal belongings.`
     ]
   },
@@ -22,17 +33,18 @@ const SERVICE_TERMS_PRESETS = {
     name: '💆‍♀️ Facials & Clinical Skin Rituals',
     defaultInclusions: 'Hospital-Grade Autoclaved Sealed Pouches Opened Live in Client Presence',
     terms: (adv, bal) => [
+      `Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
       `100% Hospital-grade autoclave sterilized single-use sealed medical pouches are opened live before treatment.`,
       `The client must disclose any active retinoids, AHA/BHA chemical peels, or dermatological conditions.`,
       `Direct sunlight, steam, and sauna should be avoided for 24-48 hours post-treatment.`,
-      `The remaining balance of ₹${(bal || 0).toLocaleString('en-IN')} is payable immediately upon completion.`,
-      `Appointments can be rescheduled with at least 4 hours advance notice.`
+      `The remaining balance of ₹${(bal || 0).toLocaleString('en-IN')} is payable immediately upon completion.`
     ]
   },
   'hair-treatments': {
     name: '💇‍♀️ Hair Spa, Color & Smoothing',
     defaultInclusions: 'Authentic L’Oréal & Olaplex Professional Ampoules & Autoclaved Tools',
     terms: (adv, bal) => [
+      `Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
       `Preliminary strand and sensitivity patch test is performed prior to chemical coloring or smoothing.`,
       `For keratin and botox smoothing, water contact and tying or pinning hair should be avoided for 48 hours.`,
       `Post-treatment sulfate-free salon home-care regimen is recommended for treatment longevity.`,
@@ -43,20 +55,11 @@ const SERVICE_TERMS_PRESETS = {
     name: '💅 Acrylic & Gel Nail Artistry',
     defaultInclusions: 'Medical Sanitization, Premium Gel Polish & Cuticle Care',
     terms: (adv, bal) => [
+      `Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.`,
       `Authentic acrylic and gel formulas applied with sterile sanitized nail implements.`,
       `Any accidental lifting or stone repair within 48 hours is retouched complimentary at our sanctuary.`,
       `Avoid using nail extensions as tools or exposing them to harsh chemical cleaning agents.`,
       `Balance payment of ₹${(bal || 0).toLocaleString('en-IN')} is payable upon completion.`
-    ]
-  },
-  'standard-salon': {
-    name: '📜 Standard Sanctuary Policies',
-    defaultInclusions: 'Sterile Station Allocation, Autoclaved Implements & Single-Use Linens',
-    terms: (adv, bal) => [
-      `All instruments are hospital-grade autoclave sterilized in single-use sealed medical pouches.`,
-      `Appointments are reserved for the scheduled appointment time.`,
-      `Payments once completed are non-refundable but adjustable for salon privilege credits.`,
-      `For customer assistance or inquiries, please WhatsApp +91 6203060789.`
     ]
   }
 };
@@ -84,7 +87,7 @@ export default function DynamicInvoiceModal({
     if (s.includes('facial') || s.includes('clean-up') || s.includes('hydra')) return 'facials-clinical';
     if (s.includes('hair') || s.includes('color') || s.includes('spa') || s.includes('botox') || s.includes('keratin')) return 'hair-treatments';
     if (s.includes('nail')) return 'nail-art';
-    return 'bridal-makeup'; // default to owner's sample invoice
+    return 'standard-salon'; // default to official salon POS receipt terms
   };
 
   const initialPresetKey = savedCustom.presetKey || inferPresetKey();
@@ -279,14 +282,13 @@ export default function DynamicInvoiceModal({
 
   // WhatsApp Share
   const handleWhatsAppShare = () => {
-    const msg = `🌸 *SERENE SALON & ACADEMY VADODARA* 🌸\n` +
+    const msg = `🌸 *RASHMIS SERENE SALON & ACADEMY VADODARA* 🌸\n` +
       `*${invoiceTitle}*\n` +
       `BEAUTY • MAKEUP • PROFESSIONAL SERVICES (CIDESCO Certified)\n` +
       `----------------------------------------\n` +
       `👤 *Client:* ${booking.guestName} (${booking.guestPhone})\n` +
-      `🧾 *Invoice No:* #${booking.id}\n` +
-      `📅 *Invoice Date:* ${invoiceDate}\n` +
-      `⏰ *Invoice Time:* ${invoiceTime}\n` +
+      `🧾 *Invoice Number:* #${booking.id}\n` +
+      `📅 *Billed On:* ${invoiceDate} ${invoiceTime}\n` +
       `💆‍♀️ *Service:* ${primaryServiceName}\n` +
       `📦 *Inclusions:* ${inclusionsText}\n` +
       `----------------------------------------\n` +
@@ -295,10 +297,12 @@ export default function DynamicInvoiceModal({
       `💳 *Balance Payment Due:* ₹${balanceDue.toLocaleString('en-IN')}\n` +
       `----------------------------------------\n` +
       `📝 *Terms & Conditions:*\n` +
-      termsList.slice(0, 3).map((t, i) => `${i + 1}. ${t}`).join('\n') + `\n\n` +
-      `✨ *Thank you for choosing Serene Salon & Academy.*\n` +
-      `*We look forward to welcoming you to our sanctuary!*\n\n` +
-      `📍 *Location:* FF 16 Raama Emperro, Manjalpur, Vadodara\n` +
+      `• Thank you for visiting Rashmis Serene Salon & Academy. Services, Products and Memberships once sold cannot be refunded, exchanged or transferred.\n` +
+      termsList.slice(1, 4).map(t => `• ${t}`).join('\n') + `\n\n` +
+      `✨ *Stay connected with Serene Salon & Academy!*\n` +
+      `Follow our WhatsApp and Instagram channels to receive the latest updates on exclusive offers, special promotions, new services, beauty trends and exciting announcements.\n\n` +
+      `Don't miss out on our latest offers! 💖\n\n` +
+      `📍 *Address:* FF 16, Ramma Emperro, Makarpura Road, Beside Kabir Complex, Manjalpur, Vadodara\n` +
       `📸 *Instagram:* @serenesalonacademy\n` +
       `📞 *WhatsApp:* +91 6203060789`;
 
@@ -550,10 +554,13 @@ export default function DynamicInvoiceModal({
                 />
               </div>
               <h1 className="font-editorial text-2xl sm:text-3xl font-extrabold tracking-wider text-[#b38728] uppercase">
-                SERENE SALON & ACADEMY
+                Rashmis Serene Salon & Academy
               </h1>
               <p className="text-[11px] sm:text-xs font-bold tracking-widest text-slate-800 uppercase mt-1">
                 BEAUTY • MAKEUP • PROFESSIONAL SERVICES (CIDESCO Certified)
+              </p>
+              <p className="text-[10px] text-slate-600 mt-0.5">
+                Address: FF 16, Ramma Emperro, Makarpura Road, Beside Kabir Complex, Manjalpur, Vadodara
               </p>
               <div className="w-full h-0.5 bg-[#b38728] my-3"></div>
             </div>
@@ -565,11 +572,11 @@ export default function DynamicInvoiceModal({
               </h2>
             </div>
 
-            {/* 3. Client Details & Invoice Details (Two-Column Beige Box - Clean Date/Time, No Occasion Date, No Enrich) */}
+            {/* 3. Client Details & Invoice Details (Matching Salon POS Receipt) */}
             <div className="border border-[#e6d5b8] rounded-xl overflow-hidden shadow-xs">
               <div className="grid grid-cols-2 bg-[#fbf6ec] border-b border-[#e6d5b8] px-4 py-2 font-bold text-[11px] uppercase tracking-wider text-[#996b1b]">
                 <div>CLIENT DETAILS</div>
-                <div>INVOICE & BOOKING DETAILS</div>
+                <div>INVOICE & BILLING DETAILS</div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 text-xs bg-[#fdfbf7]">
                 <div className="space-y-1">
@@ -581,9 +588,8 @@ export default function DynamicInvoiceModal({
                 </div>
 
                 <div className="space-y-1">
-                  <div><strong>Invoice No:</strong> <span className="font-mono font-bold text-slate-900">#{booking.id}</span></div>
-                  <div><strong>Invoice Date:</strong> <span className="font-semibold text-slate-900">{invoiceDate}</span></div>
-                  <div><strong>Invoice Time:</strong> <span className="font-semibold text-slate-900">{invoiceTime}</span></div>
+                  <div><strong>Invoice Number:</strong> <span className="font-mono font-bold text-slate-900">#{booking.id}</span></div>
+                  <div><strong>Billed On:</strong> <span className="font-semibold text-slate-900">{invoiceDate} {invoiceTime}</span></div>
                 </div>
               </div>
             </div>
@@ -667,21 +673,53 @@ export default function DynamicInvoiceModal({
               </ol>
             </div>
 
-            {/* 7. Thank You Note & Closing Greeting */}
-            <div className="text-center pt-4 space-y-1 text-slate-700 italic text-xs">
-              <p className="font-medium">Thank you for choosing Serene Salon & Academy.</p>
-              <p className="font-medium text-[#996b1b]">We look forward to welcoming you to our sanctuary!</p>
-              <div className="w-full h-0.5 bg-[#b38728] mt-3 mb-2"></div>
-            </div>
+            {/* 7. Thank You Note & Stay Connected Section (Official Owner Requirement) */}
+            <div className="pt-4 space-y-3">
+              <div className="bg-[#fbf6ec] border border-[#e6d5b8] rounded-xl p-4 text-center space-y-2 shadow-xs">
+                <p className="font-editorial text-sm font-bold text-[#996b1b]">
+                  Stay connected with Serene Salon & Academy!
+                </p>
+                <p className="text-[11px] text-slate-700 leading-relaxed max-w-lg mx-auto">
+                  Follow our WhatsApp and Instagram channels to receive the latest updates on exclusive offers, special promotions, new services, beauty trends and exciting announcements.
+                </p>
+                <p className="text-xs font-bold text-pink-700 pt-0.5">
+                  Don't miss out on our latest offers! 💖
+                </p>
+                <div className="flex items-center justify-center gap-3 pt-1 text-[11px] font-semibold text-slate-800 flex-wrap">
+                  <a 
+                    href="https://www.instagram.com/serenesalonacademy/?hl=en" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:underline text-pink-700"
+                  >
+                    📸 Instagram: @serenesalonacademy
+                  </a>
+                  <span>•</span>
+                  <a 
+                    href="https://wa.me/916203060789" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:underline text-emerald-700"
+                  >
+                    💬 WhatsApp: +91 6203060789
+                  </a>
+                </div>
+              </div>
 
-            {/* 8. Footer (Instagram ID & WhatsApp Number) */}
-            <div className="text-center pt-1 text-[11px] text-slate-600 space-y-1">
-              <p className="font-semibold">
-                For more information connect our Instagram ID: <strong className="text-slate-900">@serenesalonacademy</strong> or WhatsApp: <strong className="text-slate-900">+91 6203060789</strong>
-              </p>
-              <p className="text-[10px] font-bold tracking-widest uppercase text-slate-500 pt-1">
-                SERENE SALON & ACADEMY
-              </p>
+              <div className="w-full h-0.5 bg-[#b38728] mt-3 mb-2"></div>
+
+              {/* 8. Footer (Salon Name & Address) */}
+              <div className="text-center text-[11px] text-slate-600 space-y-0.5">
+                <p className="font-bold tracking-widest uppercase text-slate-800">
+                  Rashmis Serene Salon & Academy
+                </p>
+                <p className="text-[10px] text-slate-500">
+                  Address: FF 16, Ramma Emperro, Makarpura Road, Beside Kabir Complex, Manjalpur, Vadodara
+                </p>
+                <p className="text-[10px] text-slate-500 pt-0.5">
+                  For more information connect our Instagram ID: <strong className="text-slate-900">@serenesalonacademy</strong> or WhatsApp: <strong className="text-slate-900">+91 6203060789</strong>
+                </p>
+              </div>
             </div>
           </div>
         </div>

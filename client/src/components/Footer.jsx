@@ -153,6 +153,41 @@ export default function Footer({ onToggleAdmin, onNavigate, settings }) {
         </div>
       </div>
 
+      {/* Stay Connected Owner Promotional Banner */}
+      <div className="border-t border-champagne-900/60 py-6 px-4 bg-espresso-950/70">
+        <div className="max-w-3xl mx-auto rounded-2xl p-5 bg-gradient-to-r from-champagne-950/90 via-espresso-900/95 to-champagne-950/90 border border-champagne-700/50 text-center space-y-2 shadow-lg">
+          <p className="font-editorial text-base sm:text-lg font-bold text-champagne-200">
+            Stay connected with Serene Salon & Academy!
+          </p>
+          <p className="text-xs sm:text-sm text-champagne-300/90 max-w-xl mx-auto leading-relaxed">
+            Follow our WhatsApp and Instagram channels to receive the latest updates on exclusive offers, special promotions, new services, beauty trends and exciting announcements.
+          </p>
+          <p className="text-xs sm:text-sm font-bold text-champagne-400">
+            Don't miss out on our latest offers! 💖
+          </p>
+          <div className="pt-2 flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
+            <a 
+              href="https://wa.me/916203060789" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-sm"
+            >
+              <span>WhatsApp Channel (+91 6203060789)</span>
+              <span>↗</span>
+            </a>
+            <a 
+              href="https://www.instagram.com/serenesalonacademy/?hl=en" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:opacity-90 text-white font-bold text-xs transition shadow-sm"
+            >
+              <span>Instagram (@serenesalonacademy)</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div className="border-t border-champagne-900/60 py-6 text-center text-xs text-champagne-300/80 space-y-1.5">
         <p className="font-medium text-champagne-200 text-xs sm:text-sm">
           For more information connect our Instagram ID: <a href="https://www.instagram.com/serenesalonacademy/?hl=en" target="_blank" rel="noopener noreferrer" className="font-bold text-champagne-400 hover:underline">@serenesalonacademy</a> or WhatsApp: <a href="https://wa.me/916203060789" target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-400 hover:underline">+91 6203060789</a>
