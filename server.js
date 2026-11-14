@@ -980,6 +980,26 @@ app.post('/api/bookings/:id/payment', (req, res) => {
   res.json({ success: true, booking, message: 'Payment recorded successfully' });
 });
 
+// Update booking-specific invoice customization & terms
+app.patch('/api/bookings/:id/invoice-customization', (req, res) => {
+  const db = readDb();
+  const booking = (db.bookings || []).find(b => b.id === req.params.id);
+  if (!booking) return res.status(404).json({ success: false, message: 'Booking not found' });
+
+  booking.invoiceCustomization = {
+    ...(booking.invoiceCustomization || {}),
+    ...req.body
+  };
+  if (req.body.advanceAmount !== undefined) {
+    booking.paidAmount = Number(req.body.advanceAmount) || 0;
+  }
+  if (req.body.paymentStatus !== undefined) {
+    booking.paymentStatus = req.body.paymentStatus;
+  }
+  writeDb(db);
+  res.json({ success: true, booking, message: 'Invoice customization saved successfully' });
+});
+
 app.delete('/api/bookings/:id', (req, res) => {
   const db = readDb();
   db.bookings = (db.bookings || []).filter(b => b.id !== req.params.id);

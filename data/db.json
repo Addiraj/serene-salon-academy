@@ -1,7 +1,7 @@
 {
   "settings": {
     "salonName": "Serene Salon & Academy",
-    "tagline": "Where Clinical Hygiene Meets Couture Beauty & Mastery",
+    "tagline": "BEAUTY • MAKEUP • PROFESSIONAL SERVICES (CIDESCO Certified)",
     "founder": "Rashmi Sah",
     "phone": "+91 6203060789",
     "whatsapp": "916203060789",
@@ -29,7 +29,12 @@
       "theme": "royal-champagne",
       "enableGst": true,
       "taxPercent": 18,
-      "businessName": "Serene Salon & Academy"
+      "businessName": "Serene Salon & Academy",
+      "tagline": "BEAUTY • MAKEUP • PROFESSIONAL SERVICES (CIDESCO Certified)",
+      "footerContact": "For more information connect our Instagram ID: @serenesalonacademy or WhatsApp: +91 6203060789",
+      "instagram": "@serenesalonacademy",
+      "whatsapp": "6203060789",
+      "logoUrl": "/images/serene-logo.png"
     }
   },
   "offers": [

@@ -153,8 +153,13 @@ export default function Footer({ onToggleAdmin, onNavigate, settings }) {
         </div>
       </div>
 
-      <div className="border-t border-champagne-900/60 py-6 text-center text-xs text-champagne-300/60">
-        © 2026 Serene Salon & Academy. All Rights Reserved. • FF 16 Raama Emperro, Manjalpur, Vadodara.
+      <div className="border-t border-champagne-900/60 py-6 text-center text-xs text-champagne-300/80 space-y-1.5">
+        <p className="font-medium text-champagne-200 text-xs sm:text-sm">
+          For more information connect our Instagram ID: <a href="https://www.instagram.com/serenesalonacademy/?hl=en" target="_blank" rel="noopener noreferrer" className="font-bold text-champagne-400 hover:underline">@serenesalonacademy</a> or WhatsApp: <a href="https://wa.me/916203060789" target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-400 hover:underline">+91 6203060789</a>
+        </p>
+        <p className="text-[11px] text-champagne-400/60">
+          © 2026 Serene Salon & Academy. All Rights Reserved. • FF 16 Raama Emperro, Manjalpur, Vadodara.
+        </p>
       </div>
     </footer>
   );

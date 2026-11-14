@@ -1,9 +1,65 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { 
-  Printer, Download, Share2, X, CheckCircle2, ShieldCheck, 
-  QrCode, FileText, Check, AlertCircle, Sparkles, Phone, 
-  MapPin, Mail, Globe, Clock, User, Scissors
+  Printer, Share2, X, ShieldCheck, 
+  Edit3, Save, RotateCcw, Plus, Trash2, CheckCircle2,
+  Sparkles, Phone, MessageCircle
 } from 'lucide-react';
+
+// Preset Terms & Conditions by Service Category
+const SERVICE_TERMS_PRESETS = {
+  'bridal-makeup': {
+    name: '💄 Bridal & Engagement Makeup',
+    defaultInclusions: 'Makeup Studio Products with Hair Extension & Draping',
+    terms: (adv, bal, repTime) => [
+      `The advance payment of ₹${(adv || 0).toLocaleString('en-IN')} is strictly non-refundable and non-transferable.`,
+      `The remaining balance of ₹${(bal || 0).toLocaleString('en-IN')} must be paid immediately upon completion of the service.`,
+      `The booking is confirmed upon receipt of the advance payment.`,
+      `The client is requested to arrive at the scheduled reporting time of ${repTime || '8:30 AM'}.`,
+      `Personal belongings, including jewellery, valuables and other items, must be kept safely by the client. Serene Salon & Academy will not be responsible for any loss or damage to personal belongings.`
+    ]
+  },
+  'facials-clinical': {
+    name: '💆‍♀️ Facials & Clinical Skin Rituals',
+    defaultInclusions: 'Hospital-Grade Autoclaved Sealed Pouches Opened Live in Client Presence',
+    terms: (adv, bal, repTime) => [
+      `100% Hospital-grade autoclave sterilized single-use sealed medical pouches are opened live before treatment.`,
+      `The client must disclose any active retinoids, AHA/BHA chemical peels, or dermatological conditions.`,
+      `Direct sunlight, steam, and sauna should be avoided for 24-48 hours post-treatment.`,
+      `The remaining balance of ₹${(bal || 0).toLocaleString('en-IN')} is payable immediately upon completion.`,
+      `Appointments can be rescheduled with at least 4 hours advance notice.`
+    ]
+  },
+  'hair-treatments': {
+    name: '💇‍♀️ Hair Spa, Color & Smoothing',
+    defaultInclusions: 'Authentic L’Oréal & Olaplex Professional Ampoules & Autoclaved Tools',
+    terms: (adv, bal, repTime) => [
+      `Preliminary strand and sensitivity patch test is performed prior to chemical coloring or smoothing.`,
+      `For keratin and botox smoothing, water contact and tying or pinning hair should be avoided for 48 hours.`,
+      `Post-treatment sulfate-free salon home-care regimen is recommended for treatment longevity.`,
+      `The remaining balance of ₹${(bal || 0).toLocaleString('en-IN')} is payable upon service completion.`
+    ]
+  },
+  'nail-art': {
+    name: '💅 Acrylic & Gel Nail Artistry',
+    defaultInclusions: 'Medical Sanitization, Premium Gel Polish & Cuticle Care',
+    terms: (adv, bal, repTime) => [
+      `Authentic acrylic and gel formulas applied with sterile sanitized nail implements.`,
+      `Any accidental lifting or stone repair within 48 hours is retouched complimentary at our sanctuary.`,
+      `Avoid using nail extensions as tools or exposing them to harsh chemical cleaning agents.`,
+      `Balance payment of ₹${(bal || 0).toLocaleString('en-IN')} is payable upon completion.`
+    ]
+  },
+  'standard-salon': {
+    name: '📜 Standard Sanctuary Policies',
+    defaultInclusions: 'Sterile Station Allocation, Autoclaved Implements & Single-Use Linens',
+    terms: (adv, bal, repTime) => [
+      `All instruments are hospital-grade autoclave sterilized in single-use sealed medical pouches.`,
+      `Appointments are reserved for the scheduled reporting time of ${repTime || '10:00 AM'}.`,
+      `Payments once completed are non-refundable but adjustable for salon privilege credits.`,
+      `For customer assistance or bridal consultations, please WhatsApp +91 6203060789.`
+    ]
+  }
+};
 
 export default function DynamicInvoiceModal({ 
   isOpen, 
@@ -15,115 +71,184 @@ export default function DynamicInvoiceModal({
   isAdmin = false,
   showToast 
 }) {
-  const [selectedTheme, setSelectedTheme] = useState(invoiceSettings.theme || 'royal-champagne');
-  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
-  const [paymentInput, setPaymentInput] = useState({
-    status: booking?.paymentStatus || 'Paid',
-    method: booking?.paymentMethod || 'Paytm UPI',
-    utrNumber: booking?.utrNumber || ''
-  });
-
   if (!isOpen || !booking) return null;
 
-  // Resolved invoice settings with rock-solid defaults
-  const cfg = {
-    businessName: invoiceSettings.businessName || 'Serene Salon & Academy',
-    tagline: invoiceSettings.tagline || 'Where Clinical Hygiene Meets Couture Beauty & Mastery',
-    logoUrl: invoiceSettings.logoUrl || '/images/serene-logo.png',
-    addressLine1: invoiceSettings.addressLine1 || 'First Floor 16, Raama Emperro',
-    addressLine2: invoiceSettings.addressLine2 || 'Opp. Shell Petrol Pump, Makarpura Industrial Estate, Manjalpur',
-    city: invoiceSettings.city || 'Vadodara',
-    state: invoiceSettings.state || 'Gujarat',
-    pincode: invoiceSettings.pincode || '390010',
-    phone: invoiceSettings.phone || '+91 6203060789',
-    whatsapp: invoiceSettings.whatsapp || '916203060789',
-    email: invoiceSettings.email || 'contact@serenesalonacademy.com',
-    website: invoiceSettings.website || 'https://serene-salon-academy-nine.vercel.app',
-    gstin: invoiceSettings.gstin || '24ABCDE1234F1Z5',
-    enableGst: invoiceSettings.enableGst !== false,
-    taxPercent: Number(invoiceSettings.taxPercent) || 18,
-    taxMode: invoiceSettings.taxMode || 'inclusive',
-    invoicePrefix: invoiceSettings.invoicePrefix || 'SSA-INV-',
-    theme: selectedTheme,
-    showSterilizationBadge: invoiceSettings.showSterilizationBadge !== false,
-    sterilizationBadgeText: invoiceSettings.sterilizationBadgeText || '✓ 100% Autoclaved Sealed Pouches Opened Live in Front of Client',
-    showQrCode: invoiceSettings.showQrCode !== false,
-    qrUpiId: invoiceSettings.qrUpiId || '6203060789@ptaxis',
-    qrPayeeName: invoiceSettings.qrPayeeName || 'RASHMI KUMARI',
-    showSignatory: invoiceSettings.showSignatory !== false,
-    signatoryTitle: invoiceSettings.signatoryTitle || 'Founder & Master Educator',
-    signatoryName: invoiceSettings.signatoryName || 'Rashmi Sah',
-    thankYouNote: invoiceSettings.thankYouNote || 'Thank you for visiting Serene Salon & Academy! Where Clinical Hygiene Meets Couture Beauty.',
-    terms: Array.isArray(invoiceSettings.terms) && invoiceSettings.terms.length > 0 ? invoiceSettings.terms : [
-      'All instruments are hospital-grade autoclave sterilized in single-use sealed medical pouches.',
-      'Appointments can be rescheduled with at least 4 hours advance notice.',
-      'Billed treatments are non-refundable but adjustable for salon privileges and gift credits.',
-      'For customer assistance or bridal consultations, please WhatsApp +91 6203060789.'
-    ],
-    customFooterNote: invoiceSettings.customFooterNote || 'Follow us on Instagram: @serenesalonacademy • Manjalpur, Vadodara'
+  // Existing custom values on booking if saved earlier
+  const savedCustom = booking.invoiceCustomization || {};
+
+  // Infer default service category for terms preset
+  const primaryServiceName = (booking.services && booking.services[0]) || 'Engagement Makeup';
+  const inferPresetKey = () => {
+    const s = primaryServiceName.toLowerCase();
+    if (s.includes('makeup') || s.includes('bridal') || s.includes('engagement')) return 'bridal-makeup';
+    if (s.includes('facial') || s.includes('clean-up') || s.includes('hydra')) return 'facials-clinical';
+    if (s.includes('hair') || s.includes('color') || s.includes('spa') || s.includes('botox') || s.includes('keratin')) return 'hair-treatments';
+    if (s.includes('nail')) return 'nail-art';
+    return 'bridal-makeup'; // default to owner's sample invoice
   };
 
-  const invoiceNum = `${cfg.invoicePrefix}${String(booking.id).replace(/\D/g, '') || booking.id}`;
+  const initialPresetKey = savedCustom.presetKey || inferPresetKey();
 
-  // Match line items
-  const lineItems = (booking.services || []).map((sName, idx) => {
-    const match = (services || []).find(
-      s => s.name && s.name.toLowerCase().trim() === String(sName).toLowerCase().trim()
-    );
-    return {
-      id: idx + 1,
-      name: sName,
-      category: match ? match.category : 'Salon Ritual',
-      price: match ? Number(match.price) || 0 : 0,
-      duration: match ? match.duration : 45,
-      hygieneNote: match?.hygieneNote || 'Autoclaved Sealed Pouches Opened Live'
-    };
+  // Invoice Title
+  const defaultTitle = primaryServiceName.toUpperCase().includes('MAKEUP')
+    ? `${primaryServiceName.toUpperCase()} BOOKING INVOICE`
+    : `${primaryServiceName.toUpperCase()} INVOICE`;
+
+  const [invoiceTitle, setInvoiceTitle] = useState(savedCustom.invoiceTitle || defaultTitle);
+  const [reportingTime, setReportingTime] = useState(savedCustom.reportingTime || booking.time || '8:30 AM');
+  const [completionTime, setCompletionTime] = useState(savedCustom.completionTime || '10:30 AM');
+  
+  // Advance & Balance
+  const totalAmount = Number(booking.total) || 6400;
+  const initialAdvance = savedCustom.advanceAmount !== undefined 
+    ? Number(savedCustom.advanceAmount) 
+    : (booking.paidAmount !== undefined ? Number(booking.paidAmount) : Math.round(totalAmount * 0.2));
+
+  const [advanceAmount, setAdvanceAmount] = useState(initialAdvance);
+  const balanceDue = Math.max(0, totalAmount - advanceAmount);
+
+  // Inclusions description
+  const [inclusionsText, setInclusionsText] = useState(
+    savedCustom.inclusionsText || SERVICE_TERMS_PRESETS[initialPresetKey]?.defaultInclusions || 'Makeup Studio Products with Hair Extension'
+  );
+
+  // Editable Terms & Conditions list
+  const [termsList, setTermsList] = useState(() => {
+    if (Array.isArray(savedCustom.terms) && savedCustom.terms.length > 0) {
+      return savedCustom.terms;
+    }
+    const presetFn = SERVICE_TERMS_PRESETS[initialPresetKey]?.terms || SERVICE_TERMS_PRESETS['bridal-makeup'].terms;
+    return presetFn(initialAdvance, Math.max(0, totalAmount - initialAdvance), reportingTime);
   });
 
-  const grandTotal = Number(booking.total) || 0;
-  const isTaxInclusive = cfg.taxMode === 'inclusive';
-  let taxableAmount = grandTotal;
-  let cgst = 0;
-  let sgst = 0;
-  let subtotal = grandTotal;
+  // Admin edit mode toggle
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [activePreset, setActivePreset] = useState(initialPresetKey);
 
-  if (cfg.enableGst && cfg.taxPercent > 0) {
-    if (isTaxInclusive) {
-      taxableAmount = Math.round((grandTotal / (1 + cfg.taxPercent / 100)) * 100) / 100;
-      const gstTotal = grandTotal - taxableAmount;
-      cgst = Math.round((gstTotal / 2) * 100) / 100;
-      sgst = Math.round((gstTotal / 2) * 100) / 100;
-      subtotal = taxableAmount;
-    } else {
-      const gstTotal = Math.round((grandTotal * (cfg.taxPercent / 100)) * 100) / 100;
-      cgst = Math.round((gstTotal / 2) * 100) / 100;
-      sgst = Math.round((gstTotal / 2) * 100) / 100;
-      subtotal = grandTotal;
+  // Quick payment update state
+  const [paymentStatus, setPaymentStatus] = useState(booking.paymentStatus || (advanceAmount >= totalAmount ? 'Paid' : 'Confirmed'));
+  const [paymentMethod, setPaymentMethod] = useState(booking.paymentMethod || 'Paytm UPI');
+  const [utrNumber, setUtrNumber] = useState(booking.utrNumber || '');
+  const [isSaving, setIsSaving] = useState(false);
+
+  // When advance amount or reporting time changes, auto-update terms if using preset template
+  const applyPreset = (key) => {
+    setActivePreset(key);
+    const preset = SERVICE_TERMS_PRESETS[key];
+    if (preset) {
+      setInclusionsText(preset.defaultInclusions);
+      setTermsList(preset.terms(advanceAmount, balanceDue, reportingTime));
+      if (showToast) showToast(`Applied ${preset.name} terms preset!`);
     }
-  }
+  };
 
-  // Print handler
+  // Recalculate terms 1 & 2 when amounts change
+  const handleAdvanceChange = (newAdvance) => {
+    const adv = Number(newAdvance) || 0;
+    setAdvanceAmount(adv);
+    const newBal = Math.max(0, totalAmount - adv);
+    // dynamically refresh terms list numbers for term 1 & 2 if they follow standard wording
+    setTermsList(prev => prev.map((t, idx) => {
+      if (idx === 0 && t.includes('advance payment of')) {
+        return `The advance payment of ₹${adv.toLocaleString('en-IN')} is strictly non-refundable and non-transferable.`;
+      }
+      if (idx === 1 && t.includes('remaining balance of')) {
+        return `The remaining balance of ₹${newBal.toLocaleString('en-IN')} must be paid immediately upon completion of the service.`;
+      }
+      return t;
+    }));
+  };
+
+  // Add / Remove / Edit term item
+  const handleTermChange = (index, val) => {
+    const updated = [...termsList];
+    updated[index] = val;
+    setTermsList(updated);
+  };
+
+  const handleAddTerm = () => {
+    setTermsList([...termsList, 'New terms & conditions clause.']);
+  };
+
+  const handleRemoveTerm = (index) => {
+    setTermsList(termsList.filter((_, i) => i !== index));
+  };
+
+  // Save customizations for this booking to backend
+  const handleSaveCustomization = async () => {
+    setIsSaving(true);
+    try {
+      const payload = {
+        invoiceTitle,
+        reportingTime,
+        completionTime,
+        advanceAmount,
+        balanceAmount: balanceDue,
+        inclusionsText,
+        terms: termsList,
+        presetKey: activePreset,
+        paymentStatus,
+        paymentMethod,
+        utrNumber
+      };
+
+      const res = await fetch(`/api/bookings/${booking.id}/invoice-customization`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (onUpdatePayment) {
+          onUpdatePayment(booking.id, {
+            invoiceCustomization: payload,
+            paidAmount: advanceAmount,
+            paymentStatus,
+            paymentMethod,
+            utrNumber
+          });
+        }
+        setIsEditMode(false);
+        if (showToast) showToast('Invoice terms & customizations saved successfully!');
+      } else {
+        if (showToast) showToast('Failed to save customization.');
+      }
+    } catch (err) {
+      if (showToast) showToast('Error saving invoice customizations.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Print Handler
   const handlePrint = () => {
-    const el = document.getElementById('printableInvoiceContainer');
+    const el = document.getElementById('officialInvoiceContainer');
     if (!el) return;
-    const printWin = window.open('', '_blank', 'width=800,height=900');
+    const printWin = window.open('', '_blank', 'width=850,height=1000');
     printWin.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Invoice - ${invoiceNum}</title>
+          <title>${invoiceTitle} - ${booking.guestName}</title>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
-            @page { size: A4; margin: 12mm; }
+            @page { 
+              size: A4; 
+              margin: 10mm 12mm; 
+            }
             body { 
-              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
               color: #1a1a1a;
               background: #fff;
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
+            .gold-border { border: 2px solid #b38728; }
+            .gold-text { color: #b38728; }
+            .gold-bg { background-color: #f7eedb; }
+            .gold-divider { height: 2px; background-color: #b38728; }
             @media print {
               .no-print { display: none !important; }
               body { padding: 0; margin: 0; }
@@ -144,132 +269,98 @@ export default function DynamicInvoiceModal({
     printWin.document.close();
   };
 
-  // WhatsApp share
+  // WhatsApp Share
   const handleWhatsAppShare = () => {
     const msg = `🌸 *SERENE SALON & ACADEMY VADODARA* 🌸\n` +
-      `*Official Tax Invoice / Receipt: #${invoiceNum}*\n` +
+      `*${invoiceTitle}*\n` +
+      `BEAUTY • MAKEUP • PROFESSIONAL SERVICES (CIDESCO Certified)\n` +
       `----------------------------------------\n` +
-      `👤 *Client:* ${booking.guestName}\n` +
-      `📅 *Date & Slot:* ${booking.date} at ${booking.time}\n` +
-      `💇‍♀️ *Stylist:* ${booking.stylist}\n` +
-      `💆‍♀️ *Services:* ${(booking.services || []).join(', ')}\n` +
-      `💰 *Total Bill:* ₹${grandTotal.toLocaleString('en-IN')}\n` +
-      `💳 *Payment Status:* ${booking.paymentStatus || 'Confirmed'} ${booking.utrNumber ? `(UTR: ${booking.utrNumber})` : ''}\n` +
-      `✓ *Sterilization:* 100% Autoclaved Sealed Pouches\n` +
+      `👤 *Client:* ${booking.guestName} (${booking.guestPhone})\n` +
+      `📅 *Occasion Date:* ${booking.date}\n` +
+      `⏰ *Reporting Time:* ${reportingTime}\n` +
+      `⏱️ *Scheduled Completion:* ${completionTime}\n` +
+      `💆‍♀️ *Service:* ${primaryServiceName}\n` +
+      `📦 *Inclusions:* ${inclusionsText}\n` +
       `----------------------------------------\n` +
+      `💰 *Total Service Amount:* ₹${totalAmount.toLocaleString('en-IN')}\n` +
+      `✅ *Advance Payment Received:* ₹${advanceAmount.toLocaleString('en-IN')}\n` +
+      `💳 *Balance Payment Due:* ₹${balanceDue.toLocaleString('en-IN')}\n` +
+      `----------------------------------------\n` +
+      `📝 *Terms & Conditions:*\n` +
+      termsList.slice(0, 3).map((t, i) => `${i + 1}. ${t}`).join('\n') + `\n\n` +
+      `✨ *Thank you for choosing Serene Salon & Academy.*\n` +
+      `*We look forward to making your special occasion beautiful!*\n\n` +
       `📍 *Location:* FF 16 Raama Emperro, Manjalpur, Vadodara\n` +
-      `📞 *Helpdesk:* +91 6203060789\n` +
-      `🌐 *View Portal:* https://serene-salon-academy-nine.vercel.app`;
-    
+      `📸 *Instagram:* @serenesalonacademy\n` +
+      `📞 *WhatsApp:* +91 6203060789`;
+
     const phone = (booking.guestPhone || '').replace(/\D/g, '');
     const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };
 
-  // Admin Payment Update
-  const handleSavePaymentStatus = async () => {
-    if (!onUpdatePayment) return;
-    try {
-      await onUpdatePayment(booking.id, paymentInput);
-      setIsUpdatingPayment(false);
-      if (showToast) showToast('Invoice payment status updated successfully!');
-    } catch (err) {
-      if (showToast) showToast('Failed to update payment status.');
-    }
-  };
-
-  // Theme-specific styling classes
-  const getThemeWrapperClass = () => {
-    switch (selectedTheme) {
-      case 'modern-minimal':
-        return 'bg-white text-slate-900 border-2 border-slate-900 shadow-xl';
-      case 'clinical-emerald':
-        return 'bg-gradient-to-b from-emerald-50/40 via-white to-white text-slate-900 border-2 border-emerald-600 shadow-xl';
-      case 'thermal-pos':
-        return 'bg-amber-50/30 text-slate-900 font-mono border border-slate-300 max-w-sm mx-auto shadow-md p-4 text-[11px]';
-      case 'royal-champagne':
-      default:
-        return 'bg-gradient-to-b from-[#fdfbf7] via-white to-[#fbf8f1] text-espresso-950 border-2 border-champagne-400 shadow-2xl';
-    }
-  };
-
-  const getHeaderBadgeClass = () => {
-    switch (selectedTheme) {
-      case 'modern-minimal':
-        return 'bg-slate-900 text-white';
-      case 'clinical-emerald':
-        return 'bg-emerald-700 text-white';
-      case 'thermal-pos':
-        return 'bg-black text-white font-mono';
-      case 'royal-champagne':
-      default:
-        return 'bg-gradient-to-r from-espresso-950 to-espresso-900 text-champagne-300 border border-champagne-500/50';
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 bg-espresso-950/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-champagne-300 flex flex-col max-h-[94vh] overflow-hidden animate-scale-up">
+    <div className="fixed inset-0 z-50 bg-espresso-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-champagne-300 flex flex-col max-h-[96vh] overflow-hidden animate-scale-up">
         
-        {/* Top Modal Controls Toolbar (No-Print) */}
-        <div className="bg-espresso-950 text-white px-5 py-3.5 flex items-center justify-between border-b border-champagne-800/60 shrink-0">
+        {/* Top Control Bar (No-Print) */}
+        <div className="bg-espresso-950 text-white px-5 py-3 flex items-center justify-between border-b border-champagne-800/60 shrink-0">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-8 h-8 rounded-lg bg-champagne-600 flex items-center justify-center text-espresso-950 font-bold text-sm shadow">
               📄
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-editorial text-lg font-bold text-champagne-100">Tax Invoice #{invoiceNum}</span>
+                <span className="font-editorial text-base sm:text-lg font-bold text-champagne-100">
+                  {invoiceTitle}
+                </span>
                 <span className={`px-2 py-0.2 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                  booking.paymentStatus === 'Paid' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' :
-                  booking.paymentStatus === 'Partial' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
+                  balanceDue === 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' :
+                  advanceAmount > 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
                   'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                 }`}>
-                  {booking.paymentStatus || 'Pending'}
+                  {balanceDue === 0 ? 'Settled in Full' : advanceAmount > 0 ? `Advance Paid (Due: ₹${balanceDue.toLocaleString('en-IN')})` : 'Pending'}
                 </span>
               </div>
-              <span className="text-[10px] text-champagne-300/70">Client: {booking.guestName} • {booking.date}</span>
+              <span className="text-[10px] text-champagne-300/70">
+                Client: {booking.guestName} • Booking #{booking.id}
+              </span>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Live Theme Switcher */}
-            <div className="hidden sm:flex items-center bg-espresso-900 rounded-xl p-0.5 border border-champagne-700/50 text-[11px]">
-              {[
-                { id: 'royal-champagne', label: '👑 Royal' },
-                { id: 'modern-minimal', label: '⬛ Minimal' },
-                { id: 'clinical-emerald', label: '🌿 Clinical' },
-                { id: 'thermal-pos', label: '🧾 POS' }
-              ].map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedTheme(t.id)}
-                  className={`px-2 py-1 rounded-lg transition font-medium ${
-                    selectedTheme === t.id
-                      ? 'bg-champagne-500 text-espresso-950 font-bold shadow'
-                      : 'text-champagne-200 hover:text-white'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
+            {/* Edit Terms & Details Button (Admin Only) */}
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition shadow-xs ${
+                  isEditMode
+                    ? 'bg-amber-500 text-espresso-950 shadow-md'
+                    : 'bg-white/10 hover:bg-white/20 text-champagne-200 border border-champagne-700/60'
+                }`}
+                title="Edit Terms & Conditions, Advance & Inclusions Service-Wise"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>{isEditMode ? 'Done Editing' : 'Edit Terms ✏️'}</span>
+              </button>
+            )}
 
             {/* Print Button */}
             <button
               onClick={handlePrint}
-              className="px-3 py-1.5 rounded-xl bg-champagne-500 hover:bg-champagne-400 text-espresso-950 font-bold text-xs flex items-center gap-1.5 shadow transition"
-              title="Print Tax Invoice (A4 / Thermal)"
+              className="px-3.5 py-1.5 rounded-xl bg-champagne-500 hover:bg-champagne-400 text-espresso-950 font-bold text-xs flex items-center gap-1.5 shadow transition"
+              title="Print Official Invoice (A4 Layout)"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Print</span>
+              <span>Print</span>
             </button>
 
             {/* WhatsApp Share */}
             <button
               onClick={handleWhatsAppShare}
-              className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow transition"
-              title="Share Invoice on WhatsApp"
+              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow transition"
+              title="Share formatted invoice on WhatsApp"
             >
               <Share2 className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">WhatsApp</span>
@@ -286,310 +377,353 @@ export default function DynamicInvoiceModal({
           </div>
         </div>
 
-        {/* Printable Invoice Container */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100/60">
-          <div 
-            id="printableInvoiceContainer" 
-            className={`p-6 sm:p-8 rounded-2xl ${getThemeWrapperClass()} transition-all duration-200`}
-          >
-            {/* Header / Brand Details */}
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-champagne-300 pb-5">
-              <div className="flex items-start gap-3.5">
-                {cfg.logoUrl ? (
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl p-1 bg-white border border-champagne-300 shadow-xs flex items-center justify-center shrink-0 overflow-hidden">
-                    <img 
-                      src={cfg.logoUrl} 
-                      alt={cfg.businessName} 
-                      className="w-full h-full object-contain"
-                      onError={(e) => { e.currentTarget.src = '/images/serene-logo.png'; }}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-16 h-16 rounded-2xl bg-espresso-950 text-champagne-300 font-serif font-bold text-2xl flex items-center justify-center shadow">
-                    S
-                  </div>
-                )}
-                <div>
-                  <h1 className="font-editorial text-2xl sm:text-3xl font-bold tracking-tight text-espresso-950 leading-tight">
-                    {cfg.businessName}
-                  </h1>
-                  <p className="text-xs text-champagne-800 font-medium mt-0.5 italic">
-                    {cfg.tagline}
-                  </p>
-                  <div className="text-[11px] text-slate-600 mt-1 space-y-0.5 leading-relaxed">
-                    <p>{cfg.addressLine1}, {cfg.addressLine2}</p>
-                    <p>{cfg.city}, {cfg.state} - {cfg.pincode} • Phone: {cfg.phone}</p>
-                    {cfg.enableGst && cfg.gstin && (
-                      <p className="font-mono text-slate-800 font-semibold pt-0.5">
-                        GSTIN: <span>{cfg.gstin}</span> (State Code: 24 - Gujarat)
-                      </p>
-                    )}
-                  </div>
-                </div>
+        {/* Admin Inline Terms & Service Customizer (When toggled) */}
+        {isAdmin && isEditMode && (
+          <div className="bg-amber-50/90 border-b-2 border-amber-300 p-4 sm:p-5 space-y-4 max-h-72 overflow-y-auto shrink-0 text-xs">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <span className="font-bold text-espresso-950 flex items-center gap-1.5 text-xs">
+                  <Sparkles className="w-4 h-4 text-amber-600" />
+                  <span>Service-Wise Terms & Invoice Customizer</span>
+                </span>
+                <p className="text-[11px] text-slate-600">
+                  Change invoice heading, reporting times, advance payments, and customize terms for this exact client.
+                </p>
               </div>
 
-              {/* Invoice Meta Tag */}
-              <div className="sm:text-right flex flex-col sm:items-end justify-between">
-                <div className={`inline-block px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider shadow-xs ${getHeaderBadgeClass()}`}>
-                  Official Tax Invoice
-                </div>
-                <div className="text-xs space-y-1 mt-2 sm:mt-0">
-                  <div className="font-mono text-sm font-bold text-espresso-950">
-                    #{invoiceNum}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={isSaving}
+                  onClick={handleSaveCustomization}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1 shadow transition"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{isSaving ? 'Saving...' : 'Save for this Booking'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Presets Picker */}
+            <div>
+              <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                Load Preset Terms by Service Category:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {Object.entries(SERVICE_TERMS_PRESETS).map(([k, p]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => applyPreset(k)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition ${
+                      activePreset === k
+                        ? 'bg-espresso-900 text-champagne-200 font-bold shadow-xs'
+                        : 'bg-white text-slate-700 hover:bg-amber-100 border border-amber-200'
+                    }`}
+                  >
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Basic Details Fields */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Invoice Heading</label>
+                <input 
+                  type="text" 
+                  value={invoiceTitle}
+                  onChange={(e) => setInvoiceTitle(e.target.value)}
+                  className="w-full text-xs rounded-lg border border-slate-300 py-1.5 px-2.5 bg-white font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Advance Received (₹)</label>
+                <input 
+                  type="number" 
+                  value={advanceAmount}
+                  onChange={(e) => handleAdvanceChange(e.target.value)}
+                  className="w-full text-xs rounded-lg border border-slate-300 py-1.5 px-2.5 bg-white font-mono font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Inclusions / Products</label>
+                <input 
+                  type="text" 
+                  value={inclusionsText}
+                  onChange={(e) => setInclusionsText(e.target.value)}
+                  className="w-full text-xs rounded-lg border border-slate-300 py-1.5 px-2.5 bg-white"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Reporting Time</label>
+                <input 
+                  type="text" 
+                  value={reportingTime}
+                  onChange={(e) => setReportingTime(e.target.value)}
+                  placeholder="e.g. 8:30 AM"
+                  className="w-full text-xs rounded-lg border border-slate-300 py-1.5 px-2.5 bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Scheduled Completion</label>
+                <input 
+                  type="text" 
+                  value={completionTime}
+                  onChange={(e) => setCompletionTime(e.target.value)}
+                  placeholder="e.g. 10:30 AM"
+                  className="w-full text-xs rounded-lg border border-slate-300 py-1.5 px-2.5 bg-white"
+                />
+              </div>
+            </div>
+
+            {/* Terms List Editor */}
+            <div className="space-y-2 pt-1 border-t border-amber-200">
+              <div className="flex items-center justify-between">
+                <label className="block text-[11px] font-bold text-slate-800 uppercase tracking-wider">
+                  Edit Numbered Terms & Conditions Clauses ({termsList.length}):
+                </label>
+                <button
+                  type="button"
+                  onClick={handleAddTerm}
+                  className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Add Custom Term</span>
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {termsList.map((term, idx) => (
+                  <div key={idx} className="flex items-start gap-2 bg-white p-2 rounded-lg border border-amber-200 shadow-xs">
+                    <span className="font-bold text-slate-400 mt-1 text-[11px] w-4">{idx + 1}.</span>
+                    <textarea 
+                      rows={2}
+                      value={term}
+                      onChange={(e) => handleTermChange(idx, e.target.value)}
+                      className="flex-1 text-xs border border-slate-200 rounded p-1.5 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTerm(idx)}
+                      className="text-rose-600 hover:text-rose-800 p-1 mt-1"
+                      title="Remove term"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                  <div className="text-slate-500 text-[11px]">
-                    Date: <strong className="text-slate-800">{booking.date}</strong>
-                  </div>
-                  <div className="text-slate-500 text-[11px]">
-                    Time: <strong className="text-slate-800">{booking.time}</strong>
-                  </div>
-                  {booking.createdAt && (
-                    <div className="text-slate-400 text-[10px]">
-                      Issued: {new Date(booking.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Printable Official Invoice Body (Authentic Owner PDF Layout) */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100/60">
+          <div 
+            id="officialInvoiceContainer" 
+            className="p-8 sm:p-10 bg-white text-slate-900 border-2 border-[#b38728] shadow-2xl rounded-2xl max-w-2xl mx-auto space-y-6 text-xs leading-relaxed"
+          >
+            {/* 1. Header (Centered Gold Branding & CIDESCO Tagline) */}
+            <div className="text-center pb-2">
+              <div className="flex justify-center mb-2.5">
+                <img 
+                  src={invoiceSettings?.logoUrl || '/images/serene-logo.png'} 
+                  alt="Serene Salon & Academy Logo" 
+                  className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full p-1 bg-white border border-[#b38728]/40 shadow-xs"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              </div>
+              <h1 className="font-editorial text-2xl sm:text-3xl font-extrabold tracking-wider text-[#b38728] uppercase">
+                SERENE SALON & ACADEMY
+              </h1>
+              <p className="text-[11px] sm:text-xs font-bold tracking-widest text-slate-800 uppercase mt-1">
+                BEAUTY • MAKEUP • PROFESSIONAL SERVICES (CIDESCO Certified)
+              </p>
+              <div className="w-full h-0.5 bg-[#b38728] my-3"></div>
+            </div>
+
+            {/* 2. Invoice Document Title */}
+            <div className="text-center py-1">
+              <h2 className="font-editorial text-lg sm:text-xl font-extrabold tracking-wide text-slate-900 uppercase">
+                {invoiceTitle}
+              </h2>
+            </div>
+
+            {/* 3. Client Details & Booking Details (Two-Column Beige Box) */}
+            <div className="border border-[#e6d5b8] rounded-xl overflow-hidden shadow-xs">
+              <div className="grid grid-cols-2 bg-[#fbf6ec] border-b border-[#e6d5b8] px-4 py-2 font-bold text-[11px] uppercase tracking-wider text-[#996b1b]">
+                <div>CLIENT DETAILS</div>
+                <div>BOOKING DETAILS</div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 text-xs bg-[#fdfbf7]">
+                <div className="space-y-1">
+                  <div><strong>Name:</strong> <span>{booking.guestName}</span></div>
+                  <div><strong>Contact:</strong> <span className="font-mono">{booking.guestPhone}</span></div>
+                  {booking.notes && (
+                    <div className="text-[11px] text-slate-500 italic pt-0.5">Note: {booking.notes}</div>
                   )}
                 </div>
-              </div>
-            </div>
 
-            {/* Billed To / Specialist Details Card */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-5 p-4 rounded-xl bg-champagne-50/70 border border-champagne-200 text-xs">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-champagne-800 block mb-1">
-                  Billed To (Guest Details)
-                </span>
-                <div className="font-bold text-sm text-espresso-950">{booking.guestName}</div>
-                <div className="font-mono text-slate-600">{booking.guestPhone}</div>
-                {booking.notes && (
-                  <div className="text-[11px] text-slate-500 mt-1 italic">
-                    Note: {booking.notes}
-                  </div>
-                )}
-              </div>
-
-              <div className="sm:text-right border-t sm:border-t-0 border-champagne-200 pt-2 sm:pt-0">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-champagne-800 block mb-1">
-                  Stylist & Station Allocation
-                </span>
-                <div className="font-bold text-slate-900">{booking.stylist || 'Rashmi Sah (Master Artist)'}</div>
-                <div className="text-[11px] text-emerald-800 font-semibold mt-0.5 flex items-center sm:justify-end gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Station #4 • Class-B Autoclaved Sterile</span>
+                <div className="space-y-1">
+                  <div><strong>Occasion Date:</strong> <span>{booking.date}</span></div>
+                  <div><strong>Reporting Time:</strong> <span className="font-semibold text-slate-900">{reportingTime}</span></div>
+                  <div><strong>Scheduled Completion:</strong> <span className="font-semibold text-slate-900">{completionTime}</span></div>
                 </div>
-                {booking.promoCode && (
-                  <div className="text-[11px] text-champagne-700 font-mono mt-0.5">
-                    Festive Privilege: <strong>{booking.promoCode}</strong>
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Line Items Table */}
-            <div className="border border-champagne-200 rounded-xl overflow-hidden my-5">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-espresso-950 text-champagne-200 uppercase font-semibold text-[10px] tracking-wider border-b border-champagne-300">
-                  <tr>
-                    <th className="py-2.5 px-3 w-10 text-center">#</th>
-                    <th className="py-2.5 px-3">Treatment / Ritual Description</th>
-                    <th className="py-2.5 px-3 text-center">Duration</th>
-                    <th className="py-2.5 px-3 text-right">Amount (₹)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-champagne-100 bg-white">
-                  {lineItems.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-champagne-50/50 transition">
-                      <td className="py-3 px-3 text-center font-mono text-slate-400">{idx + 1}</td>
-                      <td className="py-3 px-3">
-                        <div className="font-bold text-espresso-950">{item.name}</div>
-                        <div className="text-[10px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                          <span className="font-medium text-champagne-700">{item.category}</span>
-                          <span>•</span>
-                          <span className="text-emerald-700 flex items-center gap-0.5">
-                            <ShieldCheck className="w-3 h-3" />
-                            {item.hygieneNote}
-                          </span>
-                        </div>
+            {/* 4. Service Details Section */}
+            <div className="space-y-2">
+              <h3 className="font-bold text-[11px] uppercase tracking-wider text-[#996b1b]">
+                SERVICE DETAILS
+              </h3>
+              <div className="border border-slate-300 rounded-lg overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#181210] text-white text-[11px] uppercase font-semibold">
+                    <tr>
+                      <th className="py-2.5 px-4 w-1/2">Service Details</th>
+                      <th className="py-2.5 px-4 w-1/2">Inclusions / Products Used</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-slate-200">
+                    <tr>
+                      <td className="py-3 px-4 font-bold text-slate-900">
+                        {primaryServiceName}
                       </td>
-                      <td className="py-3 px-3 text-center font-mono text-slate-600">{item.duration}m</td>
-                      <td className="py-3 px-3 text-right font-bold text-slate-800">
-                        {item.price > 0 ? `₹${item.price.toLocaleString('en-IN')}` : 'Included'}
+                      <td className="py-3 px-4 text-slate-700">
+                        {inclusionsText}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Calculations & Summary Section */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-start my-5 pt-2">
-              
-              {/* Left Column: QR Code Standee & Payment Details */}
-              <div className="sm:col-span-7 space-y-3">
-                {cfg.showQrCode && (
-                  <div className="p-3.5 rounded-xl bg-champagne-50 border border-champagne-200 flex items-center gap-4">
-                    <img 
-                      src="/images/serene-upi-qr.jpg" 
-                      alt="Paytm UPI Standee QR" 
-                      className="w-16 h-16 object-cover rounded-lg border border-champagne-300 shadow-xs shrink-0" 
-                    />
-                    <div className="text-[11px] text-slate-700 space-y-0.5">
-                      <span className="font-bold block text-espresso-950 text-xs">Instant Paytm / GPay / PhonePe</span>
-                      <p className="font-mono text-slate-600">VPA: <strong>{cfg.qrUpiId}</strong></p>
-                      <p className="text-slate-500">Payee: {cfg.qrPayeeName}</p>
-                      <p className="text-[10px] text-emerald-700 font-semibold">
-                        Scan to settle outstanding balance or tip your stylist
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Sterilization Guarantee Seal */}
-                {cfg.showSterilizationBadge && (
-                  <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200 flex items-center gap-2.5 text-xs text-emerald-900">
-                    <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
-                    <span className="text-[11px] font-semibold leading-tight">
-                      {cfg.sterilizationBadgeText}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column: Financial Totals Breakdown */}
-              <div className="sm:col-span-5 space-y-2 bg-champagne-50/60 p-4 rounded-xl border border-champagne-200 text-xs">
-                <div className="flex justify-between text-slate-600">
-                  <span>Subtotal:</span>
-                  <span className="font-mono font-medium">₹{subtotal.toLocaleString('en-IN')}</span>
-                </div>
-
-                {Number(booking.discount) > 0 && (
-                  <div className="flex justify-between text-emerald-700 font-medium">
-                    <span>Discount Privilege:</span>
-                    <span className="font-mono">-₹{Number(booking.discount).toLocaleString('en-IN')}</span>
-                  </div>
-                )}
-
-                {cfg.enableGst && cfg.taxPercent > 0 && (
-                  <>
-                    <div className="flex justify-between text-slate-500 text-[11px] border-t border-champagne-200/80 pt-1.5">
-                      <span>CGST ({cfg.taxPercent / 2}%):</span>
-                      <span className="font-mono">₹{cgst.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex justify-between text-slate-500 text-[11px]">
-                      <span>SGST ({cfg.taxPercent / 2}%):</span>
-                      <span className="font-mono">₹{sgst.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="text-[10px] text-slate-400 text-right">
-                      (GST {isTaxInclusive ? 'Inclusive' : 'Exclusive'} in total bill)
-                    </div>
-                  </>
-                )}
-
-                <div className="flex justify-between items-center text-sm font-bold text-espresso-950 border-t-2 border-champagne-300 pt-2">
-                  <span>Grand Total:</span>
-                  <span className="text-lg font-mono text-emerald-800">
-                    ₹{grandTotal.toLocaleString('en-IN')}
-                  </span>
-                </div>
-
-                {/* Live Payment Status Pill */}
-                <div className={`p-2 rounded-lg text-center font-bold text-[11px] flex items-center justify-between mt-2 ${
-                  booking.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' :
-                  booking.paymentStatus === 'Partial' ? 'bg-amber-100 text-amber-900 border border-amber-300' :
-                  'bg-rose-100 text-rose-900 border border-rose-300'
-                }`}>
-                  <span>Status: {booking.paymentStatus || 'Confirmed'}</span>
-                  {booking.utrNumber && <span className="font-mono text-[10px]">UTR: {booking.utrNumber}</span>}
-                </div>
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            {/* Authorized Signatory & Thank You Note */}
-            <div className="border-t border-champagne-300 pt-4 mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 items-end text-xs">
-              <div>
-                <p className="font-medium text-slate-700 italic text-[11px]">
-                  "{cfg.thankYouNote}"
-                </p>
-                <p className="text-[10px] text-slate-400 mt-1">
-                  {cfg.customFooterNote}
-                </p>
+            {/* 5. Payment Summary Section */}
+            <div className="space-y-2">
+              <h3 className="font-bold text-[11px] uppercase tracking-wider text-[#996b1b]">
+                PAYMENT SUMMARY
+              </h3>
+              <div className="border border-slate-300 rounded-lg overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#181210] text-white text-[11px] uppercase font-semibold">
+                    <tr>
+                      <th className="py-2.5 px-4 w-2/3">Description</th>
+                      <th className="py-2.5 px-4 w-1/3 text-right">Amount (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-slate-200">
+                    <tr>
+                      <td className="py-2.5 px-4 text-slate-800">Total Service Amount</td>
+                      <td className="py-2.5 px-4 text-right font-mono font-bold text-slate-900">
+                        ₹{totalAmount.toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-2.5 px-4 text-slate-800">Advance Payment Received</td>
+                      <td className="py-2.5 px-4 text-right font-mono font-bold text-emerald-800">
+                        ₹{advanceAmount.toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                    <tr className="bg-[#f7eedb] font-bold text-slate-900">
+                      <td className="py-3 px-4 text-sm font-extrabold text-[#7a5412]">Balance Payment Due</td>
+                      <td className="py-3 px-4 text-right font-mono text-base font-extrabold text-[#7a5412]">
+                        ₹{balanceDue.toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-
-              {cfg.showSignatory && (
-                <div className="sm:text-right space-y-1">
-                  <div className="font-serif italic text-base text-champagne-800 font-bold">
-                    {cfg.signatoryName}
-                  </div>
-                  <div className="h-0.5 w-32 bg-champagne-400 ml-auto my-1"></div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 block">
-                    Authorized Signatory
-                  </span>
-                  <span className="text-[10px] text-slate-400 block">
-                    {cfg.signatoryTitle}
-                  </span>
-                </div>
-              )}
+              <p className="text-[11px] text-slate-600 italic pt-0.5">
+                The remaining balance of <strong>₹{balanceDue.toLocaleString('en-IN')}</strong> is payable immediately upon completion of the service.
+              </p>
             </div>
 
-            {/* Terms and Conditions */}
-            {Array.isArray(cfg.terms) && cfg.terms.length > 0 && (
-              <div className="border-t border-champagne-200/80 pt-3 mt-4 text-[10px] text-slate-500 space-y-1">
-                <span className="font-bold uppercase tracking-wider text-slate-600 block">
-                  Terms & Sanctuary Policies:
-                </span>
-                <ol className="list-decimal pl-4 space-y-0.5">
-                  {cfg.terms.map((t, idx) => (
-                    <li key={idx}>{t}</li>
-                  ))}
-                </ol>
-              </div>
-            )}
+            {/* 6. Terms & Conditions Section (Service-Wise Dynamic) */}
+            <div className="space-y-2 pt-1">
+              <h3 className="font-bold text-[11px] uppercase tracking-wider text-[#996b1b]">
+                TERMS & CONDITIONS
+              </h3>
+              <ol className="list-decimal pl-5 space-y-1.5 text-[11px] text-slate-700 leading-relaxed">
+                {termsList.map((term, idx) => (
+                  <li key={idx} className="pl-1">{term}</li>
+                ))}
+              </ol>
+            </div>
+
+            {/* 7. Thank You Note & Closing Greeting */}
+            <div className="text-center pt-4 space-y-1 text-slate-700 italic text-xs">
+              <p className="font-medium">Thank you for choosing Serene Salon & Academy.</p>
+              <p className="font-medium text-[#996b1b]">We look forward to making your special occasion beautiful!</p>
+              <div className="w-full h-0.5 bg-[#b38728] mt-3 mb-2"></div>
+            </div>
+
+            {/* 8. Footer (Instagram ID & WhatsApp Number) */}
+            <div className="text-center pt-1 text-[11px] text-slate-600 space-y-1">
+              <p className="font-semibold">
+                For more information connect our Instagram ID: <strong className="text-slate-900">@serenesalonacademy</strong> or WhatsApp: <strong className="text-slate-900">+91 6203060789</strong>
+              </p>
+              <p className="text-[10px] font-bold tracking-widest uppercase text-slate-500 pt-1">
+                SERENE SALON & ACADEMY
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Admin Quick Action Footer (No-Print) */}
+        {/* Admin Quick Payment Settlement Bar */}
         {isAdmin && (
           <div className="bg-slate-50 border-t border-slate-200 px-5 py-3 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">Quick Payment Status:</span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-slate-700">Quick Balance Status:</span>
               <select
-                value={paymentInput.status}
-                onChange={(e) => setPaymentInput({ ...paymentInput, status: e.target.value })}
+                value={paymentStatus}
+                onChange={(e) => setPaymentStatus(e.target.value)}
                 className="rounded-lg border border-slate-300 py-1 px-2 text-xs font-semibold focus:ring-1 focus:ring-champagne-500"
               >
-                <option value="Paid">🟢 Paid / Settled</option>
-                <option value="Pending">🟡 Pending Balance</option>
+                <option value="Paid">🟢 Full Balance Paid (₹0 Due)</option>
+                <option value="Confirmed">🟡 Advance Confirmed</option>
                 <option value="Partial">🟠 Partial Advance</option>
+                <option value="Pending">🔴 Payment Pending</option>
               </select>
 
               <select
-                value={paymentInput.method}
-                onChange={(e) => setPaymentInput({ ...paymentInput, method: e.target.value })}
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
                 className="rounded-lg border border-slate-300 py-1 px-2 text-xs focus:ring-1 focus:ring-champagne-500"
               >
-                <option value="Paytm UPI">Paytm UPI</option>
-                <option value="Cash">Cash at Counter</option>
+                <option value="Paytm UPI">Paytm UPI (6203060789@ptaxis)</option>
+                <option value="Cash">Cash at Salon Sanctuary</option>
                 <option value="Credit/Debit Card">Credit/Debit Card</option>
               </select>
 
               <input 
                 type="text"
                 placeholder="UTR / Txn Ref..."
-                value={paymentInput.utrNumber}
-                onChange={(e) => setPaymentInput({ ...paymentInput, utrNumber: e.target.value })}
-                className="rounded-lg border border-slate-300 py-1 px-2 text-xs font-mono w-32 focus:ring-1 focus:ring-champagne-500"
+                value={utrNumber}
+                onChange={(e) => setUtrNumber(e.target.value)}
+                className="rounded-lg border border-slate-300 py-1 px-2 text-xs font-mono w-28 focus:ring-1 focus:ring-champagne-500"
               />
 
               <button
                 type="button"
-                onClick={handleSavePaymentStatus}
+                onClick={handleSaveCustomization}
+                disabled={isSaving}
                 className="px-3 py-1 rounded-lg bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold transition shadow-xs"
               >
-                Update Status
+                {isSaving ? 'Updating...' : 'Update Balance & Save'}
               </button>
             </div>
 
-            <div className="text-[11px] text-slate-500">
-              Booking Ref: <strong className="font-mono text-slate-800">#{booking.id}</strong>
+            <div className="text-[11px] text-slate-500 font-mono">
+              Balance: <strong>₹{balanceDue.toLocaleString('en-IN')}</strong>
             </div>
           </div>
         )}
