@@ -10,18 +10,18 @@ const SERVICE_TERMS_PRESETS = {
   'bridal-makeup': {
     name: '💄 Bridal & Engagement Makeup',
     defaultInclusions: 'Makeup Studio Products with Hair Extension & Draping',
-    terms: (adv, bal, repTime) => [
+    terms: (adv, bal) => [
       `The advance payment of ₹${(adv || 0).toLocaleString('en-IN')} is strictly non-refundable and non-transferable.`,
       `The remaining balance of ₹${(bal || 0).toLocaleString('en-IN')} must be paid immediately upon completion of the service.`,
       `The booking is confirmed upon receipt of the advance payment.`,
-      `The client is requested to arrive at the scheduled reporting time of ${repTime || '8:30 AM'}.`,
+      `The client is requested to arrive on time for the scheduled appointment.`,
       `Personal belongings, including jewellery, valuables and other items, must be kept safely by the client. Serene Salon & Academy will not be responsible for any loss or damage to personal belongings.`
     ]
   },
   'facials-clinical': {
     name: '💆‍♀️ Facials & Clinical Skin Rituals',
     defaultInclusions: 'Hospital-Grade Autoclaved Sealed Pouches Opened Live in Client Presence',
-    terms: (adv, bal, repTime) => [
+    terms: (adv, bal) => [
       `100% Hospital-grade autoclave sterilized single-use sealed medical pouches are opened live before treatment.`,
       `The client must disclose any active retinoids, AHA/BHA chemical peels, or dermatological conditions.`,
       `Direct sunlight, steam, and sauna should be avoided for 24-48 hours post-treatment.`,
@@ -32,7 +32,7 @@ const SERVICE_TERMS_PRESETS = {
   'hair-treatments': {
     name: '💇‍♀️ Hair Spa, Color & Smoothing',
     defaultInclusions: 'Authentic L’Oréal & Olaplex Professional Ampoules & Autoclaved Tools',
-    terms: (adv, bal, repTime) => [
+    terms: (adv, bal) => [
       `Preliminary strand and sensitivity patch test is performed prior to chemical coloring or smoothing.`,
       `For keratin and botox smoothing, water contact and tying or pinning hair should be avoided for 48 hours.`,
       `Post-treatment sulfate-free salon home-care regimen is recommended for treatment longevity.`,
@@ -42,7 +42,7 @@ const SERVICE_TERMS_PRESETS = {
   'nail-art': {
     name: '💅 Acrylic & Gel Nail Artistry',
     defaultInclusions: 'Medical Sanitization, Premium Gel Polish & Cuticle Care',
-    terms: (adv, bal, repTime) => [
+    terms: (adv, bal) => [
       `Authentic acrylic and gel formulas applied with sterile sanitized nail implements.`,
       `Any accidental lifting or stone repair within 48 hours is retouched complimentary at our sanctuary.`,
       `Avoid using nail extensions as tools or exposing them to harsh chemical cleaning agents.`,
@@ -52,11 +52,11 @@ const SERVICE_TERMS_PRESETS = {
   'standard-salon': {
     name: '📜 Standard Sanctuary Policies',
     defaultInclusions: 'Sterile Station Allocation, Autoclaved Implements & Single-Use Linens',
-    terms: (adv, bal, repTime) => [
+    terms: (adv, bal) => [
       `All instruments are hospital-grade autoclave sterilized in single-use sealed medical pouches.`,
-      `Appointments are reserved for the scheduled reporting time of ${repTime || '10:00 AM'}.`,
+      `Appointments are reserved for the scheduled appointment time.`,
       `Payments once completed are non-refundable but adjustable for salon privilege credits.`,
-      `For customer assistance or bridal consultations, please WhatsApp +91 6203060789.`
+      `For customer assistance or inquiries, please WhatsApp +91 6203060789.`
     ]
   }
 };
@@ -89,14 +89,22 @@ export default function DynamicInvoiceModal({
 
   const initialPresetKey = savedCustom.presetKey || inferPresetKey();
 
-  // Invoice Title
-  const defaultTitle = primaryServiceName.toUpperCase().includes('MAKEUP')
-    ? `${primaryServiceName.toUpperCase()} BOOKING INVOICE`
-    : `${primaryServiceName.toUpperCase()} INVOICE`;
+  // Default Invoice Document Title (Clean & official; no raw service names like "Signature Hydra facial" in header)
+  const defaultTitle = savedCustom.invoiceTitle || (
+    primaryServiceName.toLowerCase().includes('engagement') ? 'ENGAGEMENT MAKEUP BOOKING INVOICE' :
+    primaryServiceName.toLowerCase().includes('bridal') ? 'BRIDAL MAKEUP BOOKING INVOICE' :
+    'OFFICIAL BOOKING INVOICE'
+  );
 
-  const [invoiceTitle, setInvoiceTitle] = useState(savedCustom.invoiceTitle || defaultTitle);
-  const [reportingTime, setReportingTime] = useState(savedCustom.reportingTime || booking.time || '8:30 AM');
-  const [completionTime, setCompletionTime] = useState(savedCustom.completionTime || '10:30 AM');
+  const [invoiceTitle, setInvoiceTitle] = useState(defaultTitle);
+  const [invoiceDate, setInvoiceDate] = useState(savedCustom.invoiceDate || booking.date || new Date().toISOString().split('T')[0]);
+  const [invoiceTime, setInvoiceTime] = useState(savedCustom.invoiceTime || booking.time || '10:00 AM');
+
+  // Sanitize notes: remove any "enrich" references or auto-generated strings
+  const rawNotes = (booking.notes || '').trim();
+  const cleanNotes = /enrich/i.test(rawNotes) 
+    ? null 
+    : (rawNotes.length > 0 ? rawNotes : null);
   
   // Advance & Balance
   const totalAmount = Number(booking.total) || 6400;
@@ -118,7 +126,7 @@ export default function DynamicInvoiceModal({
       return savedCustom.terms;
     }
     const presetFn = SERVICE_TERMS_PRESETS[initialPresetKey]?.terms || SERVICE_TERMS_PRESETS['bridal-makeup'].terms;
-    return presetFn(initialAdvance, Math.max(0, totalAmount - initialAdvance), reportingTime);
+    return presetFn(initialAdvance, Math.max(0, totalAmount - initialAdvance));
   });
 
   // Admin edit mode toggle
@@ -131,13 +139,13 @@ export default function DynamicInvoiceModal({
   const [utrNumber, setUtrNumber] = useState(booking.utrNumber || '');
   const [isSaving, setIsSaving] = useState(false);
 
-  // When advance amount or reporting time changes, auto-update terms if using preset template
+  // When preset is selected, auto-update terms
   const applyPreset = (key) => {
     setActivePreset(key);
     const preset = SERVICE_TERMS_PRESETS[key];
     if (preset) {
       setInclusionsText(preset.defaultInclusions);
-      setTermsList(preset.terms(advanceAmount, balanceDue, reportingTime));
+      setTermsList(preset.terms(advanceAmount, balanceDue));
       if (showToast) showToast(`Applied ${preset.name} terms preset!`);
     }
   };
@@ -180,8 +188,8 @@ export default function DynamicInvoiceModal({
     try {
       const payload = {
         invoiceTitle,
-        reportingTime,
-        completionTime,
+        invoiceDate,
+        invoiceTime,
         advanceAmount,
         balanceAmount: balanceDue,
         inclusionsText,
@@ -276,9 +284,9 @@ export default function DynamicInvoiceModal({
       `BEAUTY • MAKEUP • PROFESSIONAL SERVICES (CIDESCO Certified)\n` +
       `----------------------------------------\n` +
       `👤 *Client:* ${booking.guestName} (${booking.guestPhone})\n` +
-      `📅 *Occasion Date:* ${booking.date}\n` +
-      `⏰ *Reporting Time:* ${reportingTime}\n` +
-      `⏱️ *Scheduled Completion:* ${completionTime}\n` +
+      `🧾 *Invoice No:* #${booking.id}\n` +
+      `📅 *Invoice Date:* ${invoiceDate}\n` +
+      `⏰ *Invoice Time:* ${invoiceTime}\n` +
       `💆‍♀️ *Service:* ${primaryServiceName}\n` +
       `📦 *Inclusions:* ${inclusionsText}\n` +
       `----------------------------------------\n` +
@@ -289,7 +297,7 @@ export default function DynamicInvoiceModal({
       `📝 *Terms & Conditions:*\n` +
       termsList.slice(0, 3).map((t, i) => `${i + 1}. ${t}`).join('\n') + `\n\n` +
       `✨ *Thank you for choosing Serene Salon & Academy.*\n` +
-      `*We look forward to making your special occasion beautiful!*\n\n` +
+      `*We look forward to welcoming you to our sanctuary!*\n\n` +
       `📍 *Location:* FF 16 Raama Emperro, Manjalpur, Vadodara\n` +
       `📸 *Instagram:* @serenesalonacademy\n` +
       `📞 *WhatsApp:* +91 6203060789`;
@@ -462,23 +470,23 @@ export default function DynamicInvoiceModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Reporting Time</label>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Invoice Date</label>
                 <input 
                   type="text" 
-                  value={reportingTime}
-                  onChange={(e) => setReportingTime(e.target.value)}
-                  placeholder="e.g. 8:30 AM"
+                  value={invoiceDate}
+                  onChange={(e) => setInvoiceDate(e.target.value)}
+                  placeholder="e.g. 2026-11-14 or 14 Nov 2026"
                   className="w-full text-xs rounded-lg border border-slate-300 py-1.5 px-2.5 bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Scheduled Completion</label>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Invoice Time</label>
                 <input 
                   type="text" 
-                  value={completionTime}
-                  onChange={(e) => setCompletionTime(e.target.value)}
-                  placeholder="e.g. 10:30 AM"
+                  value={invoiceTime}
+                  onChange={(e) => setInvoiceTime(e.target.value)}
+                  placeholder="e.g. 10:00 AM"
                   className="w-full text-xs rounded-lg border border-slate-300 py-1.5 px-2.5 bg-white"
                 />
               </div>
@@ -557,25 +565,25 @@ export default function DynamicInvoiceModal({
               </h2>
             </div>
 
-            {/* 3. Client Details & Booking Details (Two-Column Beige Box) */}
+            {/* 3. Client Details & Invoice Details (Two-Column Beige Box - Clean Date/Time, No Occasion Date, No Enrich) */}
             <div className="border border-[#e6d5b8] rounded-xl overflow-hidden shadow-xs">
               <div className="grid grid-cols-2 bg-[#fbf6ec] border-b border-[#e6d5b8] px-4 py-2 font-bold text-[11px] uppercase tracking-wider text-[#996b1b]">
                 <div>CLIENT DETAILS</div>
-                <div>BOOKING DETAILS</div>
+                <div>INVOICE & BOOKING DETAILS</div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 text-xs bg-[#fdfbf7]">
                 <div className="space-y-1">
                   <div><strong>Name:</strong> <span>{booking.guestName}</span></div>
                   <div><strong>Contact:</strong> <span className="font-mono">{booking.guestPhone}</span></div>
-                  {booking.notes && (
-                    <div className="text-[11px] text-slate-500 italic pt-0.5">Note: {booking.notes}</div>
+                  {cleanNotes && (
+                    <div className="text-[11px] text-slate-600 italic pt-0.5">Note: {cleanNotes}</div>
                   )}
                 </div>
 
                 <div className="space-y-1">
-                  <div><strong>Occasion Date:</strong> <span>{booking.date}</span></div>
-                  <div><strong>Reporting Time:</strong> <span className="font-semibold text-slate-900">{reportingTime}</span></div>
-                  <div><strong>Scheduled Completion:</strong> <span className="font-semibold text-slate-900">{completionTime}</span></div>
+                  <div><strong>Invoice No:</strong> <span className="font-mono font-bold text-slate-900">#{booking.id}</span></div>
+                  <div><strong>Invoice Date:</strong> <span className="font-semibold text-slate-900">{invoiceDate}</span></div>
+                  <div><strong>Invoice Time:</strong> <span className="font-semibold text-slate-900">{invoiceTime}</span></div>
                 </div>
               </div>
             </div>
@@ -662,7 +670,7 @@ export default function DynamicInvoiceModal({
             {/* 7. Thank You Note & Closing Greeting */}
             <div className="text-center pt-4 space-y-1 text-slate-700 italic text-xs">
               <p className="font-medium">Thank you for choosing Serene Salon & Academy.</p>
-              <p className="font-medium text-[#996b1b]">We look forward to making your special occasion beautiful!</p>
+              <p className="font-medium text-[#996b1b]">We look forward to welcoming you to our sanctuary!</p>
               <div className="w-full h-0.5 bg-[#b38728] mt-3 mb-2"></div>
             </div>
 

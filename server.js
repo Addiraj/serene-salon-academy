@@ -344,7 +344,7 @@ app.post('/api/bookings/quick-request', (req, res) => {
       phone: normalizedPhone,
       course: 'Career Counseling & Course Selection',
       preferredTime: 'Morning Batch (10 AM - 1 PM)',
-      notes: notes || 'Enrich-style quick course request from landing page',
+      notes: notes || 'Academy course consultation request from landing page',
       status: 'New',
       createdAt: new Date().toISOString()
     };
@@ -374,7 +374,7 @@ app.post('/api/bookings/quick-request', (req, res) => {
     promoCode: 'FIRSTVISIT',
     total: 549,
     status: 'Pending',
-    notes: notes || 'First Visit Priority Request (Enrich-Style Booking)',
+    notes: notes || 'First Visit Priority Privileges Appointment',
     createdAt: new Date().toISOString()
   };
 

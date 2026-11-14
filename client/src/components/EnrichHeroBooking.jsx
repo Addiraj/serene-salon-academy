@@ -76,7 +76,7 @@ export default function EnrichHeroBooking({ onScrollToServices, showToast, onQui
               </span>
             </div>
             <span className="px-2.5 py-0.5 rounded-full bg-champagne-500/20 text-champagne-300 text-[10px] font-bold border border-champagne-400/30">
-              Enrich-Standard Luxury
+              CIDESCO Certified Luxury
             </span>
           </div>
 
