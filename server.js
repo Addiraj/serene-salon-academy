@@ -918,8 +918,13 @@ app.post('/api/bookings', (req, res) => {
     }
   }
 
-  const total = Math.max(0, subtotal - discount);
+  const computedTotal = Math.max(0, subtotal - discount);
+  const finalTotal = req.body.total !== undefined ? Number(req.body.total) : computedTotal;
   const bookingId = 'SSA-' + Math.floor(1000 + Math.random() * 9000);
+
+  const initialPaid = req.body.paidAmount !== undefined 
+    ? Number(req.body.paidAmount) 
+    : (req.body.paymentStatus === 'Paid' ? finalTotal : 0);
 
   const newBooking = {
     id: bookingId,
@@ -928,12 +933,17 @@ app.post('/api/bookings', (req, res) => {
     date: date || new Date().toISOString().split('T')[0],
     time: time || '11:00 AM',
     stylist: stylist || 'Rashmi Sah (Founder & Master Artist)',
-    services: serviceNames.length > 0 ? serviceNames : ['Custom Beauty Consultation'],
-    subtotal,
+    services: serviceNames.length > 0 ? serviceNames : (Array.isArray(services) && services.length > 0 ? services : ['Custom Salon Treatment']),
+    subtotal: req.body.subtotal !== undefined ? Number(req.body.subtotal) : (subtotal || finalTotal),
     discount,
     promoCode: validatedPromo,
-    total,
-    status: 'Confirmed',
+    total: finalTotal,
+    paidAmount: initialPaid,
+    paymentStatus: req.body.paymentStatus || (initialPaid >= finalTotal && finalTotal > 0 ? 'Paid' : (initialPaid > 0 ? 'Confirmed' : 'Pending')),
+    paymentMethod: req.body.paymentMethod || 'Cash',
+    utrNumber: req.body.utrNumber || '',
+    source: req.body.source || 'Walk-in / Phone',
+    status: req.body.status || 'Confirmed',
     notes: notes || '',
     createdAt: new Date().toISOString()
   };

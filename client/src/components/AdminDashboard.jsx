@@ -4,7 +4,8 @@ import {
   Award, Star, Settings, Download, Plus, Clock, CheckCircle, RefreshCw, 
   Trash2, Edit, Printer, Send, Copy, Lock, LogOut, ArrowRight, ShieldCheck,
   Sparkles, Upload, Image as ImageIcon, FileText, Receipt, PieChart, 
-  TrendingUp, DollarSign, CreditCard, Filter, Search, Eye
+  TrendingUp, DollarSign, CreditCard, Filter, Search, Eye,
+  User, Phone
 } from 'lucide-react';
 import DynamicInvoiceModal from './DynamicInvoiceModal';
 
@@ -42,6 +43,159 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
   const [invoiceSearchQuery, setInvoiceSearchQuery] = useState('');
   const [invoiceStatusFilter, setInvoiceStatusFilter] = useState('All');
   const [activeInvoiceBooking, setActiveInvoiceBooking] = useState(null);
+
+  // Walk-in / Phone Slot Booking & Invoice generator state
+  const [manualBookingForm, setManualBookingForm] = useState({
+    guestName: '',
+    guestPhone: '',
+    date: new Date().toISOString().split('T')[0],
+    time: '11:00 AM',
+    stylist: 'Rashmi Sah (Founder & Master Artist)',
+    selectedServices: [],
+    customServiceName: '',
+    customServicePrice: '',
+    total: 0,
+    paidAmount: 0,
+    paymentStatus: 'Paid',
+    paymentMethod: 'Cash',
+    utrNumber: '',
+    source: 'Walk-in Sanctuary',
+    notes: ''
+  });
+  const [isSubmittingManual, setIsSubmittingManual] = useState(false);
+
+  const handleToggleManualService = (srv) => {
+    setManualBookingForm(prev => {
+      const exists = prev.selectedServices.some(s => (s.id || s.name) === (srv.id || srv.name));
+      let nextServices;
+      if (exists) {
+        nextServices = prev.selectedServices.filter(s => (s.id || s.name) !== (srv.id || srv.name));
+      } else {
+        nextServices = [...prev.selectedServices, srv];
+      }
+      const sum = nextServices.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+      return {
+        ...prev,
+        selectedServices: nextServices,
+        total: sum,
+        paidAmount: prev.paymentStatus === 'Paid' ? sum : prev.paidAmount
+      };
+    });
+  };
+
+  const handleAddCustomService = () => {
+    if (!manualBookingForm.customServiceName.trim()) return;
+    const price = Number(manualBookingForm.customServicePrice) || 0;
+    const customItem = {
+      id: 'custom-' + Date.now(),
+      name: manualBookingForm.customServiceName.trim(),
+      price
+    };
+    setManualBookingForm(prev => {
+      const nextServices = [...prev.selectedServices, customItem];
+      const sum = nextServices.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+      return {
+        ...prev,
+        selectedServices: nextServices,
+        customServiceName: '',
+        customServicePrice: '',
+        total: sum,
+        paidAmount: prev.paymentStatus === 'Paid' ? sum : prev.paidAmount
+      };
+    });
+  };
+
+  const handleSubmitManualBooking = async (e, openInvoice = true) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!manualBookingForm.guestName.trim()) {
+      showToast('Please enter the customer name.');
+      return;
+    }
+    if (!manualBookingForm.guestPhone.trim()) {
+      showToast('Please enter customer phone number.');
+      return;
+    }
+
+    setIsSubmittingManual(true);
+    try {
+      const serviceNames = manualBookingForm.selectedServices.map(s => s.name || s);
+      if (serviceNames.length === 0) {
+        serviceNames.push('Custom Salon Treatment');
+      }
+
+      const totalVal = Number(manualBookingForm.total) || 0;
+      const paidVal = Number(manualBookingForm.paidAmount) || 0;
+
+      const payload = {
+        guestName: manualBookingForm.guestName.trim(),
+        guestPhone: manualBookingForm.guestPhone.trim(),
+        date: manualBookingForm.date || new Date().toISOString().split('T')[0],
+        time: manualBookingForm.time || '11:00 AM',
+        stylist: manualBookingForm.stylist || 'Rashmi Sah (Founder & Master Artist)',
+        services: serviceNames,
+        subtotal: totalVal,
+        total: totalVal,
+        paidAmount: paidVal,
+        paymentStatus: manualBookingForm.paymentStatus || (paidVal >= totalVal && totalVal > 0 ? 'Paid' : 'Confirmed'),
+        paymentMethod: manualBookingForm.paymentMethod || 'Cash',
+        utrNumber: manualBookingForm.utrNumber || '',
+        source: manualBookingForm.source || 'Walk-in Sanctuary',
+        notes: manualBookingForm.notes || ''
+      };
+
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (data.success && data.booking) {
+        setBookings(prev => [data.booking, ...prev]);
+        setActiveModal(null);
+        showToast(`Created booking #${data.booking.id} successfully!`);
+
+        // Refresh analytics
+        fetch('/api/admin/invoices/analytics')
+          .then(r => r.json())
+          .then(anRes => {
+            if (anRes && anRes.success) setInvoiceAnalytics(anRes.analytics);
+          })
+          .catch(() => {});
+
+        // Instantly launch invoice modal
+        if (openInvoice) {
+          setActiveInvoiceBooking(data.booking);
+        }
+
+        // Reset
+        setManualBookingForm({
+          guestName: '',
+          guestPhone: '',
+          date: new Date().toISOString().split('T')[0],
+          time: '11:00 AM',
+          stylist: 'Rashmi Sah (Founder & Master Artist)',
+          selectedServices: [],
+          customServiceName: '',
+          customServicePrice: '',
+          total: 0,
+          paidAmount: 0,
+          paymentStatus: 'Paid',
+          paymentMethod: 'Cash',
+          utrNumber: '',
+          source: 'Walk-in Sanctuary',
+          notes: ''
+        });
+      } else {
+        showToast(data.message || 'Failed to create booking.');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Network error creating booking.');
+    } finally {
+      setIsSubmittingManual(false);
+    }
+  };
 
   // Service tab search and form state
   const [serviceFilterCat, setServiceFilterCat] = useState('All');
@@ -1088,6 +1242,15 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Export Invoices CSV</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveModal('manualBooking')}
+                  className="px-4 py-2 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs flex items-center gap-1.5 shadow-xs transition"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Walk-in / Phone Invoice</span>
                 </button>
 
                 <button
@@ -2364,6 +2527,298 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
                 >
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
                   <span>{editingItem ? 'Save Changes' : 'Add to Rate Card'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Walk-in / Phone Slot Booking & Instant Invoice Generator Modal */}
+      {activeModal === 'manualBooking' && (
+        <div className="fixed inset-0 z-50 bg-espresso-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-5 sm:p-7 max-w-2xl w-full shadow-2xl border border-champagne-300 space-y-4 max-h-[94vh] overflow-y-auto animate-scale-up">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-champagne-500/20 text-champagne-900 border border-champagne-400 uppercase tracking-wider">
+                  Front Desk POS & Billing
+                </span>
+                <h3 className="font-editorial text-xl sm:text-2xl font-bold text-espresso-950 mt-1 flex items-center gap-2">
+                  <Receipt className="w-5 h-5 text-champagne-700" />
+                  <span>New Walk-in / Phone Customer Bill</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Record an instant booking for walk-in or telephone clients and generate their official tax invoice immediately.
+                </p>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setActiveModal(null)} 
+                className="text-slate-400 hover:text-slate-600 font-bold p-1 rounded-lg text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={(e) => handleSubmitManualBooking(e, true)} className="space-y-4">
+              {/* Channel / Source Selector */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Customer Channel</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'Walk-in Sanctuary', label: '🚶‍♀️ Walk-in', desc: 'Present in salon' },
+                    { id: 'Phone Call Appointment', label: '📞 Phone Call', desc: 'Call booking' },
+                    { id: 'WhatsApp Inquiry', label: '💬 WhatsApp', desc: 'Chat inquiry' }
+                  ].map(ch => (
+                    <button
+                      key={ch.id}
+                      type="button"
+                      onClick={() => setManualBookingForm({ ...manualBookingForm, source: ch.id })}
+                      className={`p-2.5 rounded-xl border text-left transition ${
+                        manualBookingForm.source === ch.id 
+                          ? 'border-champagne-600 bg-champagne-50 text-espresso-950 ring-1 ring-champagne-500 shadow-xs' 
+                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="text-xs font-bold">{ch.label}</div>
+                      <div className="text-[10px] text-slate-400">{ch.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Client Name & Phone */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Customer Name *</label>
+                  <input 
+                    type="text"
+                    required
+                    value={manualBookingForm.guestName}
+                    onChange={(e) => setManualBookingForm({ ...manualBookingForm, guestName: e.target.value })}
+                    placeholder="e.g. Ananya Patel"
+                    className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number (WhatsApp) *</label>
+                  <input 
+                    type="tel"
+                    required
+                    value={manualBookingForm.guestPhone}
+                    onChange={(e) => setManualBookingForm({ ...manualBookingForm, guestPhone: e.target.value })}
+                    placeholder="e.g. 9876543210"
+                    className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Date & Time Slot */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Billing / Appointment Date</label>
+                  <input 
+                    type="date"
+                    value={manualBookingForm.date}
+                    onChange={(e) => setManualBookingForm({ ...manualBookingForm, date: e.target.value })}
+                    className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Time Slot</label>
+                  <input 
+                    type="text"
+                    value={manualBookingForm.time}
+                    onChange={(e) => setManualBookingForm({ ...manualBookingForm, time: e.target.value })}
+                    placeholder="e.g. 11:30 AM"
+                    className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                  />
+                </div>
+              </div>
+
+              {/* Service Selection */}
+              <div className="space-y-2 pt-1 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+                    Select Services / Treatments:
+                  </label>
+                  <span className="text-[11px] text-champagne-700 font-semibold">
+                    {manualBookingForm.selectedServices.length} selected
+                  </span>
+                </div>
+
+                {/* Popular Services Quick-Select Pills */}
+                <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-200">
+                  {services.map(s => {
+                    const isSelected = manualBookingForm.selectedServices.some(sel => (sel.id || sel.name) === s.name || (sel.id || sel.name) === s.id);
+                    return (
+                      <button
+                        key={s.id || s.name}
+                        type="button"
+                        onClick={() => handleToggleManualService(s)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition flex items-center gap-1.5 ${
+                          isSelected
+                            ? 'bg-espresso-950 text-champagne-300 shadow-xs'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>{isSelected ? '✓' : '+'}</span>
+                        <span>{s.name}</span>
+                        <span className="font-mono text-[10px] opacity-75">₹{s.price}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Custom Item Row */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input 
+                    type="text"
+                    placeholder="Or type custom treatment / item..."
+                    value={manualBookingForm.customServiceName}
+                    onChange={(e) => setManualBookingForm({ ...manualBookingForm, customServiceName: e.target.value })}
+                    className="flex-1 text-xs rounded-xl border border-slate-300 py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                  />
+                  <input 
+                    type="number"
+                    placeholder="Price (₹)"
+                    value={manualBookingForm.customServicePrice}
+                    onChange={(e) => setManualBookingForm({ ...manualBookingForm, customServicePrice: e.target.value })}
+                    className="w-24 text-xs rounded-xl border border-slate-300 py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCustomService}
+                    className="px-3 py-1.5 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-slate-900"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              {/* Total & Payment Section */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-champagne-50/60 border border-champagne-200 rounded-2xl">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-800 mb-1">Total Bill Amount (₹) *</label>
+                  <input 
+                    type="number"
+                    required
+                    value={manualBookingForm.total}
+                    onChange={(e) => {
+                      const val = Number(e.target.value) || 0;
+                      setManualBookingForm({ 
+                        ...manualBookingForm, 
+                        total: val,
+                        paidAmount: manualBookingForm.paymentStatus === 'Paid' ? val : manualBookingForm.paidAmount
+                      });
+                    }}
+                    className="w-full text-sm font-bold font-mono rounded-xl border border-champagne-300 py-1.5 px-3 bg-white text-espresso-950 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-800 mb-1">Amount Paid / Advance (₹)</label>
+                  <input 
+                    type="number"
+                    value={manualBookingForm.paidAmount}
+                    onChange={(e) => setManualBookingForm({ ...manualBookingForm, paidAmount: Number(e.target.value) || 0 })}
+                    className="w-full text-sm font-bold font-mono rounded-xl border border-champagne-300 py-1.5 px-3 bg-white text-emerald-900 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                  />
+                  <span className="text-[10px] text-slate-500 mt-0.5 block">
+                    Balance Due: ₹{Math.max(0, manualBookingForm.total - manualBookingForm.paidAmount).toLocaleString('en-IN')}
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-800 mb-1">Payment Status</label>
+                  <select
+                    value={manualBookingForm.paymentStatus}
+                    onChange={(e) => {
+                      const st = e.target.value;
+                      setManualBookingForm({
+                        ...manualBookingForm,
+                        paymentStatus: st,
+                        paidAmount: st === 'Paid' ? manualBookingForm.total : (st === 'Pending' ? 0 : manualBookingForm.paidAmount)
+                      });
+                    }}
+                    className="w-full text-xs font-semibold rounded-xl border border-champagne-300 py-2 px-2.5 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                  >
+                    <option value="Paid">🟢 Full Payment Paid</option>
+                    <option value="Confirmed">🟡 Advance Payment Received</option>
+                    <option value="Pending">🔴 Payment Pending</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Payment Method & Stylist */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Payment Method</label>
+                  <select
+                    value={manualBookingForm.paymentMethod}
+                    onChange={(e) => setManualBookingForm({ ...manualBookingForm, paymentMethod: e.target.value })}
+                    className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 bg-white"
+                  >
+                    <option value="Cash">Cash at Salon Sanctuary</option>
+                    <option value="Paytm UPI">Paytm UPI (6203060789@ptaxis)</option>
+                    <option value="Credit/Debit Card">Credit / Debit Card (POS Terminal)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Specialist / Stylist</label>
+                  <select
+                    value={manualBookingForm.stylist}
+                    onChange={(e) => setManualBookingForm({ ...manualBookingForm, stylist: e.target.value })}
+                    className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500 bg-white"
+                  >
+                    <option value="Rashmi Sah (Founder & Master Artist)">Rashmi Sah (Founder & Master Artist)</option>
+                    <option value="Senior Beauty Therapist">Senior Beauty Therapist</option>
+                    <option value="Senior Hair Specialist">Senior Hair Specialist</option>
+                    <option value="Nail Art Master">Nail Art Master</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Optional Notes */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Notes / Special Instructions (Optional)</label>
+                <input 
+                  type="text"
+                  placeholder="e.g. Skin sensitive, preferred hair length, walk-in consultation"
+                  value={manualBookingForm.notes}
+                  onChange={(e) => setManualBookingForm({ ...manualBookingForm, notes: e.target.value })}
+                  className="w-full text-xs rounded-xl border border-slate-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-champagne-500"
+                />
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setActiveModal(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleSubmitManualBooking(e, false)}
+                  disabled={isSubmittingManual}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition"
+                >
+                  Save Booking Only
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingManual}
+                  className="px-5 py-2.5 rounded-xl bg-champagne-500 hover:bg-champagne-400 text-espresso-950 text-xs font-bold transition flex items-center gap-1.5 shadow-md"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>{isSubmittingManual ? 'Generating...' : 'Save & Open Invoice 📄'}</span>
                 </button>
               </div>
             </form>
