@@ -982,11 +982,13 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button 
+                    type="button"
                     onClick={() => setActiveModal('manualBooking')}
-                    className="px-3.5 py-2 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs shadow transition flex items-center gap-1.5"
+                    className="px-4 py-2 rounded-xl bg-champagne-500 hover:bg-champagne-400 text-espresso-950 font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer ring-1 ring-champagne-600/30"
+                    title="Record walk-in or telephone client appointment and generate invoice"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Walk-in / Phone Slot</span>
+                    <Plus className="w-4 h-4 stroke-[2.5]" />
+                    <span>+ Walk-in / Phone Slot</span>
                   </button>
 
                   <div className="flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs">
@@ -1247,9 +1249,10 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
                 <button
                   type="button"
                   onClick={() => setActiveModal('manualBooking')}
-                  className="px-4 py-2 rounded-xl bg-espresso-900 hover:bg-espresso-950 text-champagne-200 font-bold text-xs flex items-center gap-1.5 shadow-xs transition"
+                  className="px-4 py-2 rounded-xl bg-champagne-500 hover:bg-champagne-400 text-espresso-950 font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer ring-1 ring-champagne-600/30"
+                  title="Generate official tax invoice for walk-in or telephone client"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
                   <span>+ Walk-in / Phone Invoice</span>
                 </button>
 
@@ -1418,9 +1421,20 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Filter className="w-3.5 h-3.5 text-slate-400" />
-                  {['All', 'Paid', 'Pending', 'Cancelled'].map(st => (
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveModal('manualBooking')}
+                    className="px-3 py-1.5 rounded-xl bg-champagne-500 hover:bg-champagne-400 text-espresso-950 font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer ring-1 ring-champagne-600/20"
+                    title="Generate instant bill for walk-in client"
+                  >
+                    <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>+ New Walk-in Bill</span>
+                  </button>
+
+                  <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200">
+                    <Filter className="w-3.5 h-3.5 text-slate-400" />
+                    {['All', 'Paid', 'Pending', 'Cancelled'].map(st => (
                     <button
                       key={st}
                       type="button"
@@ -1434,6 +1448,7 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
                       {st}
                     </button>
                   ))}
+                  </div>
                 </div>
               </div>
 
@@ -2536,8 +2551,11 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
 
       {/* Walk-in / Phone Slot Booking & Instant Invoice Generator Modal */}
       {activeModal === 'manualBooking' && (
-        <div className="fixed inset-0 z-50 bg-espresso-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl p-5 sm:p-7 max-w-2xl w-full shadow-2xl border border-champagne-300 space-y-4 max-h-[94vh] overflow-y-auto animate-scale-up">
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setActiveModal(null); }}
+          className="fixed inset-0 z-[100] bg-espresso-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+        >
+          <div className="bg-white rounded-3xl p-5 sm:p-7 max-w-2xl w-full shadow-2xl border border-champagne-300 space-y-4 max-h-[94vh] overflow-y-auto animate-scale-up my-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
