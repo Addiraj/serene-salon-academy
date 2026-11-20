@@ -71,7 +71,19 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
       if (exists) {
         nextServices = prev.selectedServices.filter(s => (s.id || s.name) !== (srv.id || srv.name));
       } else {
-        nextServices = [...prev.selectedServices, srv];
+        const origPrice = Number(srv.price) || 0;
+        const itemObj = {
+          id: srv.id || ('srv-' + Date.now()),
+          name: srv.name,
+          category: srv.category || '',
+          originalPrice: origPrice,
+          discount: 0,
+          discountType: 'fixed',
+          discountPercent: 0,
+          price: origPrice,
+          inclusions: srv.hygieneNote || srv.badge || ''
+        };
+        nextServices = [...prev.selectedServices, itemObj];
       }
       const sum = nextServices.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
       return {
@@ -89,7 +101,13 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
     const customItem = {
       id: 'custom-' + Date.now(),
       name: manualBookingForm.customServiceName.trim(),
-      price
+      category: 'Custom Service / Product',
+      originalPrice: price,
+      discount: 0,
+      discountType: 'fixed',
+      discountPercent: 0,
+      price: price,
+      inclusions: 'Specialized Custom Treatment / Salon Product'
     };
     setManualBookingForm(prev => {
       const nextServices = [...prev.selectedServices, customItem];
@@ -99,6 +117,57 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
         selectedServices: nextServices,
         customServiceName: '',
         customServicePrice: '',
+        total: sum,
+        paidAmount: prev.paymentStatus === 'Paid' ? sum : prev.paidAmount
+      };
+    });
+  };
+
+  const handleUpdateItemDiscount = (itemId, discountVal, discountType = 'fixed') => {
+    setManualBookingForm(prev => {
+      const nextServices = prev.selectedServices.map(item => {
+        if ((item.id || item.name) !== itemId) return item;
+        const orig = Number(item.originalPrice !== undefined ? item.originalPrice : item.price) || 0;
+        let disc = 0;
+        let discPct = 0;
+        const inputNum = Math.max(0, Number(discountVal) || 0);
+
+        if (discountType === 'percent') {
+          discPct = Math.min(100, inputNum);
+          disc = Math.round((orig * discPct) / 100);
+        } else {
+          disc = Math.min(orig, inputNum);
+          discPct = orig > 0 ? Math.round((disc / orig) * 100) : 0;
+        }
+
+        const net = Math.max(0, orig - disc);
+        return {
+          ...item,
+          originalPrice: orig,
+          discount: disc,
+          discountType,
+          discountPercent: discPct,
+          price: net
+        };
+      });
+
+      const sum = nextServices.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+      return {
+        ...prev,
+        selectedServices: nextServices,
+        total: sum,
+        paidAmount: prev.paymentStatus === 'Paid' ? sum : prev.paidAmount
+      };
+    });
+  };
+
+  const handleRemoveSelectedItem = (itemId) => {
+    setManualBookingForm(prev => {
+      const nextServices = prev.selectedServices.filter(s => (s.id || s.name) !== itemId);
+      const sum = nextServices.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+      return {
+        ...prev,
+        selectedServices: nextServices,
         total: sum,
         paidAmount: prev.paymentStatus === 'Paid' ? sum : prev.paidAmount
       };
@@ -118,12 +187,41 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
 
     setIsSubmittingManual(true);
     try {
-      const serviceNames = manualBookingForm.selectedServices.map(s => s.name || s);
+      const itemsList = manualBookingForm.selectedServices.map(s => {
+        const orig = Number(s.originalPrice !== undefined ? s.originalPrice : s.price) || 0;
+        const disc = Number(s.discount) || 0;
+        const net = Math.max(0, orig - disc);
+        return {
+          id: s.id,
+          name: s.name || 'Salon Treatment',
+          category: s.category || '',
+          originalPrice: orig,
+          discount: disc,
+          discountType: s.discountType || 'fixed',
+          discountPercent: s.discountPercent || (orig > 0 ? Math.round((disc / orig) * 100) : 0),
+          price: net,
+          inclusions: s.inclusions || s.hygieneNote || ''
+        };
+      });
+
+      const serviceNames = itemsList.map(it => it.name);
       if (serviceNames.length === 0) {
         serviceNames.push('Custom Salon Treatment');
+        itemsList.push({
+          name: 'Custom Salon Treatment',
+          originalPrice: Number(manualBookingForm.total) || 0,
+          discount: 0,
+          price: Number(manualBookingForm.total) || 0,
+          inclusions: 'Hospital-Grade Autoclaved Sealed Pouches Opened Live in Client Presence'
+        });
       }
 
-      const totalVal = Number(manualBookingForm.total) || 0;
+      const grossSubtotal = itemsList.reduce((acc, it) => acc + (it.originalPrice || 0), 0);
+      const totalItemDiscount = itemsList.reduce((acc, it) => acc + (it.discount || 0), 0);
+      const calculatedNet = Math.max(0, grossSubtotal - totalItemDiscount);
+      const totalVal = Number(manualBookingForm.total) !== undefined && Number(manualBookingForm.total) > 0 && Math.abs(Number(manualBookingForm.total) - calculatedNet) > 0
+        ? Number(manualBookingForm.total)
+        : calculatedNet;
       const paidVal = Number(manualBookingForm.paidAmount) || 0;
 
       const payload = {
@@ -133,7 +231,9 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
         time: manualBookingForm.time || '11:00 AM',
         stylist: manualBookingForm.stylist || 'Rashmi Sah (Founder & Master Artist)',
         services: serviceNames,
-        subtotal: totalVal,
+        items: itemsList,
+        subtotal: grossSubtotal || totalVal,
+        itemDiscount: totalItemDiscount,
         total: totalVal,
         paidAmount: paidVal,
         paymentStatus: manualBookingForm.paymentStatus || (paidVal >= totalVal && totalVal > 0 ? 'Paid' : 'Confirmed'),
@@ -2713,6 +2813,109 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
                     Add
                   </button>
                 </div>
+
+                {/* Selected Items & Item-Wise Discounts Breakdown */}
+                {manualBookingForm.selectedServices.length > 0 && (
+                  <div className="space-y-2 bg-slate-50 p-3 sm:p-3.5 rounded-2xl border border-champagne-300/80 shadow-xs">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-champagne-700" />
+                        <span>Billed Items & Product-Wise Discounts ({manualBookingForm.selectedServices.length}):</span>
+                      </span>
+                      <span className="text-[11px] text-slate-500 font-medium">
+                        Enter discount below for specific services
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                      {manualBookingForm.selectedServices.map(item => {
+                        const itemId = item.id || item.name;
+                        const orig = Number(item.originalPrice !== undefined ? item.originalPrice : item.price) || 0;
+                        const disc = Number(item.discount) || 0;
+                        const net = Math.max(0, orig - disc);
+
+                        return (
+                          <div 
+                            key={itemId}
+                            className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs hover:border-champagne-300 transition"
+                          >
+                            <div className="flex-1 min-w-[150px]">
+                              <div className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                                <span>{item.name}</span>
+                                {item.category && (
+                                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-medium">{item.category}</span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-slate-500 font-mono mt-0.5 flex items-center gap-2 flex-wrap">
+                                <span>Regular Rate: <strong className="text-slate-800">₹{orig.toLocaleString('en-IN')}</strong></span>
+                                {disc > 0 && (
+                                  <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                                    • Net: ₹{net.toLocaleString('en-IN')} (Save ₹{disc.toLocaleString('en-IN')})
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Item Specific Discount Input */}
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[11px] font-semibold text-slate-600">Disc:</span>
+                              <div className="relative flex items-center">
+                                <span className="absolute left-2 text-[11px] text-slate-400 font-mono">₹</span>
+                                <input 
+                                  type="number"
+                                  min="0"
+                                  max={orig}
+                                  placeholder="0"
+                                  value={item.discount || ''}
+                                  onChange={(e) => handleUpdateItemDiscount(itemId, e.target.value, 'fixed')}
+                                  className="w-20 text-xs font-mono font-bold rounded-lg border border-slate-300 py-1 pl-5 pr-2 focus:outline-none focus:ring-2 focus:ring-champagne-500 bg-white"
+                                  title="Enter specific discount for this item in ₹"
+                                />
+                              </div>
+
+                              {/* Quick % discount presets */}
+                              <div className="flex items-center gap-0.5">
+                                {[10, 20, 50].map(pct => (
+                                  <button
+                                    key={pct}
+                                    type="button"
+                                    onClick={() => handleUpdateItemDiscount(itemId, Math.round((orig * pct) / 100), 'fixed')}
+                                    className="text-[9.5px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-champagne-100 text-slate-700 hover:text-espresso-950 font-semibold border border-slate-200 transition"
+                                    title={`Apply ${pct}% discount to this item`}
+                                  >
+                                    {pct}%
+                                  </button>
+                                ))}
+                              </div>
+
+                              {/* Remove item button */}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveSelectedItem(itemId)}
+                                className="text-slate-400 hover:text-rose-600 p-1 rounded-md text-xs font-bold transition ml-1"
+                                title="Remove this item from bill"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Financial Summary of selected items */}
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-xs">
+                      <div className="text-[11px] text-slate-600 space-x-2">
+                        <span>Original Total: <strong className="font-mono text-slate-800">₹{manualBookingForm.selectedServices.reduce((a, c) => a + (Number(c.originalPrice !== undefined ? c.originalPrice : c.price) || 0), 0).toLocaleString('en-IN')}</strong></span>
+                        <span>•</span>
+                        <span>Total Discounts: <strong className="font-mono text-emerald-700">-₹{manualBookingForm.selectedServices.reduce((a, c) => a + (Number(c.discount) || 0), 0).toLocaleString('en-IN')}</strong></span>
+                      </div>
+                      <div className="text-xs font-bold text-slate-900">
+                        Net Services Total: <span className="font-mono text-sm text-espresso-950 font-extrabold">₹{manualBookingForm.total.toLocaleString('en-IN')}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Total & Payment Section */}

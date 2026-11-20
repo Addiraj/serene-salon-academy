@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Printer, Share2, X, ShieldCheck, 
   Edit3, Save, RotateCcw, Plus, Trash2, CheckCircle2,
-  Sparkles, Phone, MessageCircle
+  Sparkles, Phone, MessageCircle, Tag
 } from 'lucide-react';
 
 // Preset Terms & Conditions by Service Category (Matching Owner Reference & POS Receipt)
@@ -92,7 +92,83 @@ export default function DynamicInvoiceModal({
 
   const initialPresetKey = savedCustom.presetKey || inferPresetKey();
 
-  // Default Invoice Document Title (Clean & official; no raw service names like "Signature Hydra facial" in header)
+  // Parse all billed items & services (Supports both booking.items with discounts and booking.services)
+  const initialItems = useMemo(() => {
+    // 1. If saved on invoiceCustomization
+    if (Array.isArray(savedCustom.items) && savedCustom.items.length > 0) {
+      return savedCustom.items.map(it => ({
+        id: it.id || ('it-' + Math.random()),
+        name: it.name || 'Salon Treatment',
+        category: it.category || '',
+        originalPrice: Number(it.originalPrice !== undefined ? it.originalPrice : it.price) || 0,
+        discount: Number(it.discount) || 0,
+        discountPercent: Number(it.discountPercent) || 0,
+        price: Number(it.price !== undefined ? it.price : Math.max(0, (it.originalPrice || 0) - (Number(it.discount) || 0))),
+        inclusions: it.inclusions || 'Hospital-Grade Autoclaved Sealed Pouches Opened Live in Client Presence'
+      }));
+    }
+    // 2. If booking.items exists
+    if (Array.isArray(booking.items) && booking.items.length > 0) {
+      return booking.items.map(it => ({
+        id: it.id || ('it-' + Math.random()),
+        name: it.name || 'Salon Treatment',
+        category: it.category || '',
+        originalPrice: Number(it.originalPrice !== undefined ? it.originalPrice : it.price) || 0,
+        discount: Number(it.discount) || 0,
+        discountPercent: Number(it.discountPercent) || 0,
+        price: Number(it.price !== undefined ? it.price : Math.max(0, (it.originalPrice || 0) - (Number(it.discount) || 0))),
+        inclusions: it.inclusions || 'Hospital-Grade Autoclaved Sealed Pouches Opened Live in Client Presence'
+      }));
+    }
+    // 3. If booking.services is an array of strings or objects
+    if (Array.isArray(booking.services) && booking.services.length > 0) {
+      const avgPrice = Math.round((Number(booking.total) || 0) / booking.services.length);
+      return booking.services.map((srv, idx) => {
+        const srvName = typeof srv === 'string' ? srv : (srv.name || 'Salon Treatment');
+        const srvPrice = typeof srv === 'object' && srv.price ? Number(srv.price) : null;
+        const found = (services || []).find(s => s.name === srvName || s.id === srvName);
+        const orig = srvPrice !== null ? srvPrice : (found ? Number(found.price) : (avgPrice || 1000));
+        return {
+          id: (typeof srv === 'object' && srv.id) || (found && found.id) || ('srv-' + idx),
+          name: srvName,
+          category: (found && found.category) || '',
+          originalPrice: orig,
+          discount: 0,
+          discountPercent: 0,
+          price: orig,
+          inclusions: (found && (found.hygieneNote || found.badge)) || 'Hospital-Grade Autoclaved Sealed Pouches Opened Live in Client Presence'
+        };
+      });
+    }
+    // 4. Fallback single service
+    return [{
+      id: 'fallback-0',
+      name: primaryServiceName,
+      originalPrice: Number(booking.total) || 6400,
+      discount: 0,
+      discountPercent: 0,
+      price: Number(booking.total) || 6400,
+      inclusions: 'Hospital-Grade Autoclaved Sealed Pouches Opened Live in Client Presence'
+    }];
+  }, [booking, savedCustom, services, primaryServiceName]);
+
+  const [invoiceItems, setInvoiceItems] = useState(initialItems);
+
+  // Financial Calculations
+  const grossServicesAmount = useMemo(() => {
+    return invoiceItems.reduce((acc, it) => acc + (Number(it.originalPrice !== undefined ? it.originalPrice : it.price) || 0), 0);
+  }, [invoiceItems]);
+
+  const totalItemDiscounts = useMemo(() => {
+    return invoiceItems.reduce((acc, it) => acc + (Number(it.discount) || 0), 0);
+  }, [invoiceItems]);
+
+  const calculatedNetTotal = Math.max(0, grossServicesAmount - totalItemDiscounts);
+  const totalAmount = savedCustom.totalAmount !== undefined 
+    ? Number(savedCustom.totalAmount) 
+    : (booking.total !== undefined && booking.total > 0 ? Number(booking.total) : calculatedNetTotal);
+
+  // Default Invoice Document Title
   const defaultTitle = savedCustom.invoiceTitle || (
     primaryServiceName.toLowerCase().includes('engagement') ? 'ENGAGEMENT MAKEUP BOOKING INVOICE' :
     primaryServiceName.toLowerCase().includes('bridal') ? 'BRIDAL MAKEUP BOOKING INVOICE' :
@@ -103,14 +179,7 @@ export default function DynamicInvoiceModal({
   const [invoiceDate, setInvoiceDate] = useState(savedCustom.invoiceDate || booking.date || new Date().toISOString().split('T')[0]);
   const [invoiceTime, setInvoiceTime] = useState(savedCustom.invoiceTime || booking.time || '10:00 AM');
 
-  // Sanitize notes: remove any "enrich" references or auto-generated strings
-  const rawNotes = (booking.notes || '').trim();
-  const cleanNotes = /enrich/i.test(rawNotes) 
-    ? null 
-    : (rawNotes.length > 0 ? rawNotes : null);
-  
   // Advance & Balance
-  const totalAmount = Number(booking.total) || 6400;
   const initialAdvance = savedCustom.advanceAmount !== undefined 
     ? Number(savedCustom.advanceAmount) 
     : (booking.paidAmount !== undefined ? Number(booking.paidAmount) : Math.round(totalAmount * 0.2));
@@ -118,7 +187,7 @@ export default function DynamicInvoiceModal({
   const [advanceAmount, setAdvanceAmount] = useState(initialAdvance);
   const balanceDue = Math.max(0, totalAmount - advanceAmount);
 
-  // Inclusions description
+  // Inclusions description (global fallback)
   const [inclusionsText, setInclusionsText] = useState(
     savedCustom.inclusionsText || SERVICE_TERMS_PRESETS[initialPresetKey]?.defaultInclusions || 'Makeup Studio Products with Hair Extension'
   );
@@ -153,12 +222,11 @@ export default function DynamicInvoiceModal({
     }
   };
 
-  // Recalculate terms 1 & 2 when amounts change
+  // Recalculate terms when amounts change
   const handleAdvanceChange = (newAdvance) => {
     const adv = Number(newAdvance) || 0;
     setAdvanceAmount(adv);
     const newBal = Math.max(0, totalAmount - adv);
-    // dynamically refresh terms list numbers for term 1 & 2 if they follow standard wording
     setTermsList(prev => prev.map((t, idx) => {
       if (idx === 0 && t.includes('advance payment of')) {
         return `The advance payment of ₹${adv.toLocaleString('en-IN')} is strictly non-refundable and non-transferable.`;
@@ -168,6 +236,26 @@ export default function DynamicInvoiceModal({
       }
       return t;
     }));
+  };
+
+  // Handler for item discount update inside invoice edit mode
+  const handleItemDiscountChange = (idx, discountVal) => {
+    setInvoiceItems(prev => {
+      return prev.map((item, i) => {
+        if (i !== idx) return item;
+        const orig = Number(item.originalPrice !== undefined ? item.originalPrice : item.price) || 0;
+        const disc = Math.min(orig, Math.max(0, Number(discountVal) || 0));
+        const discPct = orig > 0 ? Math.round((disc / orig) * 100) : 0;
+        const net = Math.max(0, orig - disc);
+        return {
+          ...item,
+          originalPrice: orig,
+          discount: disc,
+          discountPercent: discPct,
+          price: net
+        };
+      });
+    });
   };
 
   // Add / Remove / Edit term item
@@ -189,15 +277,24 @@ export default function DynamicInvoiceModal({
   const handleSaveCustomization = async () => {
     setIsSaving(true);
     try {
+      const gross = invoiceItems.reduce((acc, it) => acc + (Number(it.originalPrice !== undefined ? it.originalPrice : it.price) || 0), 0);
+      const disc = invoiceItems.reduce((acc, it) => acc + (Number(it.discount) || 0), 0);
+      const net = Math.max(0, gross - disc);
+
       const payload = {
         invoiceTitle,
         invoiceDate,
         invoiceTime,
         advanceAmount,
-        balanceAmount: balanceDue,
+        balanceAmount: Math.max(0, net - advanceAmount),
         inclusionsText,
         terms: termsList,
         presetKey: activePreset,
+        items: invoiceItems,
+        subtotal: gross,
+        itemDiscount: disc,
+        totalAmount: net,
+        total: net,
         paymentStatus,
         paymentMethod,
         utrNumber
@@ -213,6 +310,11 @@ export default function DynamicInvoiceModal({
         if (onUpdatePayment) {
           onUpdatePayment(booking.id, {
             invoiceCustomization: payload,
+            items: invoiceItems,
+            services: invoiceItems.map(it => it.name),
+            subtotal: gross,
+            itemDiscount: disc,
+            total: net,
             paidAmount: advanceAmount,
             paymentStatus,
             paymentMethod,
@@ -298,6 +400,16 @@ export default function DynamicInvoiceModal({
 
   // WhatsApp Share
   const handleWhatsAppShare = () => {
+    const servicesText = invoiceItems.map(it => {
+      const orig = Number(it.originalPrice !== undefined ? it.originalPrice : it.price) || 0;
+      const disc = Number(it.discount) || 0;
+      const net = Number(it.price !== undefined ? it.price : orig - disc) || 0;
+      if (disc > 0) {
+        return `• ${it.name}: ₹${net.toLocaleString('en-IN')} (Reg: ~₹${orig.toLocaleString('en-IN')}~, Save ₹${disc.toLocaleString('en-IN')})`;
+      }
+      return `• ${it.name}: ₹${net.toLocaleString('en-IN')}`;
+    }).join('\n');
+
     const msg = `🌸 *SERENE SALON & ACADEMY VADODARA* 🌸\n` +
       `*${invoiceTitle}*\n` +
       `BEAUTY • MAKEUP • PROFESSIONAL SERVICES (CIDESCO Certified)\n` +
@@ -305,10 +417,13 @@ export default function DynamicInvoiceModal({
       `👤 *Client:* ${booking.guestName} (${booking.guestPhone})\n` +
       `🧾 *Invoice Number:* #${booking.id}\n` +
       `📅 *Billed On:* ${invoiceDate} ${invoiceTime}\n` +
-      `💆‍♀️ *Service:* ${primaryServiceName}\n` +
-      `📦 *Inclusions:* ${inclusionsText}\n` +
+      `💆‍♀️ *Services & Products Billed:*\n` +
+      `${servicesText}\n` +
+      `📦 *Inclusions & Protocol:* ${inclusionsText}\n` +
       `----------------------------------------\n` +
-      `💰 *Total Service Amount:* ₹${totalAmount.toLocaleString('en-IN')}\n` +
+      `💰 *Total Services Amount:* ₹${grossServicesAmount.toLocaleString('en-IN')}\n` +
+      (totalItemDiscounts > 0 ? `🏷️ *Item Discounts Applied:* -₹${totalItemDiscounts.toLocaleString('en-IN')}\n` : '') +
+      `💵 *Net Invoiced Total:* ₹${totalAmount.toLocaleString('en-IN')}\n` +
       `✅ *Advance Payment Received:* ₹${advanceAmount.toLocaleString('en-IN')}\n` +
       `💳 *Balance Payment Due:* ₹${balanceDue.toLocaleString('en-IN')}\n` +
       `----------------------------------------\n` +
@@ -512,6 +627,50 @@ export default function DynamicInvoiceModal({
               </div>
             </div>
 
+            {/* Item-Specific Discounts Customizer (in Edit Mode) */}
+            {invoiceItems.length > 0 && (
+              <div className="space-y-2 pt-2 border-t border-amber-200">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-bold text-slate-800 uppercase tracking-wider">
+                    Item-Specific Discounts ({invoiceItems.length} items):
+                  </label>
+                  <span className="text-[10px] text-slate-500 font-medium">Adjust discounts per service below</span>
+                </div>
+
+                <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                  {invoiceItems.map((item, idx) => {
+                    const orig = Number(item.originalPrice !== undefined ? item.originalPrice : item.price) || 0;
+                    const disc = Number(item.discount) || 0;
+                    const net = Math.max(0, orig - disc);
+
+                    return (
+                      <div key={idx} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-white border border-amber-200 text-xs">
+                        <div className="flex-1 truncate">
+                          <span className="font-bold text-slate-900">{item.name}</span>
+                          <span className="text-[10px] text-slate-500 font-mono ml-2">Rate: ₹{orig}</span>
+                          {disc > 0 && (
+                            <span className="text-[10px] text-emerald-700 font-bold ml-1">• Net: ₹{net}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-slate-600">Disc ₹:</span>
+                          <input 
+                            type="number"
+                            min="0"
+                            max={orig}
+                            value={item.discount || ''}
+                            onChange={(e) => handleItemDiscountChange(idx, e.target.value)}
+                            placeholder="0"
+                            className="w-16 text-xs font-mono font-bold rounded border border-slate-300 py-0.5 px-1.5 bg-white"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Terms List Editor */}
             <div className="space-y-2 pt-1 border-t border-amber-200">
               <div className="flex items-center justify-between">
@@ -612,26 +771,67 @@ export default function DynamicInvoiceModal({
 
             {/* 4. Service Details Section */}
             <div className="space-y-1">
-              <h3 className="font-bold text-[10px] uppercase tracking-wider text-[#996b1b]">
-                SERVICE DETAILS
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-[10px] uppercase tracking-wider text-[#996b1b]">
+                  SERVICE DETAILS {invoiceItems.length > 1 && `(${invoiceItems.length} SERVICES / PRODUCTS)`}
+                </h3>
+                {totalItemDiscounts > 0 && (
+                  <span className="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    Total Privilege Discount: -₹{totalItemDiscounts.toLocaleString('en-IN')}
+                  </span>
+                )}
+              </div>
               <div className="border border-slate-300 rounded-lg overflow-hidden">
                 <table className="w-full text-left text-[11px]">
                   <thead className="bg-[#181210] text-white text-[10px] uppercase font-semibold">
                     <tr>
-                      <th className="py-1 px-3 w-1/2">Service Details</th>
-                      <th className="py-1 px-3 w-1/2">Inclusions / Products Used</th>
+                      <th className="py-1 px-3 w-5/12">Service / Product Details</th>
+                      <th className="py-1 px-3 w-4/12">Inclusions / Products Used</th>
+                      <th className="py-1 px-3 w-3/12 text-right">Amount (₹)</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-slate-200">
-                    <tr>
-                      <td className="py-1.5 px-3 font-bold text-slate-900">
-                        {primaryServiceName}
-                      </td>
-                      <td className="py-1.5 px-3 text-slate-700">
-                        {inclusionsText}
-                      </td>
-                    </tr>
+                    {invoiceItems.map((item, idx) => {
+                      const hasDiscount = (Number(item.discount) || 0) > 0;
+                      const origPrice = Number(item.originalPrice !== undefined ? item.originalPrice : item.price) || 0;
+                      const netPrice = Number(item.price !== undefined ? item.price : origPrice - (Number(item.discount) || 0)) || 0;
+                      const discVal = Number(item.discount) || 0;
+                      const discPct = item.discountPercent || (origPrice > 0 ? Math.round((discVal / origPrice) * 100) : 0);
+
+                      return (
+                        <tr key={idx} className="hover:bg-slate-50/60 transition">
+                          <td className="py-1.5 px-3 align-top">
+                            <div className="font-bold text-slate-900 leading-snug">{item.name}</div>
+                            {hasDiscount && (
+                              <div className="text-[9px] font-semibold text-emerald-700 mt-0.5 inline-flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                                <Tag className="w-2.5 h-2.5" />
+                                <span>Privilege Disc: -₹{discVal.toLocaleString('en-IN')}</span>
+                                {discPct > 0 && <span className="opacity-80">({discPct}% off)</span>}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-1.5 px-3 text-slate-700 align-top leading-snug text-[10px]">
+                            {item.inclusions || inclusionsText}
+                          </td>
+                          <td className="py-1.5 px-3 text-right align-top whitespace-nowrap">
+                            {hasDiscount ? (
+                              <div>
+                                <span className="line-through text-slate-400 text-[9.5px] mr-1.5 font-mono">
+                                  ₹{origPrice.toLocaleString('en-IN')}
+                                </span>
+                                <span className="font-bold font-mono text-slate-900 text-xs">
+                                  ₹{netPrice.toLocaleString('en-IN')}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="font-bold font-mono text-slate-900 text-xs">
+                                ₹{netPrice.toLocaleString('en-IN')}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -652,13 +852,48 @@ export default function DynamicInvoiceModal({
                   </thead>
                   <tbody className="bg-white divide-y divide-slate-200">
                     <tr>
-                      <td className="py-1 px-3 text-slate-800">Total Service Amount</td>
+                      <td className="py-1 px-3 text-slate-800">
+                        Total Services Amount (Gross)
+                        {invoiceItems.length > 1 && (
+                          <span className="text-[10px] text-slate-500 ml-1">
+                            ({invoiceItems.length} items)
+                          </span>
+                        )}
+                      </td>
                       <td className="py-1 px-3 text-right font-mono font-bold text-slate-900">
-                        ₹{totalAmount.toLocaleString('en-IN')}
+                        ₹{grossServicesAmount.toLocaleString('en-IN')}
                       </td>
                     </tr>
+                    {totalItemDiscounts > 0 && (
+                      <tr className="bg-emerald-50/40">
+                        <td className="py-1 px-3 text-emerald-800 font-medium">
+                          Item-Specific Discounts Applied
+                        </td>
+                        <td className="py-1 px-3 text-right font-mono font-bold text-emerald-700">
+                          -₹{totalItemDiscounts.toLocaleString('en-IN')}
+                        </td>
+                      </tr>
+                    )}
+                    {Number(booking.discount) > totalItemDiscounts && (
+                      <tr className="bg-emerald-50/40">
+                        <td className="py-1 px-3 text-emerald-800 font-medium">
+                          Promotional Privilege Code ({booking.promoCode})
+                        </td>
+                        <td className="py-1 px-3 text-right font-mono font-bold text-emerald-700">
+                          -₹{(Number(booking.discount) - totalItemDiscounts).toLocaleString('en-IN')}
+                        </td>
+                      </tr>
+                    )}
+                    {(totalItemDiscounts > 0 || (Number(booking.discount) > totalItemDiscounts)) && (
+                      <tr className="font-bold bg-slate-50/80">
+                        <td className="py-1 px-3 text-slate-900">Net Invoiced Total</td>
+                        <td className="py-1 px-3 text-right font-mono font-bold text-slate-900">
+                          ₹{totalAmount.toLocaleString('en-IN')}
+                        </td>
+                      </tr>
+                    )}
                     <tr>
-                      <td className="py-1 px-3 text-slate-800">Advance Payment Received</td>
+                      <td className="py-1 px-3 text-slate-800">Advance / Payment Received</td>
                       <td className="py-1 px-3 text-right font-mono font-bold text-emerald-800">
                         ₹{advanceAmount.toLocaleString('en-IN')}
                       </td>

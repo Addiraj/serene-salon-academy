@@ -926,6 +926,9 @@ app.post('/api/bookings', (req, res) => {
     ? Number(req.body.paidAmount) 
     : (req.body.paymentStatus === 'Paid' ? finalTotal : 0);
 
+  const incomingItems = Array.isArray(req.body.items) && req.body.items.length > 0 ? req.body.items : null;
+  const itemDiscount = Number(req.body.itemDiscount) || 0;
+
   const newBooking = {
     id: bookingId,
     guestName: guestName.trim(),
@@ -933,9 +936,11 @@ app.post('/api/bookings', (req, res) => {
     date: date || new Date().toISOString().split('T')[0],
     time: time || '11:00 AM',
     stylist: stylist || 'Rashmi Sah (Founder & Master Artist)',
-    services: serviceNames.length > 0 ? serviceNames : (Array.isArray(services) && services.length > 0 ? services : ['Custom Salon Treatment']),
+    services: serviceNames.length > 0 ? serviceNames : (incomingItems ? incomingItems.map(i => i.name) : (Array.isArray(services) && services.length > 0 ? services : ['Custom Salon Treatment'])),
+    items: incomingItems || null,
+    itemDiscount,
     subtotal: req.body.subtotal !== undefined ? Number(req.body.subtotal) : (subtotal || finalTotal),
-    discount,
+    discount: discount + itemDiscount,
     promoCode: validatedPromo,
     total: finalTotal,
     paidAmount: initialPaid,
@@ -1005,6 +1010,19 @@ app.patch('/api/bookings/:id/invoice-customization', (req, res) => {
   }
   if (req.body.paymentStatus !== undefined) {
     booking.paymentStatus = req.body.paymentStatus;
+  }
+  if (Array.isArray(req.body.items)) {
+    booking.items = req.body.items;
+    booking.services = req.body.items.map(it => it.name || it);
+  }
+  if (req.body.total !== undefined) {
+    booking.total = Number(req.body.total);
+  }
+  if (req.body.subtotal !== undefined) {
+    booking.subtotal = Number(req.body.subtotal);
+  }
+  if (req.body.itemDiscount !== undefined) {
+    booking.itemDiscount = Number(req.body.itemDiscount);
   }
   writeDb(db);
   res.json({ success: true, booking, message: 'Invoice customization saved successfully' });
