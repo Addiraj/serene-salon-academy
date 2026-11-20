@@ -9,6 +9,46 @@ import {
 } from 'lucide-react';
 import DynamicInvoiceModal from './DynamicInvoiceModal';
 
+class InvoiceErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("Invoice ErrorBoundary caught an error:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="fixed inset-0 z-50 bg-espresso-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-champagne-300 text-center space-y-4">
+            <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+              ⚠️
+            </div>
+            <h3 className="text-lg font-bold text-slate-900">Invoice Display Notice</h3>
+            <p className="text-xs text-slate-600">
+              The booking was saved successfully, but the invoice encountered a display issue.
+            </p>
+            <button 
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                if (this.props.onClose) this.props.onClose();
+              }}
+              className="px-5 py-2.5 bg-espresso-950 hover:bg-black text-champagne-200 rounded-xl text-xs font-bold transition shadow"
+            >
+              Close & Return to Dashboard
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdate }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('serene_admin_auth') === 'true';
@@ -3130,16 +3170,18 @@ export default function AdminDashboard({ onExitAdmin, showToast, onSettingsUpdat
       )}
       {/* Dynamic Tax Invoice Modal */}
       {activeInvoiceBooking && (
-        <DynamicInvoiceModal 
-          isOpen={!!activeInvoiceBooking}
-          onClose={() => setActiveInvoiceBooking(null)}
-          booking={activeInvoiceBooking}
-          invoiceSettings={settings.invoiceSettings || {}}
-          services={services}
-          isAdmin={true}
-          onUpdatePayment={handleUpdateBookingPayment}
-          showToast={showToast}
-        />
+        <InvoiceErrorBoundary onClose={() => setActiveInvoiceBooking(null)}>
+          <DynamicInvoiceModal 
+            isOpen={!!activeInvoiceBooking}
+            onClose={() => setActiveInvoiceBooking(null)}
+            booking={activeInvoiceBooking}
+            invoiceSettings={settings.invoiceSettings || {}}
+            services={services}
+            isAdmin={true}
+            onUpdatePayment={handleUpdateBookingPayment}
+            showToast={showToast}
+          />
+        </InvoiceErrorBoundary>
       )}
     </div>
   );

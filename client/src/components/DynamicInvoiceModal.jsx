@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  Printer, Share2, X, ShieldCheck, 
-  Edit3, Save, RotateCcw, Plus, Trash2, CheckCircle2,
-  Sparkles, Phone, MessageCircle, Tag
+  Printer, Share2, X,
+  Edit3, Save, Plus, Trash2,
+  Sparkles, Tag
 } from 'lucide-react';
 
 // Preset Terms & Conditions by Service Category (Matching Owner Reference & POS Receipt)
@@ -74,15 +74,22 @@ export default function DynamicInvoiceModal({
   isAdmin = false,
   showToast 
 }) {
-  if (!isOpen || !booking) return null;
+  // Safe booking fallback so hooks can run unconditionally
+  const safeBooking = booking || {};
+  const savedCustom = safeBooking.invoiceCustomization || {};
 
-  // Existing custom values on booking if saved earlier
-  const savedCustom = booking.invoiceCustomization || {};
+  // Clean notes (Owner: remove enrich / sample test strings)
+  const rawNotes = ((safeBooking.notes || '') + '').trim();
+  const cleanNotes = /enrich/i.test(rawNotes) ? null : (rawNotes.length > 0 ? rawNotes : null);
 
   // Infer default service category for terms preset
-  const primaryServiceName = (booking.services && booking.services[0]) || 'Engagement Makeup';
+  const firstService = (safeBooking.services && Array.isArray(safeBooking.services) && safeBooking.services[0]) || '';
+  const primaryServiceName = typeof firstService === 'string' 
+    ? firstService 
+    : (firstService?.name || 'Engagement Makeup');
+
   const inferPresetKey = () => {
-    const s = primaryServiceName.toLowerCase();
+    const s = (primaryServiceName || '').toLowerCase();
     if (s.includes('makeup') || s.includes('bridal') || s.includes('engagement')) return 'bridal-makeup';
     if (s.includes('facial') || s.includes('clean-up') || s.includes('hydra')) return 'facials-clinical';
     if (s.includes('hair') || s.includes('color') || s.includes('spa') || s.includes('botox') || s.includes('keratin')) return 'hair-treatments';
@@ -94,10 +101,11 @@ export default function DynamicInvoiceModal({
 
   // Parse all billed items & services (Supports both booking.items with discounts and booking.services)
   const initialItems = useMemo(() => {
+    if (!booking) return [];
     // 1. If saved on invoiceCustomization
     if (Array.isArray(savedCustom.items) && savedCustom.items.length > 0) {
-      return savedCustom.items.map(it => ({
-        id: it.id || ('it-' + Math.random()),
+      return savedCustom.items.map((it, idx) => ({
+        id: it.id || ('it-' + idx),
         name: it.name || 'Salon Treatment',
         category: it.category || '',
         originalPrice: Number(it.originalPrice !== undefined ? it.originalPrice : it.price) || 0,
@@ -108,9 +116,9 @@ export default function DynamicInvoiceModal({
       }));
     }
     // 2. If booking.items exists
-    if (Array.isArray(booking.items) && booking.items.length > 0) {
-      return booking.items.map(it => ({
-        id: it.id || ('it-' + Math.random()),
+    if (Array.isArray(safeBooking.items) && safeBooking.items.length > 0) {
+      return safeBooking.items.map((it, idx) => ({
+        id: it.id || ('it-' + idx),
         name: it.name || 'Salon Treatment',
         category: it.category || '',
         originalPrice: Number(it.originalPrice !== undefined ? it.originalPrice : it.price) || 0,
@@ -121,15 +129,15 @@ export default function DynamicInvoiceModal({
       }));
     }
     // 3. If booking.services is an array of strings or objects
-    if (Array.isArray(booking.services) && booking.services.length > 0) {
-      const avgPrice = Math.round((Number(booking.total) || 0) / booking.services.length);
-      return booking.services.map((srv, idx) => {
-        const srvName = typeof srv === 'string' ? srv : (srv.name || 'Salon Treatment');
-        const srvPrice = typeof srv === 'object' && srv.price ? Number(srv.price) : null;
+    if (Array.isArray(safeBooking.services) && safeBooking.services.length > 0) {
+      const avgPrice = Math.round((Number(safeBooking.total) || 0) / safeBooking.services.length);
+      return safeBooking.services.map((srv, idx) => {
+        const srvName = typeof srv === 'string' ? srv : (srv?.name || 'Salon Treatment');
+        const srvPrice = typeof srv === 'object' && srv?.price ? Number(srv.price) : null;
         const found = (services || []).find(s => s.name === srvName || s.id === srvName);
         const orig = srvPrice !== null ? srvPrice : (found ? Number(found.price) : (avgPrice || 1000));
         return {
-          id: (typeof srv === 'object' && srv.id) || (found && found.id) || ('srv-' + idx),
+          id: (typeof srv === 'object' && srv?.id) || (found && found.id) || ('srv-' + idx),
           name: srvName,
           category: (found && found.category) || '',
           originalPrice: orig,
@@ -144,13 +152,13 @@ export default function DynamicInvoiceModal({
     return [{
       id: 'fallback-0',
       name: primaryServiceName,
-      originalPrice: Number(booking.total) || 6400,
+      originalPrice: Number(safeBooking.total) || 6400,
       discount: 0,
       discountPercent: 0,
-      price: Number(booking.total) || 6400,
+      price: Number(safeBooking.total) || 6400,
       inclusions: 'Hospital-Grade Autoclaved Sealed Pouches Opened Live in Client Presence'
     }];
-  }, [booking, savedCustom, services, primaryServiceName]);
+  }, [safeBooking, savedCustom, services, primaryServiceName, booking]);
 
   const [invoiceItems, setInvoiceItems] = useState(initialItems);
 
@@ -166,7 +174,7 @@ export default function DynamicInvoiceModal({
   const calculatedNetTotal = Math.max(0, grossServicesAmount - totalItemDiscounts);
   const totalAmount = savedCustom.totalAmount !== undefined 
     ? Number(savedCustom.totalAmount) 
-    : (booking.total !== undefined && booking.total > 0 ? Number(booking.total) : calculatedNetTotal);
+    : (safeBooking.total !== undefined && safeBooking.total > 0 ? Number(safeBooking.total) : calculatedNetTotal);
 
   // Default Invoice Document Title
   const defaultTitle = savedCustom.invoiceTitle || (
@@ -176,13 +184,13 @@ export default function DynamicInvoiceModal({
   );
 
   const [invoiceTitle, setInvoiceTitle] = useState(defaultTitle);
-  const [invoiceDate, setInvoiceDate] = useState(savedCustom.invoiceDate || booking.date || new Date().toISOString().split('T')[0]);
-  const [invoiceTime, setInvoiceTime] = useState(savedCustom.invoiceTime || booking.time || '10:00 AM');
+  const [invoiceDate, setInvoiceDate] = useState(() => savedCustom.invoiceDate || safeBooking.date || new Date().toISOString().split('T')[0]);
+  const [invoiceTime, setInvoiceTime] = useState(() => savedCustom.invoiceTime || safeBooking.time || '10:00 AM');
 
   // Advance & Balance
   const initialAdvance = savedCustom.advanceAmount !== undefined 
     ? Number(savedCustom.advanceAmount) 
-    : (booking.paidAmount !== undefined ? Number(booking.paidAmount) : Math.round(totalAmount * 0.2));
+    : (safeBooking.paidAmount !== undefined ? Number(safeBooking.paidAmount) : Math.round(totalAmount * 0.2));
 
   const [advanceAmount, setAdvanceAmount] = useState(initialAdvance);
   const balanceDue = Math.max(0, totalAmount - advanceAmount);
@@ -206,10 +214,34 @@ export default function DynamicInvoiceModal({
   const [activePreset, setActivePreset] = useState(initialPresetKey);
 
   // Quick payment update state
-  const [paymentStatus, setPaymentStatus] = useState(booking.paymentStatus || (advanceAmount >= totalAmount ? 'Paid' : 'Confirmed'));
-  const [paymentMethod, setPaymentMethod] = useState(booking.paymentMethod || 'Paytm UPI');
-  const [utrNumber, setUtrNumber] = useState(booking.utrNumber || '');
+  const [paymentStatus, setPaymentStatus] = useState(safeBooking.paymentStatus || (advanceAmount >= totalAmount ? 'Paid' : 'Confirmed'));
+  const [paymentMethod, setPaymentMethod] = useState(safeBooking.paymentMethod || 'Paytm UPI');
+  const [utrNumber, setUtrNumber] = useState(safeBooking.utrNumber || '');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Sync state whenever booking or initialItems changes
+  useEffect(() => {
+    if (booking) {
+      setInvoiceItems(initialItems);
+      setInvoiceTitle(savedCustom.invoiceTitle || defaultTitle);
+      setInvoiceDate(savedCustom.invoiceDate || safeBooking.date || new Date().toISOString().split('T')[0]);
+      setInvoiceTime(savedCustom.invoiceTime || safeBooking.time || '10:00 AM');
+      setAdvanceAmount(initialAdvance);
+      setInclusionsText(
+        savedCustom.inclusionsText || SERVICE_TERMS_PRESETS[initialPresetKey]?.defaultInclusions || 'Makeup Studio Products with Hair Extension'
+      );
+      if (Array.isArray(savedCustom.terms) && savedCustom.terms.length > 0) {
+        setTermsList(savedCustom.terms);
+      } else {
+        const presetFn = SERVICE_TERMS_PRESETS[initialPresetKey]?.terms || SERVICE_TERMS_PRESETS['bridal-makeup'].terms;
+        setTermsList(presetFn(initialAdvance, Math.max(0, totalAmount - initialAdvance)));
+      }
+      setPaymentStatus(safeBooking.paymentStatus || (initialAdvance >= totalAmount ? 'Paid' : 'Confirmed'));
+      setPaymentMethod(safeBooking.paymentMethod || 'Paytm UPI');
+      setUtrNumber(safeBooking.utrNumber || '');
+      setActivePreset(initialPresetKey);
+    }
+  }, [booking?.id, initialItems]);
 
   // When preset is selected, auto-update terms
   const applyPreset = (key) => {
@@ -327,6 +359,7 @@ export default function DynamicInvoiceModal({
         if (showToast) showToast('Failed to save customization.');
       }
     } catch (err) {
+      console.error('Invoice customization save error:', err);
       if (showToast) showToast('Error saving invoice customizations.');
     } finally {
       setIsSaving(false);
@@ -437,10 +470,12 @@ export default function DynamicInvoiceModal({
       `📸 *Instagram:* @serenesalonacademy\n` +
       `📞 *WhatsApp:* +91 6203060789`;
 
-    const phone = (booking.guestPhone || '').replace(/\D/g, '');
+    const phone = ((booking?.guestPhone) || '').replace(/\D/g, '');
     const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };
+
+  if (!isOpen || !booking) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-espresso-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
